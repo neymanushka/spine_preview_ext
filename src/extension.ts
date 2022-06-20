@@ -20,27 +20,11 @@ export class Provider implements vscode.CustomTextEditorProvider {
         webviewPanel: vscode.WebviewPanel,
         _token: vscode.CancellationToken
     ): Promise<void> {
-        console.log(document, webviewPanel);
-        // Setup initial content for the webview
         webviewPanel.webview.options = {
             enableScripts: true,
         };
-
-        const webViewUri = webviewPanel.webview.asWebviewUri(document.uri);
-
-        webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview, webViewUri);
-
-        webviewPanel.webview.onDidReceiveMessage(
-            (message) => {
-                switch (message.command) {
-                    case "alert":
-                        vscode.window.showErrorMessage(message.text);
-                        return;
-                }
-            },
-            undefined,
-            this.context.subscriptions
-        );
+        const uri = webviewPanel.webview.asWebviewUri(document.uri);
+        webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview, uri);
     }
 
     private getHtmlForWebview(webview: vscode.Webview, uri: vscode.Uri): string {
