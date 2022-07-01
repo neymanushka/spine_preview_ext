@@ -65,13 +65,14 @@ export class Provider implements vscode.CustomTextEditorProvider {
 
 					const animation = new PIXI.spine.Spine(res.spine.spineData);
 					app.stage.addChild(animation);
-					animation.state.setAnimation(0, animation.spineData.animations[0].name, true);
+					const animations = animation.spineData.animations;
+					animation.state.setAnimation(0, animations[0].name, true);
 					animation.scale.set(0.5,0.5)
 
-					animation.spineData.animations.map(a => {
+					animations.map(a => {
 						const div = document.createElement('div');
 						div.className = 'list-item';
-						div.innerText = a.name;
+						div.innerText = ${"`${a.name}   [${a.duration}]`"};
 						listContainer.appendChild(div);
 						div.onclick = () => animation.state.setAnimation(0,a.name,true);
 					});
