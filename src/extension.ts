@@ -34,7 +34,7 @@ export class Provider implements vscode.CustomTextEditorProvider {
 			<meta charset="UTF-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/6.2.0/browser/pixi.js"></script>
-			<script src="https://cdn.jsdelivr.net/npm/pixi-spine@3.0.15/dist/pixi-spine.umd.js"></script>
+			<script src="https://cdn.jsdelivr.net/npm/pixi-spine@3.0.16/dist/pixi-spine.umd.js"></script>
 		</head>
 		<style>
 			.list-container {
@@ -63,28 +63,36 @@ export class Provider implements vscode.CustomTextEditorProvider {
 		    	PIXI.Loader.shared.add({ name: "spine", url:"${uri.toString().replace(/\.[^.]+$/, ".json")}"  });
 				PIXI.Loader.shared.load((loader,res) => {
 
-					const animation = new PIXI.spine.Spine(res.spine.spineData);
-					app.stage.addChild(animation);
-					const animations = animation.spineData.animations;
-					animation.state.setAnimation(0, animations[0].name, true);
-					animation.scale.set(0.5,0.5)
+				const createDiv = (className,content) => {
+					const div = document.createElement('div');
+					div.innerText = content;
+					div.className = className;
+					return div;
+				}
 
-					animations.map(a => {
-						const div = document.createElement('div');
-						div.className = 'list-item';
-						div.innerText = ${"`${a.name}   [${a.duration}]`"};
-						listContainer.appendChild(div);
-						div.onclick = () => animation.state.setAnimation(0,a.name,true);
-					});
+				const animation = new PIXI.spine.Spine(res.spine.spineData);
+				app.stage.addChild(animation);
+				const animations = animation.spineData.animations;
+				animation.state.setAnimation(0, animations[0].name, true);
 
-					const resize = () => {
-						animation.x = window.innerWidth * 0.5;
-						animation.y = window.innerHeight * 0.5;
-					}
+				const div = createDiv('version',${"`spine version: ${animation.spineData.version}`"});
+				listContainer.appendChild(div);
 
-					resize();
+				animations.map(a=>{
+					const div = createDiv('list-item',${"`${a.name}   [${a.duration}]`"});
+					listContainer.appendChild(div);
+					div.onclick = () =>	{
+						console.log('click',a.name);
+						animation.state.setAnimation(0,a.name,true);
+					};
+				});
 
-					window.onresize = () => resize();
+				const resize = () => {
+					animation.x = window.innerWidth * 0.5;
+					animation.y = window.innerHeight * 0.5;
+				}
+				resize();
+				window.onresize = () => resize();
 
 			  	})
 		  	</script>
