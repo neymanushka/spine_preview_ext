@@ -37,10 +37,22 @@ export class Provider implements vscode.CustomTextEditorProvider {
 			<script src="https://cdn.jsdelivr.net/npm/pixi-spine@3.0.16/dist/pixi-spine.umd.js"></script>
 		</head>
 		<style>
+			body {
+				position: relative;
+				overflow: hidden;
+				width: 100%;
+				height: 100%;
+				margin: 0;
+				padding: 0;
+			}
 			.list-container {
 				position:absolute;
 				cursor:pointer;
+				left: 0;
+				top: 0;
 				user-select:none;
+				height: 100%;
+				overflow-y: auto;
 			}
 			.list-item {
 				background-color: transparent;
