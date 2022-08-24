@@ -33,8 +33,8 @@ export class Provider implements vscode.CustomTextEditorProvider {
 		<head>
 			<meta charset="UTF-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-			<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/6.2.0/browser/pixi.js"></script>
-			<script src="https://cdn.jsdelivr.net/npm/pixi-spine@3.0.16/dist/pixi-spine.umd.js"></script>
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/6.5.1/browser/pixi.js"></script>
+			<script src="https://cdn.jsdelivr.net/npm/pixi-spine@3.1.0/dist/pixi-spine.umd.js"></script>
 		</head>
 		<style>
 			body {

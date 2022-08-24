@@ -1,7 +1,7 @@
 {
     "name": "spine-animation-preview",
     "description": "spine animation preview for vscode",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "publisher": "neymanushka",
     "private": true,
     "license": "MIT",
