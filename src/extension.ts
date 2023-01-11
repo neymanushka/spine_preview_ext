@@ -1,5 +1,8 @@
 import * as vscode from "vscode";
 
+const PIXI_CDN_URL = `https://cdnjs.cloudflare.com/ajax/libs/pixi.js/6.5.8/browser/pixi.js`;
+const SPINE_CDN_URL = `https://cdn.jsdelivr.net/npm/pixi-spine@3.1.2/dist/pixi-spine.umd.js`;
+
 export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(Provider.register(context));
 }
@@ -33,8 +36,8 @@ export class Provider implements vscode.CustomTextEditorProvider {
 		<head>
 			<meta charset="UTF-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-			<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/6.5.1/browser/pixi.js"></script>
-			<script src="https://cdn.jsdelivr.net/npm/pixi-spine@3.1.0/dist/pixi-spine.umd.js"></script>
+			<script src="${PIXI_CDN_URL}"></script>
+			<script src="${SPINE_CDN_URL}"></script>
 		</head>
 		<style>
 			body {
