@@ -32,7 +32,7 @@ export class Provider implements vscode.CustomTextEditorProvider {
     }
 
     private getHtmlForWebview(webview: vscode.Webview, uri: vscode.Uri): string {
-        const pixiUri = webview.asWebviewUri(vscode.Uri.file(path.join(this.basePath, "libs", "pixjs6_5_8.js")));
+        const pixiUri = webview.asWebviewUri(vscode.Uri.file(path.join(this.basePath, "libs", "pixi.min.js")));
         const spineUri = webview.asWebviewUri(vscode.Uri.file(path.join(this.basePath, "libs", "pixi-spine.umd.js")));
 
         return `<!DOCTYPE html>
