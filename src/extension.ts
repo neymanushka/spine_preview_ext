@@ -119,6 +119,8 @@ export class Provider implements vscode.CustomTextEditorProvider {
 				const buttons = document.querySelector('.title-container-buttons');
 				const timeContainer = document.querySelector('.title-container-time');
 				const listContainer = document.querySelector('.list-container');
+				let animation = null;
+
 		    	PIXI.Loader.shared.add({ name: "spine", url:"${uri.toString().replace(/\.[^.]+$/, ".json")}"  });
 				PIXI.Loader.shared.load((loader,res) => {
 
@@ -147,7 +149,8 @@ export class Provider implements vscode.CustomTextEditorProvider {
 						return button;
 					}
 
-					const animation = new PIXI.spine.Spine(res.spine.spineData);
+					animation = new PIXI.spine.Spine(res.spine.spineData);
+					animation.autoUpdate = false;
 					app.stage.addChild(animation);
 					const animations = animation.spineData.animations;
 					animation.state.setAnimation(0, animations[0].name, true);
@@ -177,6 +180,16 @@ export class Provider implements vscode.CustomTextEditorProvider {
 
 					resize();
 					window.onresize = () => resize();
+
+					app.ticker.add(() => {
+							if(animation) {
+									const startTime = performance.now();
+									animation.update(app.ticker.deltaMS/1000)
+									const diff = (performance.now() - startTime).toFixed(4);
+									timeContainer.innerText = ${"`update time: ${diff} ms`"};
+							}
+					});
+
 			  	})
 		  	</script>
 		</body>
