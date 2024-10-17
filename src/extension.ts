@@ -1,5 +1,4 @@
-import * as vscode from 'vscode';
-
+import vscode = require('vscode');
 import path = require('path');
 import fs = require('fs');
 
@@ -7,43 +6,42 @@ const PIXI_LIB = 'pixi.min.js';
 const SPINE_LIB = 'pixi-spine.umd.min.js';
 
 export function activate(context: vscode.ExtensionContext) {
-	context.subscriptions.push(Provider.register(context));
+  context.subscriptions.push(Provider.register(context));
 }
 
 export class Provider implements vscode.CustomTextEditorProvider {
-	private basePath: string;
-	public static register(context: vscode.ExtensionContext): vscode.Disposable {
-		const provider = new Provider(context);
-		const providerRegistration = vscode.window.registerCustomEditorProvider(Provider.viewType, provider);
-		return providerRegistration;
-	}
+  private basePath: string;
+  public static register(context: vscode.ExtensionContext): vscode.Disposable {
+    const provider = new Provider(context);
+    const providerRegistration = vscode.window.registerCustomEditorProvider(Provider.viewType, provider);
+    return providerRegistration;
+  }
 
-	private static readonly viewType = 'spinePreview.preview';
+  private static readonly viewType = 'spinePreview.preview';
 
-	constructor(private readonly context: vscode.ExtensionContext) {
-		this.basePath = context.extensionUri.fsPath;
-	}
+  constructor(private readonly context: vscode.ExtensionContext) {
+    this.basePath = context.extensionUri.fsPath;
+  }
 
-	public async resolveCustomTextEditor(
-		document: vscode.TextDocument,
-		webviewPanel: vscode.WebviewPanel,
-		_token: vscode.CancellationToken
-	): Promise<void> {
-		webviewPanel.webview.options = {
-			enableScripts: true,
-		};
-		const uri = webviewPanel.webview.asWebviewUri(document.uri);
-		webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview, uri);
-	}
+  public async resolveCustomTextEditor(
+    document: vscode.TextDocument,
+    webviewPanel: vscode.WebviewPanel,
+  ): Promise<void> {
+    webviewPanel.webview.options = {
+      enableScripts: true,
+    };
+    const uri = webviewPanel.webview.asWebviewUri(document.uri);
+    webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview, uri);
+  }
 
-	private getHtmlForWebview(webview: vscode.Webview, uri: vscode.Uri): string {
-		const directory = path.dirname(uri.fsPath);
-		const files = fs.readdirSync(directory);
-		const spines = files.filter((f) => f.endsWith('.json')).map((f) => path.join(directory, f));
-		const pixiUri = webview.asWebviewUri(vscode.Uri.file(path.join(this.basePath, 'libs', PIXI_LIB)));
-		const spineUri = webview.asWebviewUri(vscode.Uri.file(path.join(this.basePath, 'libs', SPINE_LIB)));
+  private getHtmlForWebview(webview: vscode.Webview, uri: vscode.Uri): string {
+    const directory = path.dirname(uri.fsPath);
+    const files = fs.readdirSync(directory);
+    const spines = files.filter((f) => f.endsWith('.json')).map((f) => path.join(directory, f));
+    const pixiUri = webview.asWebviewUri(vscode.Uri.file(path.join(this.basePath, 'libs', PIXI_LIB)));
+    const spineUri = webview.asWebviewUri(vscode.Uri.file(path.join(this.basePath, 'libs', SPINE_LIB)));
 
-		return /* html */ `<!DOCTYPE html>
+    return /* html */ `<!DOCTYPE html>
 		<html lang="en">
 		<head>
 			<meta charset="UTF-8">
@@ -143,12 +141,12 @@ export class Provider implements vscode.CustomTextEditorProvider {
 
 				PIXI.Loader.shared
 					${spines
-						.map((spine) => {
-							return `.add("${path.basename(spine)}", "${webview.asWebviewUri(
-								vscode.Uri.file(spine)
-							)}", { metadata: { spineAtlasFile: "${uri}"}})`;
-						})
-						.join('\n')};
+            .map((spine) => {
+              return `.add("${path.basename(spine)}", "${webview.asWebviewUri(
+                vscode.Uri.file(spine),
+              )}", { metadata: { spineAtlasFile: "${uri}"}})`;
+            })
+            .join('\n')};
 				PIXI.Loader.shared.load((loader,resources) => {
 					const createDiv = (className,content) => {
 						const div = document.createElement('div');
@@ -172,8 +170,8 @@ export class Provider implements vscode.CustomTextEditorProvider {
 					}
 
 					${spines
-						.map((spinePath) => {
-							return `{
+            .map((spinePath) => {
+              return `{
 							const name = '${path.basename(spinePath)}';
 							animation = new PIXI.spine.Spine(resources[name].spineData);
 							animation.autoUpdate = false;
@@ -191,8 +189,8 @@ export class Provider implements vscode.CustomTextEditorProvider {
 							option.text = name;
 							fileSelect.appendChild(option);
 						}`;
-						})
-						.join('\n')}
+            })
+            .join('\n')}
 
 					const resize = () => {
 						animation.x = window.innerWidth * 0.5;
@@ -260,5 +258,5 @@ export class Provider implements vscode.CustomTextEditorProvider {
 		  	</script>
 		</body>
 		</html>`;
-	}
+  }
 }

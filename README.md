@@ -3,8 +3,8 @@
 ## build
 
 ```bash
-npm install
-npm run pack
+pnpm install
+pnpm run pack
 ```
 
 ## vscode
