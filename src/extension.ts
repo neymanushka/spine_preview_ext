@@ -75,17 +75,33 @@ export class Provider implements vscode.CustomTextEditorProvider {
 			.title-container-time {
 				flex: 1;
 			}
-			.list-container {
+			.main-container {
+				display: flex;
+				flex-direction: row;
 				position: fixed;
-				cursor: pointer;
+				gap: 10px;
 				right: 0;
 				left: 0;
 				bottom: 0;
 				height: calc(100% - 50px);
+			}
+			.list-container .skin-container {
+			    display: flex;
+				flex-direction: column;
+				padding: 10px;
+				gap: 100px;
+			}
+			.list-container {
+				cursor: pointer;
 				user-select:none;
 				overflow-y: auto;
-				padding: 10px;
 			}
+			.skins-container {
+				cursor: pointer;
+				user-select:none;
+				overflow-y: auto;
+            	align-items: flex-end;
+  			}
 			.list-item {
 				display: flex;
 				background-color: transparent;
@@ -98,7 +114,7 @@ export class Provider implements vscode.CustomTextEditorProvider {
 			.list-item-right {
 				flex: 1;
 			}
-			.list-item:hover {
+			.list-item:hover .skin-item:hover {
 				background-color: black;
 				color: white;
 			}
@@ -106,6 +122,11 @@ export class Provider implements vscode.CustomTextEditorProvider {
 				content: "\\1F4CB";
 				margin-right: 10px;
 			}
+			.skin-item {
+            	display: flex;
+				background-color: transparent;
+				color: black;
+        	}
 		</style>
 		<body>
 			<div class="title-container">
@@ -115,8 +136,10 @@ export class Provider implements vscode.CustomTextEditorProvider {
 				<label>loop: <input class="loop-checkbox" type="checkbox" id="loopInput" checked /></label>
 				<div class="title-container-time"></div>
 			</div>
-			<div class="list-container"></div>
-
+			<div class="main-container">
+			    <div class="list-container"></div>
+				<div class="skins-container"></div>
+			</div>
 			<script>
 				const width = window.innerWidth;
 				const height = window.innerHeight;
@@ -127,6 +150,7 @@ export class Provider implements vscode.CustomTextEditorProvider {
 				const version = document.querySelector('.title-container-version');
 				const timeContainer = document.querySelector('.title-container-time');
 				const listContainer = document.querySelector('.list-container');
+				const skinsContainer = document.querySelector('.skins-container');
 				const fileSelect = document.querySelector('#fileSelect');
 
 				let animation = null;
@@ -206,7 +230,9 @@ export class Provider implements vscode.CustomTextEditorProvider {
 
 						animation = spines[name];
 						animation.visible = true;
-						animations = animation.spineData.animations;
+						const animations = animation.spineData.animations;
+						const skins = animation.spineData.skins;
+
 
 						version.innerHTML = ${'`spine version: ${animation.spineData.version}`'};
 
@@ -224,6 +250,38 @@ export class Provider implements vscode.CustomTextEditorProvider {
 
 							listContainer.appendChild(div);
 						});
+
+						if(skins.length > 1) {
+							const skinParts = new Set();
+							skins.map((s) => {
+								const div = createDiv('skin-item',"");
+								const text = createDiv('list-item-right',${'`${s.name}`'});
+								const checkBox = document.createElement('input');
+								checkBox.type = 'checkbox';
+								const clickAction = () =>	{
+									if(checkBox.checked) {
+										skinParts.add(s.name);
+									} else {
+										skinParts.delete(s.name);
+									}
+									const customSkin = new PIXI.spine.Skin('custom');
+									[...skinParts].forEach((partName) => {
+										const part = animation.spineData.findSkin(partName);
+										customSkin.addSkin(part)
+									});
+									animation.skeleton.setSkin(customSkin);
+									animation.skeleton.setSlotsToSetupPose();
+								}
+								checkBox.onchange = clickAction;
+								text.onclick = () => {
+									checkBox.checked = !checkBox.checked;
+									clickAction();
+								}
+								div.appendChild(checkBox);
+								div.appendChild(text);
+								skinsContainer.appendChild(div);
+							});
+						}
 						resize();
 					}
 
