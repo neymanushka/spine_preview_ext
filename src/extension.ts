@@ -232,7 +232,7 @@ export class Provider implements vscode.CustomTextEditorProvider {
 						animation.visible = true;
 						const animations = animation.spineData.animations;
 						const skins = animation.spineData.skins;
-
+						skinsContainer.textContent = "";
 
 						version.innerHTML = ${'`spine version: ${animation.spineData.version}`'};
 
