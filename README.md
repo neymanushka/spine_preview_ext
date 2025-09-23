@@ -12,3 +12,7 @@ pnpm run pack
 ```
 Extensions -> install from VSIX -> repo folder
 ```
+
+## install from vscode market
+
+[vscode marketplace](https://marketplace.visualstudio.com/items?itemName=neymanushka.spine-animation-preview)
