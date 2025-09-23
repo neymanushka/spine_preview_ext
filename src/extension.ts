@@ -3,7 +3,7 @@ import path = require('path');
 import fs = require('fs');
 
 const PIXI_LIB = 'pixi.min.js';
-const SPINE_LIB = 'pixi-spine.umd.min.js';
+const SPINE_LIB = 'pixi-spine.min.js';
 
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(Provider.register(context));
@@ -29,292 +29,296 @@ export class Provider implements vscode.CustomTextEditorProvider {
   ): Promise<void> {
     webviewPanel.webview.options = {
       enableScripts: true,
+      localResourceRoots: [vscode.Uri.file(path.dirname(document.uri.fsPath)), vscode.Uri.file(this.basePath)],
     };
     const uri = webviewPanel.webview.asWebviewUri(document.uri);
-    webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview, uri);
+    webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview, uri, document.uri.fsPath);
   }
 
-  private getHtmlForWebview(webview: vscode.Webview, uri: vscode.Uri): string {
-    const directory = path.dirname(uri.fsPath);
+  private getHtmlForWebview(webview: vscode.Webview, uri: vscode.Uri, documentPath: string): string {
+    const directory = path.dirname(documentPath);
     const files = fs.readdirSync(directory);
-    const spines = files.filter((f) => f.endsWith('.json')).map((f) => path.join(directory, f));
+    const spines = files
+      .filter((f) => f.endsWith('.json'))
+      .map((f) => path.join(directory, f))
+      .filter((f) => fs.existsSync(f)); // Ensure files exist
     const pixiUri = webview.asWebviewUri(vscode.Uri.file(path.join(this.basePath, 'libs', PIXI_LIB)));
     const spineUri = webview.asWebviewUri(vscode.Uri.file(path.join(this.basePath, 'libs', SPINE_LIB)));
 
     return /* html */ `<!DOCTYPE html>
-		<html lang="en">
-		<head>
-			<meta charset="UTF-8">
-			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-			<script src="${pixiUri}"></script>
-			<script src="${spineUri}"></script>
-		</head>
-		<style>
-			body {
-				margin: 0;
-				padding: 0;
-			}
-			.title-container {
-				display: flex;
-				align-items: baseline;
-				gap: 10px;
-				position: fixed;
-				top: 0;
-				left: 0;
-				right: 0;
-				height: 50px;
-			  user-select:none;
-				padding-left: 10px;
-			}
-			.title-container-version {
-				width: 200px;
-			}
-			.title-container-buttons {
-				width: 200px;
-			}
-			.title-container-time {
-				flex: 1;
-			}
-			.main-container {
-				display: flex;
-				flex-direction: row;
-				position: fixed;
-				gap: 10px;
-				right: 0;
-				left: 0;
-				bottom: 0;
-				height: calc(100% - 50px);
-			}
-			.list-container .skin-container {
-			    display: flex;
-				flex-direction: column;
-				padding: 10px;
-				gap: 100px;
-			}
-			.list-container {
-				cursor: pointer;
-				user-select:none;
-				overflow-y: auto;
-			}
-			.skins-container {
-				cursor: pointer;
-				user-select:none;
-				overflow-y: auto;
-            	align-items: flex-end;
-  			}
-			.list-item {
-				display: flex;
-				background-color: transparent;
-				color: black;
-			}
-			.list-item-left {
-				width: 20px;
-				cursor: grab;
-			}
-			.list-item-right {
-				flex: 1;
-			}
-			.list-item:hover .skin-item:hover {
-				background-color: black;
-				color: white;
-			}
-			.icon::after {
-				content: "\\1F4CB";
-				margin-right: 10px;
-			}
-			.skin-item {
-            	display: flex;
-				background-color: transparent;
-				color: black;
-        	}
-		</style>
-		<body>
-			<div class="title-container">
-				<select id="fileSelect"></select>
-				<div class="title-container-version"></div>
-				<input type="range" id="zoomInput" min="0.1" max="1" step="0.025" value="1" />
-				<label>loop: <input class="loop-checkbox" type="checkbox" id="loopInput" checked /></label>
-				<div class="title-container-time"></div>
-			</div>
-			<div class="main-container">
-			    <div class="list-container"></div>
-				<div class="skins-container"></div>
-			</div>
-			<script>
-				const width = window.innerWidth;
-				const height = window.innerHeight;
-				const app = new PIXI.Application({ backgroundColor: 0x1099bb, width, height, resizeTo: window });
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="${pixiUri}"></script>
+    <script src="${spineUri}"></script>
+</head>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+    .title-container {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 50px;
+        user-select: none;
+        padding-left: 10px;
+    }
+    .title-container-version {
+        width: 200px;
+    }
+    .title-container-time {
+        flex: 1;
+    }
+    .main-container {
+        display: flex;
+        flex-direction: row;
+        position: fixed;
+        gap: 10px;
+        right: 0;
+        left: 0;
+        bottom: 0;
+        height: calc(100% - 50px);
+    }
+    .list-container, .skins-container {
+        cursor: pointer;
+        user-select: none;
+        overflow-y: auto;
+    }
+    .skins-container {
+        align-items: flex-end;
+    }
+    .list-item, .skin-item {
+        display: flex;
+        background-color: transparent;
+        color: black;
+    }
+    .list-item-left {
+        width: 20px;
+        cursor: grab;
+    }
+    .list-item-right {
+        flex: 1;
+    }
+    .list-item:hover, .skin-item:hover {
+        background-color: black;
+        color: white;
+    }
+    .icon::after {
+        content: "\\1F4CB";
+        margin-right: 10px;
+    }
+</style>
+<body>
+    <div class="title-container">
+        <select id="fileSelect"></select>
+        <div class="title-container-version"></div>
+        <input type="range" id="zoomInput" min="0.1" max="1" step="0.025" value="1" />
+        <label>loop: <input class="loop-checkbox" type="checkbox" id="loopInput" checked /></label>
+        <div class="title-container-time"></div>
+    </div>
+    <div class="main-container">
+        <div class="list-container"></div>
+        <div class="skins-container"></div>
+    </div>
+    <script>
+        (async () => {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const app = new PIXI.Application({ background: '#1099bb', resizeTo: window });
 
-				document.body.appendChild(app.view);
+            document.body.appendChild(app.view);
 
-				const version = document.querySelector('.title-container-version');
-				const timeContainer = document.querySelector('.title-container-time');
-				const listContainer = document.querySelector('.list-container');
-				const skinsContainer = document.querySelector('.skins-container');
-				const fileSelect = document.querySelector('#fileSelect');
+            const version = document.querySelector('.title-container-version');
+            const timeContainer = document.querySelector('.title-container-time');
+            const listContainer = document.querySelector('.list-container');
+            const skinsContainer = document.querySelector('.skins-container');
+            const fileSelect = document.querySelector('#fileSelect');
+            const zoomInput = document.querySelector('#zoomInput');
+            const loopInput = document.querySelector('#loopInput');
 
-				let animation = null;
-				let animations = [];
-				let framesTime = 0;
-				let frames = 0;
-				let zoomFactor = 1;
-				let isLoop = true;
+            let animation = null;
+            let zoomFactor = 1;
+            let isLoop = true;
+            let spines = {};
+            let filesToAnimationsMap = {};
 
-				let spines = {};
-				let filesToAnimationsMap = {};
+            const createDiv = (className, content) => {
+                const div = document.createElement('div');
+                div.innerText = content;
+                div.className = className;
+                return div;
+            };
 
-				PIXI.Loader.shared
-					${spines
-            .map((spine) => {
-              return `.add("${path.basename(spine)}", "${webview.asWebviewUri(
-                vscode.Uri.file(spine),
-              )}", { metadata: { spineAtlasFile: "${uri}"}})`;
-            })
-            .join('\n')};
-				PIXI.Loader.shared.load((loader,resources) => {
-					const createDiv = (className,content) => {
-						const div = document.createElement('div');
-						div.innerText = content;
-						div.className = className;
-						return div;
-					}
+            const createIcon = (name) => {
+                const a = document.createElement('a');
+                a.className = 'list-item-left icon';
+                a.onclick = () => navigator.clipboard.writeText(name);
+                return a;
+            };
 
-					const createIcon = (name) => {
-						const a = document.createElement('a');
-						a.className = 'list-item-left icon';
-						a.onclick = () => navigator.clipboard.writeText(name);
-						return a;
-					}
+            const getEvents = (track) => {
+                const text = track.timelines
+                    .filter(t => 'events' in t)
+                    .flatMap(e => e.events)
+                    .map(e => \`event: \${e.data.name}   time: \${e.time.toFixed(3)}\`)
+                    .join("\\n");
+                return text.length > 0 ? text : 'no events found';
+            };
 
-					const getEvents = (track) => {
-						const text = track.timelines.filter(t => 'events' in t)
-							.flatMap(e => e.events).map(e => (${'`event: ${e.data.name}   time: ${e.time.toFixed(3)}`'}))
-							.join("\\n");
-						return text.length > 0 ? text : 'no events found';
-					}
+            const assetNames = [];
+			PIXI.Assets.add({ alias: 'atlas', src: "${uri}"});
 
-					${spines
-            .map((spinePath) => {
-              return `{
-							const name = '${path.basename(spinePath)}';
-							animation = new PIXI.spine.Spine(resources[name].spineData);
-							animation.autoUpdate = false;
-							animation.visible = false;
-							animations = animation.spineData.animations;
-							animation.state.setAnimation(0, animations[0].name, isLoop);
+            ${spines
+              .map((spine) => {
+                const name = path.basename(spine);
+                const json = webview.asWebviewUri(vscode.Uri.file(spine));
+                return `PIXI.Assets.add({ alias: '${name}', src: '${json}' });
+                assetNames.push('${name}');
 
-							spines[name] = animation;
-							filesToAnimationsMap[name] = animations.map((a) => a.name);
+				`;
+              })
+              .join('\n')}
+			assetNames.push('atlas');
 
-							app.stage.addChild(animation);
+			const assets = await PIXI.Assets.load(assetNames);
+            let index = 0;
+            ${spines
+              .map((spinePath) => {
+                return `{
+                    const name = '${path.basename(spinePath)}';
+					console.log('testname',name,assets, assets[name]);
+                    const spineData = assets[name];
+                    const animation = spine.Spine.from({skeleton:name, atlas:'atlas' });;
+                    animation.autoUpdate = false;
+                    animation.visible = false;
+                    const animations = Object.entries(spineData.animations).map(([name, data]) => name);
+					console.log('animations',animations,animation);
+                    if (animations.length === 0) {
+                        console.warn(\`No animations found for \${name}\`);
+                    } else {
+                        animation.state.setAnimation(0, animations[0], isLoop);
+                    }
 
-							const option = document.createElement('option');
-							option.value = name;
-							option.text = name;
-							fileSelect.appendChild(option);
-						}`;
-            })
-            .join('\n')}
+                    spines[name] = animation;
+                    filesToAnimationsMap[name] = animations;
 
-					const resize = () => {
-						animation.x = window.innerWidth * 0.5;
-						animation.y = window.innerHeight * 0.5;
-						animation.scale.set(zoomFactor)
-					}
+                    app.stage.addChild(animation);
 
-					const showAnimation = (name) => {
-						if (animation) {
-							animation.visible = false;
-							listContainer.innerHTML = '';
-						}
+                    const option = document.createElement('option');
+                    option.value = name;
+                    option.text = name;
+                    fileSelect.appendChild(option);
+                }`;
+              })
+              .join('\n')}
 
-						animation = spines[name];
-						animation.visible = true;
-						const animations = animation.spineData.animations;
-						const skins = animation.spineData.skins;
-						skinsContainer.textContent = "";
+            const resize = () => {
+                    animation.x = window.innerWidth * 0.5;
+                    animation.y = window.innerHeight * 0.5;
+                    animation.scale.set(zoomFactor);
+            };
 
-						version.innerHTML = ${'`spine version: ${animation.spineData.version}`'};
+            const showAnimation = (name) => {
+                if (animation) {
+                    animation.visible = false;
+                    listContainer.innerHTML = '';
+                }
 
-						animations.map((a) => {
-							const div = createDiv('list-item',"");
-							const text = createDiv('list-item-right',${'`${a.name}   [${a.duration.toFixed(3)}]`'});
-							text.title = getEvents(a);
+                animation = spines[name];
+                animation.visible = true;
+                const animations = animation.skeleton.data.animations;
+                const skins = animation.skeleton.data.skins;
+                skinsContainer.textContent = '';
 
-							text.onclick = () =>	{
-								animation.state.setAnimation(0, a.name, isLoop);
-							};
+                version.innerHTML = \`spine version: \${animation.skeleton.data.version || 'unknown'}\`;
 
-							div.appendChild(createIcon(a.name));
-							div.appendChild(text);
+                animations.forEach((a) => {
+                    const div = createDiv('list-item', '');
+                    const text = createDiv('list-item-right', \`\${a.name}   [\${a.duration.toFixed(3)}]\`);
+                    text.title = getEvents(a);
 
-							listContainer.appendChild(div);
-						});
+                    text.onclick = () => {
+                        animation.state.setAnimation(0, a.name, isLoop);
+                    };
 
-						if(skins.length > 1) {
-							const skinParts = new Set();
-							skins.map((s) => {
-								const div = createDiv('skin-item',"");
-								const text = createDiv('list-item-right',${'`${s.name}`'});
-								const checkBox = document.createElement('input');
-								checkBox.type = 'checkbox';
-								const clickAction = () =>	{
-									if(checkBox.checked) {
-										skinParts.add(s.name);
-									} else {
-										skinParts.delete(s.name);
-									}
-									const customSkin = new PIXI.spine.Skin('custom');
-									[...skinParts].forEach((partName) => {
-										const part = animation.spineData.findSkin(partName);
-										customSkin.addSkin(part)
-									});
-									animation.skeleton.setSkin(customSkin);
-									animation.skeleton.setSlotsToSetupPose();
-								}
-								checkBox.onchange = clickAction;
-								text.onclick = () => {
-									checkBox.checked = !checkBox.checked;
-									clickAction();
-								}
-								div.appendChild(checkBox);
-								div.appendChild(text);
-								skinsContainer.appendChild(div);
-							});
-						}
-						resize();
-					}
+                    div.appendChild(createIcon(a.name));
+                    div.appendChild(text);
 
-					showAnimation("${path.basename(spines[0])}");
+                    listContainer.appendChild(div);
+                });
 
-					fileSelect.onchange = () => {
-						showAnimation(fileSelect.value);
-					}
+                if (skins.length > 1) {
+                    const skinParts = new Set();
+                    skins.forEach((s) => {
+                        const div = createDiv('skin-item', '');
+                        const text = createDiv('list-item-right', \`\${s.name}\`);
+                        const checkBox = document.createElement('input');
+                        checkBox.type = 'checkbox';
+                        const clickAction = () => {
+                            if (checkBox.checked) {
+                                skinParts.add(s.name);
+                            } else {
+                                skinParts.delete(s.name);
+                            }
+                            const customSkin = new spine.Skin('custom');
+                            [...skinParts].forEach((partName) => {
+                                const part = animation.skeleton.data.findSkin(partName);
+                                if (part) customSkin.addSkin(part);
+                            });
+                            animation.skeleton.setSkin(customSkin);
+                            animation.skeleton.setSlotsToSetupPose();
+                        };
+                        checkBox.onchange = clickAction;
+                        text.onclick = () => {
+                            checkBox.checked = !checkBox.checked;
+                            clickAction();
+                        };
+                        div.appendChild(checkBox);
+                        div.appendChild(text);
+                        skinsContainer.appendChild(div);
+                    });
+                }
+                resize();
+            };
 
-					zoomInput.oninput = (e) => {
-						zoomFactor = e.target.value;
-						resize();
-					}
+             showAnimation("${path.basename(spines[0])}");
 
-					loopInput.onchange = (e) => {
-						isLoop = e.target.checked;
-						animation.state.setAnimation(0, animation.state.tracks[0].animation.name, isLoop);
-					}
+            fileSelect.onchange = () => {
+                showAnimation(fileSelect.value);
+            };
 
-					window.onresize = () => resize();
+            zoomInput.oninput = (e) => {
+                zoomFactor = parseFloat(e.target.value);
+                resize();
+            };
 
-					app.ticker.add(() => {
-							if(animation) {
-									const startTime = performance.now();
-									animation.update(app.ticker.deltaMS/1000)
-									const diff = (performance.now() - startTime).toFixed(4);
-									timeContainer.innerText = ${'`update time: ${diff} ms`'};
-							}
-					});
+            loopInput.onchange = (e) => {
+                isLoop = e.target.checked;
+                if (animation && animation.state.tracks[0]) {
+                    animation.state.setAnimation(0, animation.state.tracks[0].animation.name, isLoop);
+                }
+            };
 
-			  	})
-		  	</script>
-		</body>
-		</html>`;
+            window.onresize = resize;
+
+            app.ticker.add(() => {
+                if (animation) {
+                    const startTime = performance.now();
+                    animation.update(app.ticker.deltaMS / 1000);
+                    const diff = (performance.now() - startTime).toFixed(4);
+                    timeContainer.innerText = \`update time: \${diff} ms\`;
+                }
+            });
+        })();
+    </script>
+</body>
+</html>`;
   }
 }
