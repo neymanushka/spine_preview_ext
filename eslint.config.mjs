@@ -4,6 +4,9 @@ import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 import tseslint from 'typescript-eslint';
 
 export default [
+  {
+    ignores: ['**/node_modules/**', '**/libs/**', '**/out/**', '**/src/webview/**', 'esbuild.webview.mjs'],
+  },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   eslintPluginPrettierRecommended,
@@ -21,8 +24,5 @@ export default [
       //TODO: vscode plugins not supported esm
       '@typescript-eslint/no-require-imports': 'off',
     },
-  },
-  {
-    ignores: ['**/node_modules/*', '**/libs/*', '**/out/*'],
   },
 ];
