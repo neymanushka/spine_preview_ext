@@ -1,0 +1,21 @@
+
+orange.png
+size: 128, 128
+filter: Linear, Linear
+pma: false
+orange
+  bounds: 0, 0, 128, 128
+
+apple.png
+size: 128, 128
+filter: Linear, Linear
+pma: false
+apple
+  bounds: 0, 0, 128, 128
+
+lime.png
+size: 128, 128
+filter: Linear, Linear
+pma: false
+lime
+  bounds: 0, 0, 128, 128

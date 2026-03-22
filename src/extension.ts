@@ -4,17 +4,30 @@ import fs = require('fs');
 
 const PIXI_LIB = 'pixi.min.js';
 const SPINE_LIB = 'pixi-spine.min.js';
+const PREACT_LIB = 'preact.umd.js';
+const PREACT_HOOKS_LIB = 'preact.hooks.umd.js';
+const HTM_LIB = 'htm.umd.js';
 
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(Provider.register(context));
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      'spinePreview.copyAnimationName',
+      (ctx: { webviewSection: string; animationName: string }) => {
+        if (ctx?.animationName) {
+          vscode.env.clipboard.writeText(ctx.animationName);
+        }
+      },
+    ),
+  );
 }
 
 export class Provider implements vscode.CustomTextEditorProvider {
   private basePath: string;
+
   public static register(context: vscode.ExtensionContext): vscode.Disposable {
     const provider = new Provider(context);
-    const providerRegistration = vscode.window.registerCustomEditorProvider(Provider.viewType, provider);
-    return providerRegistration;
+    return vscode.window.registerCustomEditorProvider(Provider.viewType, provider);
   }
 
   private static readonly viewType = 'spinePreview.preview';
@@ -31,293 +44,45 @@ export class Provider implements vscode.CustomTextEditorProvider {
       enableScripts: true,
       localResourceRoots: [vscode.Uri.file(path.dirname(document.uri.fsPath)), vscode.Uri.file(this.basePath)],
     };
-    const uri = webviewPanel.webview.asWebviewUri(document.uri);
-    webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview, uri, document.uri.fsPath);
+    const atlasUri = webviewPanel.webview.asWebviewUri(document.uri);
+    webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview, atlasUri, document.uri.fsPath);
   }
 
-  private getHtmlForWebview(webview: vscode.Webview, uri: vscode.Uri, documentPath: string): string {
+  private libUri(webview: vscode.Webview, lib: string): string {
+    return webview.asWebviewUri(vscode.Uri.file(path.join(this.basePath, 'libs', lib))).toString();
+  }
+
+  private getHtmlForWebview(webview: vscode.Webview, atlasUri: vscode.Uri, documentPath: string): string {
     const directory = path.dirname(documentPath);
-    const files = fs.readdirSync(directory);
-    const spines = files
+    const spines = fs
+      .readdirSync(directory)
       .filter((f) => f.endsWith('.json'))
-      .map((f) => path.join(directory, f))
-      .filter((f) => fs.existsSync(f)); // Ensure files exist
-    const pixiUri = webview.asWebviewUri(vscode.Uri.file(path.join(this.basePath, 'libs', PIXI_LIB)));
-    const spineUri = webview.asWebviewUri(vscode.Uri.file(path.join(this.basePath, 'libs', SPINE_LIB)));
+      .map((f) => ({
+        name: f,
+        uri: webview.asWebviewUri(vscode.Uri.file(path.join(directory, f))).toString(),
+      }));
+
+    const webviewScript = webview.asWebviewUri(vscode.Uri.file(path.join(this.basePath, 'out', 'webview', 'app.js')));
 
     return /* html */ `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="${pixiUri}"></script>
-    <script src="${spineUri}"></script>
+    <script src="${this.libUri(webview, PIXI_LIB)}"></script>
+    <script src="${this.libUri(webview, SPINE_LIB)}"></script>
+    <script src="${this.libUri(webview, PREACT_LIB)}"></script>
+    <script src="${this.libUri(webview, PREACT_HOOKS_LIB)}"></script>
+    <script src="${this.libUri(webview, HTM_LIB)}"></script>
 </head>
-<style>
-    body {
-        margin: 0;
-        padding: 0;
-    }
-    .title-container {
-        display: flex;
-        align-items: baseline;
-        gap: 10px;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 50px;
-        user-select: none;
-        padding-left: 10px;
-    }
-    .title-container-version {
-        width: 200px;
-    }
-    .title-container-time {
-        flex: 1;
-    }
-    .main-container {
-        display: flex;
-        flex-direction: row;
-        position: fixed;
-        gap: 10px;
-        right: 0;
-        left: 0;
-        bottom: 0;
-        height: calc(100% - 50px);
-    }
-    .list-container, .skins-container {
-        cursor: pointer;
-        user-select: none;
-        overflow-y: auto;
-    }
-    .skins-container {
-        align-items: flex-end;
-    }
-    .list-item, .skin-item {
-        display: flex;
-        background-color: transparent;
-        color: black;
-    }
-    .list-item-left {
-        width: 20px;
-        cursor: grab;
-    }
-    .list-item-right {
-        flex: 1;
-    }
-    .list-item:hover, .skin-item:hover {
-        background-color: black;
-        color: white;
-    }
-    .icon::after {
-        content: "\\1F4CB";
-        margin-right: 10px;
-    }
-</style>
 <body>
-    <div class="title-container">
-        <select id="fileSelect"></select>
-        <div class="title-container-version"></div>
-        <input type="range" id="zoomInput" min="0.1" max="1" step="0.025" value="1" />
-        <label>loop: <input class="loop-checkbox" type="checkbox" id="loopInput" checked /></label>
-        <div class="title-container-time"></div>
-    </div>
-    <div class="main-container">
-        <div class="list-container"></div>
-        <div class="skins-container"></div>
-    </div>
+    <div id="canvas-container"></div>
+    <div id="app"></div>
     <script>
-        (async () => {
-            const width = window.innerWidth;
-            const height = window.innerHeight;
-            const app = new PIXI.Application({ background: '#1099bb', resizeTo: window });
-
-            document.body.appendChild(app.view);
-
-            const version = document.querySelector('.title-container-version');
-            const timeContainer = document.querySelector('.title-container-time');
-            const listContainer = document.querySelector('.list-container');
-            const skinsContainer = document.querySelector('.skins-container');
-            const fileSelect = document.querySelector('#fileSelect');
-            const zoomInput = document.querySelector('#zoomInput');
-            const loopInput = document.querySelector('#loopInput');
-
-            let animation = null;
-            let zoomFactor = 1;
-            let isLoop = true;
-            let spines = {};
-            let filesToAnimationsMap = {};
-
-            const createDiv = (className, content) => {
-                const div = document.createElement('div');
-                div.innerText = content;
-                div.className = className;
-                return div;
-            };
-
-            const createIcon = (name) => {
-                const a = document.createElement('a');
-                a.className = 'list-item-left icon';
-                a.onclick = () => navigator.clipboard.writeText(name);
-                return a;
-            };
-
-            const getEvents = (track) => {
-                const text = track.timelines
-                    .filter(t => 'events' in t)
-                    .flatMap(e => e.events)
-                    .map(e => \`event: \${e.data.name}   time: \${e.time.toFixed(3)}\`)
-                    .join("\\n");
-                return text.length > 0 ? text : 'no events found';
-            };
-
-            const assetNames = [];
-			PIXI.Assets.add({ alias: 'atlas', src: "${uri}"});
-
-            ${spines
-              .map((spine) => {
-                const name = path.basename(spine);
-                const json = webview.asWebviewUri(vscode.Uri.file(spine));
-                return `PIXI.Assets.add({ alias: '${name}', src: '${json}' });
-                assetNames.push('${name}');
-
-				`;
-              })
-              .join('\n')}
-			assetNames.push('atlas');
-
-			const assets = await PIXI.Assets.load(assetNames);
-            let index = 0;
-            ${spines
-              .map((spinePath) => {
-                return `{
-                    const name = '${path.basename(spinePath)}';
-					console.log('testname',name,assets, assets[name]);
-                    const spineData = assets[name];
-                    const animation = spine.Spine.from({skeleton:name, atlas:'atlas' });;
-                    animation.autoUpdate = false;
-                    animation.visible = false;
-                    const animations = Object.entries(spineData.animations).map(([name, data]) => name);
-					console.log('animations',animations,animation);
-                    if (animations.length === 0) {
-                        console.warn(\`No animations found for \${name}\`);
-                    } else {
-                        animation.state.setAnimation(0, animations[0], isLoop);
-                    }
-
-                    spines[name] = animation;
-                    filesToAnimationsMap[name] = animations;
-
-                    app.stage.addChild(animation);
-
-                    const option = document.createElement('option');
-                    option.value = name;
-                    option.text = name;
-                    fileSelect.appendChild(option);
-                }`;
-              })
-              .join('\n')}
-
-            const resize = () => {
-                    animation.x = window.innerWidth * 0.5;
-                    animation.y = window.innerHeight * 0.5;
-                    animation.scale.set(zoomFactor);
-            };
-
-            const showAnimation = (name) => {
-                if (animation) {
-                    animation.visible = false;
-                    listContainer.innerHTML = '';
-                }
-
-                animation = spines[name];
-                animation.visible = true;
-                const animations = animation.skeleton.data.animations;
-                const skins = animation.skeleton.data.skins;
-                skinsContainer.textContent = '';
-
-                version.innerHTML = \`spine version: \${animation.skeleton.data.version || 'unknown'}\`;
-
-                animations.forEach((a) => {
-                    const div = createDiv('list-item', '');
-                    const text = createDiv('list-item-right', \`\${a.name}   [\${a.duration.toFixed(3)}]\`);
-                    text.title = getEvents(a);
-
-                    text.onclick = () => {
-                        animation.state.setAnimation(0, a.name, isLoop);
-                    };
-
-                    div.appendChild(createIcon(a.name));
-                    div.appendChild(text);
-
-                    listContainer.appendChild(div);
-                });
-
-                if (skins.length > 1) {
-                    const skinParts = new Set();
-                    skins.forEach((s) => {
-                        const div = createDiv('skin-item', '');
-                        const text = createDiv('list-item-right', \`\${s.name}\`);
-                        const checkBox = document.createElement('input');
-                        checkBox.type = 'checkbox';
-                        const clickAction = () => {
-                            if (checkBox.checked) {
-                                skinParts.add(s.name);
-                            } else {
-                                skinParts.delete(s.name);
-                            }
-                            const customSkin = new spine.Skin('custom');
-                            [...skinParts].forEach((partName) => {
-                                const part = animation.skeleton.data.findSkin(partName);
-                                if (part) customSkin.addSkin(part);
-                            });
-                            animation.skeleton.setSkin(customSkin);
-                            animation.skeleton.setSlotsToSetupPose();
-                        };
-                        checkBox.onchange = clickAction;
-                        text.onclick = () => {
-                            checkBox.checked = !checkBox.checked;
-                            clickAction();
-                        };
-                        div.appendChild(checkBox);
-                        div.appendChild(text);
-                        skinsContainer.appendChild(div);
-                    });
-                }
-                resize();
-            };
-
-             showAnimation("${path.basename(spines[0])}");
-
-            fileSelect.onchange = () => {
-                showAnimation(fileSelect.value);
-            };
-
-            zoomInput.oninput = (e) => {
-                zoomFactor = parseFloat(e.target.value);
-                resize();
-            };
-
-            loopInput.onchange = (e) => {
-                isLoop = e.target.checked;
-                if (animation && animation.state.tracks[0]) {
-                    animation.state.setAnimation(0, animation.state.tracks[0].animation.name, isLoop);
-                }
-            };
-
-            window.onresize = resize;
-
-            app.ticker.add(() => {
-                if (animation) {
-                    const startTime = performance.now();
-                    animation.update(app.ticker.deltaMS / 1000);
-                    const diff = (performance.now() - startTime).toFixed(4);
-                    timeContainer.innerText = \`update time: \${diff} ms\`;
-                }
-            });
-        })();
+    var SPINES = ${JSON.stringify(spines)};
+    var ATLAS_URI = '${atlasUri.toString()}';
     </script>
+    <script src="${webviewScript}"></script>
 </body>
 </html>`;
   }

@@ -1,5 +1,13 @@
 # spine animation preview for vscode
 
+![preview](https://raw.githubusercontent.com/neymanushka/spine_preview_ext/master/preview.png)
+
+## controls
+
+- Shift + left-click drag — pan the animation
+- Middle-click drag — pan the animation
+- Double-click — reset pan to center
+
 ## build
 
 ```bash
