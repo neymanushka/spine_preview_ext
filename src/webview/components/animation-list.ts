@@ -46,11 +46,11 @@ export function AnimationList({ animations, onSelect }: {
   return html`<div class="list-container">
     <div class="panel-header">Animations</div>
     ${animations.map(a => html`
-      <div key=${a.name} class="list-item"
+      <div key=${a.name} class="list-item" onClick=${() => onSelect(a.name)}
         data-vscode-context=${JSON.stringify({ webviewSection: 'animationItem', animationName: a.name, preventDefaultContextMenuItems: true })}>
-        <a class="list-item-left icon" onClick=${() => navigator.clipboard.writeText(a.name)}></a>
+        <a class="list-item-left icon" onClick=${(e: MouseEvent) => { e.stopPropagation(); navigator.clipboard.writeText(a.name); }}></a>
         <${Tooltip} text=${getEvents(a)}>
-          <div class="list-item-right" onClick=${() => onSelect(a.name)}>
+          <div class="list-item-right">
             ${a.name}   [${a.duration.toFixed(3)}]
           </div>
         </${Tooltip}>
