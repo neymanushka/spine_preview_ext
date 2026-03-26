@@ -30,6 +30,17 @@ export const appStyles = `
     gap: 8px;
     right: 8px; left: 8px; bottom: 8px;
     height: calc(100% - 66px);
+}
+.left-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    height: 100%;
+    min-width: 220px;
+}
+.left-panel > * {
+    flex: 1;
+    min-height: 0;
 }`;
 
 export function App({ spineInstances, pixiApp }: { spineInstances: Record<string, SpineInstance>; pixiApp: PIXIApplication }) {
@@ -177,8 +188,10 @@ export function App({ spineInstances, pixiApp }: { spineInstances: Record<string
       <${Controls} zoom=${zoom} onZoom=${setZoom} loop=${loop} onLoop=${handleLoop} />
     </div>
     <div class="main-container">
-      <${AnimationList} animations=${animations} onSelect=${selectAnimation} />
-      <${SkinsPanel} skins=${skins} activeSkins=${activeSkins} onToggle=${toggleSkin} />
+      <div class="left-panel">
+        <${AnimationList} animations=${animations} onSelect=${selectAnimation} />
+        <${SkinsPanel} skins=${skins} activeSkins=${activeSkins} onToggle=${toggleSkin} />
+      </div>
     </div>
   </${Fragment}>`;
 }
