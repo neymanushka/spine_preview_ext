@@ -3,6 +3,7 @@ import { Controls } from './components/controls';
 import { StatusBar } from './components/status-bar';
 import { AnimationList } from './components/animation-list';
 import { SkinsPanel } from './components/skins-panel';
+import { TracksPanel } from './components/tracks-panel';
 
 const { h, Fragment } = preact;
 const { useState, useRef, useEffect, useCallback } = preactHooks;
@@ -30,6 +31,17 @@ export const appStyles = `
     gap: 8px;
     right: 8px; left: 8px; bottom: 8px;
     height: calc(100% - 66px);
+}
+.left-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    height: 100%;
+    min-width: 220px;
+}
+.left-panel > * {
+    flex: 1;
+    min-height: 0;
 }`;
 
 export function App({ spineInstances, pixiApp }: { spineInstances: Record<string, SpineInstance>; pixiApp: PIXIApplication }) {
@@ -43,10 +55,13 @@ export function App({ spineInstances, pixiApp }: { spineInstances: Record<string
   const [animations, setAnimations] = useState<SpineAnimation[]>([]);
   const [skins, setSkins] = useState<SpineSkin[]>([]);
   const [activeSkins, setActiveSkins] = useState(new Set<string>());
+  const [activeTrack, setActiveTrack] = useState(0);
 
   const currentAnimRef = useRef<SpineInstance | null>(null);
   const loopRef = useRef(loop);
   loopRef.current = loop;
+  const activeTrackRef = useRef(activeTrack);
+  activeTrackRef.current = activeTrack;
   const zoomRef = useRef(zoom);
   zoomRef.current = zoom;
   const panRef = useRef({ x: 0, y: 0 });
@@ -66,6 +81,7 @@ export function App({ spineInstances, pixiApp }: { spineInstances: Record<string
     setAnimations([...anim.skeleton.data.animations]);
     setSkins([...anim.skeleton.data.skins]);
     setActiveSkins(new Set());
+    setActiveTrack(0);
   }, [selectedFile]);
 
   useEffect(() => {
@@ -143,7 +159,7 @@ export function App({ spineInstances, pixiApp }: { spineInstances: Record<string
   }, []);
 
   const selectAnimation = useCallback((name: string) => {
-    if (currentAnimRef.current) currentAnimRef.current.state.setAnimation(0, name, loopRef.current);
+    if (currentAnimRef.current) currentAnimRef.current.state.setAnimation(activeTrackRef.current, name, loopRef.current);
   }, []);
 
   const toggleSkin = useCallback((skinName: string) => {
@@ -166,8 +182,9 @@ export function App({ spineInstances, pixiApp }: { spineInstances: Record<string
 
   const handleLoop = useCallback((val: boolean) => {
     setLoop(val);
-    const track = currentAnimRef.current?.state.tracks[0];
-    if (track) currentAnimRef.current.state.setAnimation(0, track.animation.name, val);
+    const trackIndex = activeTrackRef.current;
+    const track = currentAnimRef.current?.state.tracks[trackIndex];
+    if (track) currentAnimRef.current.state.setAnimation(trackIndex, track.animation.name, val);
   }, []);
 
   return html`<${Fragment}>
@@ -177,8 +194,11 @@ export function App({ spineInstances, pixiApp }: { spineInstances: Record<string
       <${Controls} zoom=${zoom} onZoom=${setZoom} loop=${loop} onLoop=${handleLoop} />
     </div>
     <div class="main-container">
-      <${AnimationList} animations=${animations} onSelect=${selectAnimation} />
-      <${SkinsPanel} skins=${skins} activeSkins=${activeSkins} onToggle=${toggleSkin} />
+      <div class="left-panel">
+        <${AnimationList} animations=${animations} onSelect=${selectAnimation} />
+        <${SkinsPanel} skins=${skins} activeSkins=${activeSkins} onToggle=${toggleSkin} />
+        <${TracksPanel} activeTrack=${activeTrack} onSelect=${setActiveTrack} />
+      </div>
     </div>
   </${Fragment}>`;
 }
