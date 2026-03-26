@@ -3,6 +3,7 @@ import { controlsStyles } from './components/controls';
 import { statusBarStyles } from './components/status-bar';
 import { animationListStyles } from './components/animation-list';
 import { skinsPanelStyles } from './components/skins-panel';
+import { tracksPanelStyles } from './components/tracks-panel';
 import { tooltipStyles } from './components/tooltip';
 import { appStyles } from './app';
 
@@ -46,5 +47,6 @@ export const allStyles = [
   statusBarStyles,
   animationListStyles,
   skinsPanelStyles,
+  tracksPanelStyles,
   tooltipStyles,
 ].join('\n');
