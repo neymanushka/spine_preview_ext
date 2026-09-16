@@ -12,10 +12,9 @@ import { appStyles } from './app';
 // editor the user actually runs. The literals are fallbacks only - they apply
 // when a variable is missing, never when the theme provides one.
 //
-// Panels are deliberately opaque and unblurred. A translucent panel with a
-// backdrop-filter over a transparent canvas makes the compositor flatten the
-// canvas and the CSS background into a texture before every blur pass, which
-// stalls window resizing.
+// The canvas paints its own background (see canvas-background.ts) and stays
+// opaque, so the panels' backdrop-filter blurs a single GPU layer. Moving that
+// background back into CSS would make window resizing stutter.
 const globalStyles = `
 :root {
     --sp-1: 4px;
@@ -25,7 +24,7 @@ const globalStyles = `
     --radius: 4px;
     --radius-lg: 6px;
 
-    --panel-bg: var(--vscode-editorWidget-background, #252526);
+    --panel-bg: color-mix(in srgb, var(--vscode-editorWidget-background, #252526) 92%, transparent);
     --panel-border-color: var(--vscode-editorWidget-border, var(--vscode-panel-border, rgba(128, 128, 128, 0.35)));
     --panel-shadow: 0 2px 8px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.36));
 
@@ -62,18 +61,6 @@ body {
     z-index: 0;
     background: var(--vscode-editor-background, #1e1e1e);
 }
-/* Checkerboard is the default so transparent regions of the art stay readable. */
-#canvas-container.bg-checker {
-    background-color: #8a8a8a;
-    background-image:
-        linear-gradient(45deg, #6e6e6e 25%, transparent 25%, transparent 75%, #6e6e6e 75%),
-        linear-gradient(45deg, #6e6e6e 25%, transparent 25%, transparent 75%, #6e6e6e 75%);
-    background-size: 20px 20px;
-    background-position: 0 0, 10px 10px;
-}
-#canvas-container.bg-dark { background: #1e1e1e; background-image: none; }
-#canvas-container.bg-light { background: #f3f3f3; background-image: none; }
-#canvas-container.bg-theme { background: var(--vscode-editor-background, #1e1e1e); background-image: none; }
 
 /* The overlay never eats pointer events; only the panels inside it do. */
 #app { position: relative; z-index: 1; pointer-events: none; }
@@ -84,6 +71,7 @@ body {
     border: 1px solid var(--panel-border-color);
     border-radius: var(--radius-lg);
     box-shadow: var(--panel-shadow);
+    backdrop-filter: blur(12px);
 }
 .panel-header {
     padding: var(--sp-2) var(--sp-2) var(--sp-1);

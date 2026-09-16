@@ -7,6 +7,7 @@ import { AnimationList } from './components/animation-list';
 import { SkinsPanel } from './components/skins-panel';
 import { TracksPanel } from './components/tracks-panel';
 import { clampZoom, ZOOM_WHEEL_SENSITIVITY } from './zoom';
+import type { CanvasBackground } from './canvas-background';
 
 const DEFAULT_BACKGROUND: BackgroundId = 'checker';
 const DEFAULT_ZOOM = 1;
@@ -73,11 +74,11 @@ function applyTransform(anim: SpineInstance, zoom: number, pan: Pan) {
 export function App({
   spineInstances,
   pixiApp,
-  canvasContainer,
+  canvasBackground,
 }: {
   spineInstances: Record<string, SpineInstance>;
   pixiApp: PIXIApplication;
-  canvasContainer: HTMLElement;
+  canvasBackground: CanvasBackground;
 }) {
   const [selectedFile, setSelectedFile] = useState(SPINES[0]?.name ?? '');
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
@@ -114,8 +115,8 @@ export function App({
   }, [zoom, pan]);
 
   useEffect(() => {
-    canvasContainer.className = `bg-${background}`;
-  }, [background, canvasContainer]);
+    canvasBackground.apply(background);
+  }, [background, canvasBackground]);
 
   useEffect(() => {
     if (!selectedFile) return;
@@ -179,6 +180,7 @@ export function App({
       resetView();
     };
     const onResize = () => {
+      canvasBackground.resize(window.innerWidth, window.innerHeight);
       if (currentAnimRef.current) applyTransform(currentAnimRef.current, zoomRef.current, panRef.current);
     };
 
@@ -194,7 +196,7 @@ export function App({
       window.removeEventListener('dblclick', onDblClick);
       window.removeEventListener('resize', onResize);
     };
-  }, [resetView]);
+  }, [resetView, canvasBackground]);
 
   useEffect(() => {
     let smoothedUpdateMs = 0;

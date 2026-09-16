@@ -2,6 +2,7 @@ import { render } from 'preact';
 import { allStyles } from './styles';
 import { App } from './app';
 import { Notice } from './components/notice';
+import { CHECKER_CLEAR_CSS, createCanvasBackground } from './canvas-background';
 
 const ATLAS_ALIAS = 'atlas';
 
@@ -30,8 +31,10 @@ async function boot(appRoot: HTMLElement, canvasContainer: HTMLElement) {
 
   render(<Notice kind="loading" title="Loading Spine assets" />, appRoot);
 
-  const pixiApp = new PIXI.Application({ backgroundAlpha: 0, resizeTo: canvasContainer });
+  // Opaque on purpose - see canvas-background.ts.
+  const pixiApp = new PIXI.Application({ background: CHECKER_CLEAR_CSS, resizeTo: canvasContainer });
   canvasContainer.appendChild(pixiApp.view);
+  const canvasBackground = createCanvasBackground(pixiApp);
 
   PIXI.Assets.add({ alias: ATLAS_ALIAS, src: ATLAS_URI });
   SPINES.forEach(({ name, uri }) => PIXI.Assets.add({ alias: name, src: uri }));
@@ -48,7 +51,7 @@ async function boot(appRoot: HTMLElement, canvasContainer: HTMLElement) {
     pixiApp.stage.addChild(anim);
   });
 
-  render(<App spineInstances={spineInstances} pixiApp={pixiApp} canvasContainer={canvasContainer} />, appRoot);
+  render(<App spineInstances={spineInstances} pixiApp={pixiApp} canvasBackground={canvasBackground} />, appRoot);
 }
 
 injectStyles();
