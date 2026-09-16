@@ -1,16 +1,16 @@
 {
   "name": "spine-animation-preview",
   "description": "spine animation preview for vscode",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "publisher": "neymanushka",
   "private": true,
   "scripts": {
-    "pack": "vsce package --no-dependencies",
+    "pack": "vsce package --allow-missing-repository --no-dependencies",
     "vscode:prepublish": "node ./node_modules/typescript/bin/tsc -p ./ && node esbuild.webview.mjs",
     "compile": "tsc -p ./ && node esbuild.webview.mjs",
     "compile:ext": "tsc -p ./",
     "compile:webview": "node esbuild.webview.mjs",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc --noEmit -p ./ && tsc -p src/webview",
     "lint": "eslint . --fix",
     "watch": "tsc -w -p ./",
     "watch:webview": "node esbuild.webview.mjs --watch"
@@ -27,6 +27,7 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-prettier": "^5.2.1",
+    "preact": "^10.29.8",
     "prettier": "^3.3.3",
     "typescript": "~5.5.4",
     "typescript-eslint": "8.9.0"

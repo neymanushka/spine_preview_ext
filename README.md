@@ -4,9 +4,11 @@
 
 ## controls
 
-- Shift + left-click drag — pan the animation
-- Middle-click drag — pan the animation
-- Double-click — reset pan to center
+- Mouse wheel - zoom towards the cursor (5% to 800%)
+- Shift + left-click drag - pan the animation
+- Middle-click drag - pan the animation
+- Double-click the canvas - reset zoom and pan
+- Right-click an animation - copy its name
 
 ## build
 

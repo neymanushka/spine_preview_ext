@@ -12,6 +12,7 @@ specifiers:
   eslint-config-prettier: ^9.1.0
   eslint-plugin-import: ^2.31.0
   eslint-plugin-prettier: ^5.2.1
+  preact: ^10.29.8
   prettier: ^3.3.3
   typescript: ~5.5.4
   typescript-eslint: 8.9.0
@@ -28,6 +29,7 @@ devDependencies:
   eslint-config-prettier: 9.1.0_eslint@9.12.0
   eslint-plugin-import: 2.31.0_vmu7wyjxa67gjdwb7mtc543ds4
   eslint-plugin-prettier: 5.2.1_wobwgy5bpitrvv6eupqvvj7uxe
+  preact: 10.29.8
   prettier: 3.3.3
   typescript: 5.5.4
   typescript-eslint: 8.9.0_sycbiuemshigxvy3he3dpsdh64
@@ -2578,6 +2580,15 @@ packages:
   /possible-typed-array-names/1.0.0:
     resolution: {integrity: sha512-d7Uw+eZoloe0EHDIYoe+bQ5WXnGMOpmiZFTuMWCwpjzzkL2nTjcKiAk4hh8TjnGye2TwWOk3UXucZ+3rbmBa8Q==}
     engines: {node: '>= 0.4'}
+    dev: true
+
+  /preact/10.29.8:
+    resolution: {integrity: sha512-ej2aVZ+vZ8WO7tvlQWRM9N63A0KzF9q4mWJfDUHgYaIofWY9hu74QdnQrjoPMmZi2/nZ5gN0bJCQF49xQqx09Q==}
+    peerDependencies:
+      preact-render-to-string: '>=5'
+    peerDependenciesMeta:
+      preact-render-to-string:
+        optional: true
     dev: true
 
   /prebuild-install/7.1.2:

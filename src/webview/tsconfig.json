@@ -1,15 +1,15 @@
 {
   "compilerOptions": {
-    "module": "es2020",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "target": "es2020",
     "lib": ["es2020", "dom"],
-    "outDir": "../../out/webview",
-    "sourceMap": true,
     "strict": true,
-    "rootDir": ".",
     "noEmit": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
     "types": [],
     "skipLibCheck": true
   },
-  "include": ["./**/*.ts"]
+  "include": ["./**/*.ts", "./**/*.tsx"]
 }
