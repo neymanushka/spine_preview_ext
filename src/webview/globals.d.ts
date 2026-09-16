@@ -83,6 +83,8 @@ interface PIXITicker {
   deltaMS: number;
   add(fn: () => void): void;
   remove(fn: () => void): void;
+  start(): void;
+  stop(): void;
 }
 
 interface PIXIContainer {
@@ -94,6 +96,7 @@ interface PIXIContainer {
 // missing one must degrade to "colour stays as constructed", not to a crash.
 interface PIXIRenderer {
   background?: { color: number };
+  resize(width: number, height: number): void;
 }
 
 interface PIXIApplication {
@@ -104,7 +107,7 @@ interface PIXIApplication {
 }
 
 interface PIXINamespace {
-  Application: new (options: { background: string; resizeTo: HTMLElement }) => PIXIApplication;
+  Application: new (options: { background: string; width: number; height: number }) => PIXIApplication;
   Texture: {
     from(source: HTMLCanvasElement): PIXITexture;
   };

@@ -31,8 +31,18 @@ async function boot(appRoot: HTMLElement, canvasContainer: HTMLElement) {
 
   render(<Notice kind="loading" title="Loading Spine assets" />, appRoot);
 
-  // Opaque on purpose - see canvas-background.ts.
-  const pixiApp = new PIXI.Application({ background: CHECKER_CLEAR_CSS, resizeTo: canvasContainer });
+  // Opaque on purpose - see canvas-background.ts. The renderer is sized by hand
+  // rather than with `resizeTo`, which reallocates the drawing buffer on every
+  // resize frame; app.tsx stretches the canvas with CSS during a drag and
+  // resizes the buffer once the drag settles.
+  const pixiApp = new PIXI.Application({
+    background: CHECKER_CLEAR_CSS,
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+  pixiApp.view.style.display = 'block';
+  pixiApp.view.style.width = '100%';
+  pixiApp.view.style.height = '100%';
   canvasContainer.appendChild(pixiApp.view);
   const canvasBackground = createCanvasBackground(pixiApp);
 

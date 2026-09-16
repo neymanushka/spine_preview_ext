@@ -22,6 +22,9 @@ const MIDDLE_MOUSE_BUTTON = 1;
 const STATS_SMOOTHING = 0.1;
 const STATS_FLUSH_INTERVAL_MS = 250;
 
+// How long after the last resize event the renderer is considered settled.
+const RESIZE_SETTLE_MS = 150;
+
 export const appStyles = `
 .title-container {
     display: flex;
@@ -179,24 +182,51 @@ export function App({
       if (isOverPanel(e.target)) return;
       resetView();
     };
-    const onResize = () => {
-      canvasBackground.resize(window.innerWidth, window.innerHeight);
-      if (currentAnimRef.current) applyTransform(currentAnimRef.current, zoomRef.current, panRef.current);
-    };
-
     window.addEventListener('mousedown', onMouseDown);
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
     window.addEventListener('dblclick', onDblClick);
-    window.addEventListener('resize', onResize);
     return () => {
       window.removeEventListener('mousedown', onMouseDown);
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
       window.removeEventListener('dblclick', onDblClick);
-      window.removeEventListener('resize', onResize);
     };
-  }, [resetView, canvasBackground]);
+  }, [resetView]);
+
+  useEffect(() => {
+    let settleTimer = 0;
+    let resizing = false;
+
+    const settle = () => {
+      resizing = false;
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      pixiApp.renderer.resize(width, height);
+      canvasBackground.resize(width, height);
+      if (currentAnimRef.current) applyTransform(currentAnimRef.current, zoomRef.current, panRef.current);
+      pixiApp.ticker.start();
+    };
+
+    const onResize = () => {
+      if (!resizing) {
+        resizing = true;
+        // Freeze the canvas for the duration of the drag. The old buffer stays
+        // on screen, stretched by CSS, instead of being reallocated and
+        // redrawn on every resize frame.
+        pixiApp.ticker.stop();
+      }
+      window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(settle, RESIZE_SETTLE_MS);
+    };
+
+    window.addEventListener('resize', onResize);
+    return () => {
+      window.removeEventListener('resize', onResize);
+      window.clearTimeout(settleTimer);
+      pixiApp.ticker.start();
+    };
+  }, [pixiApp, canvasBackground]);
 
   useEffect(() => {
     let smoothedUpdateMs = 0;
