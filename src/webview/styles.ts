@@ -9,8 +9,13 @@ import { noticeStyles } from './components/notice';
 import { appStyles } from './app';
 
 // Every colour is sourced from the VS Code theme so the preview matches the
-// editor the user actually runs. The literals are fallbacks only — they apply
+// editor the user actually runs. The literals are fallbacks only - they apply
 // when a variable is missing, never when the theme provides one.
+//
+// Panels are deliberately opaque and unblurred. A translucent panel with a
+// backdrop-filter over a transparent canvas makes the compositor flatten the
+// canvas and the CSS background into a texture before every blur pass, which
+// stalls window resizing.
 const globalStyles = `
 :root {
     --sp-1: 4px;
@@ -20,7 +25,7 @@ const globalStyles = `
     --radius: 4px;
     --radius-lg: 6px;
 
-    --panel-bg: color-mix(in srgb, var(--vscode-editorWidget-background, #252526) 92%, transparent);
+    --panel-bg: var(--vscode-editorWidget-background, #252526);
     --panel-border-color: var(--vscode-editorWidget-border, var(--vscode-panel-border, rgba(128, 128, 128, 0.35)));
     --panel-shadow: 0 2px 8px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.36));
 
@@ -79,7 +84,6 @@ body {
     border: 1px solid var(--panel-border-color);
     border-radius: var(--radius-lg);
     box-shadow: var(--panel-shadow);
-    backdrop-filter: blur(12px);
 }
 .panel-header {
     padding: var(--sp-2) var(--sp-2) var(--sp-1);
