@@ -54,9 +54,18 @@ interface SpineTrackEntry {
   nextAnimationLast: number;
 }
 
+// The runtime guards every callback with a truthiness check, so a listener may
+// declare only the ones it wants. The others (start, interrupt, end, dispose,
+// complete) are left out until something needs them.
+interface SpineAnimationStateListener {
+  event?(entry: SpineTrackEntry, event: SpineEvent): void;
+}
+
 interface SpineAnimationState {
   setAnimation(trackIndex: number, name: string, loop: boolean): SpineTrackEntry;
   tracks: (SpineTrackEntry | null)[];
+  addListener(listener: SpineAnimationStateListener): void;
+  removeListener(listener: SpineAnimationStateListener): void;
 }
 
 interface SpineInstance {

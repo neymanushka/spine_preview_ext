@@ -7,6 +7,8 @@ import { AnimationList } from './components/animation-list';
 import { SkinsPanel } from './components/skins-panel';
 import { TracksPanel } from './components/tracks-panel';
 import { TimelinePanel } from './components/timeline-panel';
+import { EventLog } from './components/event-log';
+import type { EventLogHandle } from './components/event-log';
 import { clampZoom, ZOOM_WHEEL_SENSITIVITY } from './zoom';
 
 const DEFAULT_BACKGROUND: BackgroundId = 'checker';
@@ -142,6 +144,8 @@ export function App({
   const statsRef = useRef<HTMLSpanElement | null>(null);
   const scrubberRef = useRef<HTMLInputElement | null>(null);
   const timeLabelRef = useRef<HTMLSpanElement | null>(null);
+  const eventLogRef = useRef<EventLogHandle | null>(null);
+  const flashMarkerRef = useRef<((time: number) => void) | null>(null);
   const playingRef = useRef(playing);
   const loopRef = useRef(loop);
   const speedRef = useRef(speed);
@@ -167,8 +171,12 @@ export function App({
     setPlaying(value);
   }, []);
 
+  // `eventsFrom` is the far end of the window `apply()` fires events for.
+  // Collapsing it onto `time` - the default - is what stops a backwards scrub
+  // from replaying everything in between; a forward step passes its previous
+  // position instead, so the frames it skipped over still report.
   const seekTo = useCallback(
-    (time: number) => {
+    (time: number, eventsFrom = time) => {
       const anim = currentAnimRef.current;
       const entry = currentEntry();
       if (!anim || !entry) return;
@@ -177,10 +185,10 @@ export function App({
       // owns the flag and turns it off; starting playback puts it back.
       entry.loop = false;
       entry.trackTime = time;
-      // Without moving the event window with the playhead, scrubbing backwards
-      // replays every event between the old and the new position.
-      entry.animationLast = time;
-      entry.nextAnimationLast = time;
+      // `update()` promotes `nextAnimationLast` into `animationLast`, so the
+      // second of the two is the one that actually decides the window.
+      entry.animationLast = eventsFrom;
+      entry.nextAnimationLast = eventsFrom;
       anim.update(0);
       syncTimelineDom();
     },
@@ -200,7 +208,11 @@ export function App({
       const entry = currentEntry();
       if (!entry) return;
       applyPlaying(false);
-      seekTo(clampTime(positionInAnimation(entry) + frames * FRAME_SECONDS, entry.animation.duration));
+      const from = positionInAnimation(entry);
+      const to = clampTime(from + frames * FRAME_SECONDS, entry.animation.duration);
+      // Only a forward step reports what it crossed. Stepping back would have
+      // to replay the whole span between the two positions to get there.
+      seekTo(to, frames > 0 ? from : to);
     },
     [applyPlaying, currentEntry, seekTo],
   );
@@ -300,6 +312,24 @@ export function App({
     setTrackAnimation(entry?.animation ?? null);
     applyPlaying(true);
   }, [selectedFile, spineInstances, applyPlaying]);
+
+  // Only the runtime knows an event actually fired: deriving it from the
+  // playhead would mean re-implementing the wrapping rules that decide when
+  // `apply()` reports one.
+  useEffect(() => {
+    const anim = spineInstances[selectedFile];
+    if (!anim) return;
+    const listener: SpineAnimationStateListener = {
+      event: (entry, event) => {
+        eventLogRef.current?.(event.data.name);
+        // The timeline only draws the active track, so that is the only entry
+        // whose events have a marker to flash.
+        if (entry === currentEntry()) flashMarkerRef.current?.(event.time);
+      },
+    };
+    anim.state.addListener(listener);
+    return () => anim.state.removeListener(listener);
+  }, [selectedFile, spineInstances, currentEntry]);
 
   useEffect(() => {
     const onWheel = (e: WheelEvent) => {
@@ -453,6 +483,7 @@ export function App({
           <TracksPanel activeTrack={activeTrack} onSelect={setActiveTrack} />
         </div>
         <div class="stage-column">
+          <EventLog handleRef={eventLogRef} />
           <TimelinePanel
             animation={trackAnimation}
             playing={playing}
@@ -465,6 +496,7 @@ export function App({
             onSpeed={handleSpeed}
             scrubberRef={scrubberRef}
             timeLabelRef={timeLabelRef}
+            flashRef={flashMarkerRef}
           />
         </div>
       </div>

@@ -5,6 +5,7 @@ import { animationListStyles } from './components/animation-list';
 import { skinsPanelStyles } from './components/skins-panel';
 import { tracksPanelStyles } from './components/tracks-panel';
 import { timelinePanelStyles } from './components/timeline-panel';
+import { eventLogStyles } from './components/event-log';
 import { tooltipStyles } from './components/tooltip';
 import { noticeStyles } from './components/notice';
 import { appStyles } from './app';
@@ -116,6 +117,7 @@ export const allStyles = [
   skinsPanelStyles,
   tracksPanelStyles,
   timelinePanelStyles,
+  eventLogStyles,
   tooltipStyles,
   noticeStyles,
 ].join('\n');

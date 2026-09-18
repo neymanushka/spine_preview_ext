@@ -1,4 +1,4 @@
-import { useMemo } from 'preact/hooks';
+import { useEffect, useMemo, useRef } from 'preact/hooks';
 import { collectEvents } from '../animation-events';
 import type { AnimationEvent } from '../animation-events';
 
@@ -9,6 +9,9 @@ const SCRUBBER_STEP_SECONDS = 0.001;
 // `width - 6px`. Event markers have to use the same inset or they drift away
 // from the playhead towards both ends of the track.
 const THUMB_SIZE_PX = 12;
+// Markers are found by their formatted time, so the attribute and the lookup
+// have to round identically.
+const EVENT_TIME_DIGITS = 3;
 
 export const timelinePanelStyles = `
 .timeline-container {
@@ -92,6 +95,11 @@ export const timelinePanelStyles = `
     background: var(--event-marker);
 }
 .timeline-marker:hover .timeline-marker-tick { background: var(--text-primary); }
+.timeline-marker.is-fired .timeline-marker-tick { animation: marker-flash 500ms ease-out; }
+@keyframes marker-flash {
+    0% { background: var(--text-primary); transform: scale(2, 1.8); }
+    100% { background: var(--event-marker); transform: scale(1, 1); }
+}
 .timeline-speed {
     flex-shrink: 0;
     padding: 2px var(--sp-1);
@@ -129,7 +137,10 @@ function groupByTime(events: readonly AnimationEvent[]): readonly EventMarker[] 
     if (existing) existing.push(event.name);
     else names.set(event.time, [event.name]);
   });
-  return [...names].map(([time, grouped]) => ({ time, label: `${grouped.join(', ')} @ ${time.toFixed(3)}s` }));
+  return [...names].map(([time, grouped]) => ({
+    time,
+    label: `${grouped.join(', ')} @ ${time.toFixed(EVENT_TIME_DIGITS)}s`,
+  }));
 }
 
 function markerOffset(ratio: number) {
@@ -201,6 +212,7 @@ export function TimelinePanel({
   onSpeed,
   scrubberRef,
   timeLabelRef,
+  flashRef,
 }: {
   animation: SpineAnimation | null;
   playing: boolean;
@@ -214,8 +226,28 @@ export function TimelinePanel({
   // Both are written to by the render loop - see the ticker effect in app.tsx.
   scrubberRef: { current: HTMLInputElement | null };
   timeLabelRef: { current: HTMLSpanElement | null };
+  // Filled in below so <App> can flash a marker straight from the Spine event
+  // listener without a state update per event.
+  flashRef: { current: ((time: number) => void) | null };
 }) {
   const markers = useMemo(() => (animation ? groupByTime(collectEvents(animation)) : []), [animation]);
+  const markersRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    flashRef.current = (time: number) => {
+      const marker = markersRef.current?.querySelector(`[data-event-time="${time.toFixed(EVENT_TIME_DIGITS)}"]`);
+      if (!(marker instanceof HTMLElement)) return;
+      // An event that fires again while the previous flash is still running has
+      // to restart it, and a class the element already carries would not
+      // re-trigger the animation without forcing a reflow in between.
+      marker.classList.remove('is-fired');
+      marker.getBoundingClientRect();
+      marker.classList.add('is-fired');
+    };
+    return () => {
+      flashRef.current = null;
+    };
+  }, [flashRef]);
 
   const duration = animation?.duration ?? 0;
   const idle = duration <= 0;
@@ -270,15 +302,17 @@ export function TimelinePanel({
               aria-label="Animation time"
               onInput={(e) => onScrub(parseFloat((e.target as HTMLInputElement).value))}
             />
-            <div class="timeline-markers">
+            <div class="timeline-markers" ref={markersRef}>
               {markers.map((marker) => (
                 <button
                   key={marker.time}
                   type="button"
                   class="timeline-marker"
+                  data-event-time={marker.time.toFixed(EVENT_TIME_DIGITS)}
                   style={{ left: markerOffset(marker.time / duration) }}
                   title={marker.label}
                   aria-label={`Jump to event ${marker.label}`}
+                  onAnimationEnd={(e) => e.currentTarget.classList.remove('is-fired')}
                   onClick={() => onScrub(marker.time)}
                 >
                   <span class="timeline-marker-tick" />
