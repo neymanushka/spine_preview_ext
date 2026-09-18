@@ -4,6 +4,9 @@ import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 // queue is capped and consecutive repeats of one name collapse into a counter
 // rather than stacking.
 const MAX_TOASTS = 6;
+// How long an open toast keeps absorbing repeats. It has to stay under the fade
+// in the stylesheet below, so the toast is still on screen while it absorbs.
+const COALESCE_WINDOW_MS = 1000;
 
 export const eventLogStyles = `
 .event-log {
@@ -42,11 +45,14 @@ export const eventLogStyles = `
 }`;
 
 // The name is what identifies a toast; `id` only exists to key the element, and
-// changing it is how a repeat restarts the rise.
+// changing it is how a repeat restarts the rise. `openedAt` is when the toast
+// first appeared and deliberately survives a repeat - measuring the window from
+// the last repeat instead would never let a steady stream of one event close it.
 type Toast = {
   readonly id: number;
   readonly name: string;
   readonly count: number;
+  readonly openedAt: number;
 };
 
 export type EventLogHandle = (name: string) => void;
@@ -60,10 +66,16 @@ export function EventLog({ handleRef }: { handleRef: { current: EventLogHandle |
       lastId.current += 1;
       const id = lastId.current;
       const last = prev[prev.length - 1];
+      const now = performance.now();
       // A fresh id remounts the element, so the repeat replays the animation
-      // instead of silently bumping a number that is already fading out.
-      if (last?.name === name) return [...prev.slice(0, -1), { id, name, count: last.count + 1 }];
-      const next = [...prev, { id, name, count: 1 }];
+      // instead of silently bumping a number that is already fading out. That
+      // also restarts the fade, which is why folding only lasts a window: an
+      // event firing steadily would otherwise hold one toast open forever and
+      // its counter would climb for as long as the animation ran.
+      if (last?.name === name && now - last.openedAt < COALESCE_WINDOW_MS) {
+        return [...prev.slice(0, -1), { ...last, id, count: last.count + 1 }];
+      }
+      const next = [...prev, { id, name, count: 1, openedAt: now }];
       return next.slice(Math.max(next.length - MAX_TOASTS, 0));
     });
   }, []);
