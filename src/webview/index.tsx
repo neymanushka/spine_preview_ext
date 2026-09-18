@@ -2,7 +2,6 @@ import { render } from 'preact';
 import { allStyles } from './styles';
 import { App } from './app';
 import { Notice } from './components/notice';
-import { CHECKER_CLEAR_CSS, createCanvasBackground } from './canvas-background';
 
 const ATLAS_ALIAS = 'atlas';
 
@@ -31,20 +30,8 @@ async function boot(appRoot: HTMLElement, canvasContainer: HTMLElement) {
 
   render(<Notice kind="loading" title="Loading Spine assets" />, appRoot);
 
-  // Opaque on purpose - see canvas-background.ts. The renderer is sized by hand
-  // rather than with `resizeTo`, which reallocates the drawing buffer on every
-  // resize frame; app.tsx stretches the canvas with CSS during a drag and
-  // resizes the buffer once the drag settles.
-  const pixiApp = new PIXI.Application({
-    background: CHECKER_CLEAR_CSS,
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
-  pixiApp.view.style.display = 'block';
-  pixiApp.view.style.width = '100%';
-  pixiApp.view.style.height = '100%';
+  const pixiApp = new PIXI.Application({ backgroundAlpha: 0, resizeTo: canvasContainer });
   canvasContainer.appendChild(pixiApp.view);
-  const canvasBackground = createCanvasBackground(pixiApp);
 
   PIXI.Assets.add({ alias: ATLAS_ALIAS, src: ATLAS_URI });
   SPINES.forEach(({ name, uri }) => PIXI.Assets.add({ alias: name, src: uri }));
@@ -61,7 +48,7 @@ async function boot(appRoot: HTMLElement, canvasContainer: HTMLElement) {
     pixiApp.stage.addChild(anim);
   });
 
-  render(<App spineInstances={spineInstances} pixiApp={pixiApp} canvasBackground={canvasBackground} />, appRoot);
+  render(<App spineInstances={spineInstances} pixiApp={pixiApp} canvasContainer={canvasContainer} />, appRoot);
 }
 
 injectStyles();

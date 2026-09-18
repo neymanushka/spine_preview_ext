@@ -49,7 +49,8 @@ interface SpineAnimationState {
   tracks: (SpineTrackEntry | null)[];
 }
 
-interface SpineInstance extends PIXIDisplayObject {
+interface SpineInstance {
+  visible: boolean;
   x: number;
   y: number;
   scale: { set(value: number): void };
@@ -60,20 +61,6 @@ interface SpineInstance extends PIXIDisplayObject {
 }
 
 // --- PIXI types ---
-interface PIXIDisplayObject {
-  visible: boolean;
-}
-
-interface PIXITexture {
-  readonly width: number;
-  readonly height: number;
-}
-
-interface PIXITilingSprite extends PIXIDisplayObject {
-  width: number;
-  height: number;
-}
-
 interface PIXIAssetAddOptions {
   alias: string;
   src: string;
@@ -83,35 +70,20 @@ interface PIXITicker {
   deltaMS: number;
   add(fn: () => void): void;
   remove(fn: () => void): void;
-  start(): void;
-  stop(): void;
 }
 
 interface PIXIContainer {
-  addChild(child: PIXIDisplayObject): void;
-  addChildAt(child: PIXIDisplayObject, index: number): void;
-}
-
-// Optional: the accessor only exists on the PIXI v7 background system, and a
-// missing one must degrade to "colour stays as constructed", not to a crash.
-interface PIXIRenderer {
-  background?: { color: number };
-  resize(width: number, height: number): void;
+  addChild(child: SpineInstance): void;
 }
 
 interface PIXIApplication {
   view: HTMLCanvasElement;
   stage: PIXIContainer;
   ticker: PIXITicker;
-  renderer: PIXIRenderer;
 }
 
 interface PIXINamespace {
-  Application: new (options: { background: string; width: number; height: number }) => PIXIApplication;
-  Texture: {
-    from(source: HTMLCanvasElement): PIXITexture;
-  };
-  TilingSprite: new (texture: PIXITexture, width: number, height: number) => PIXITilingSprite;
+  Application: new (options: { backgroundAlpha: number; resizeTo: HTMLElement }) => PIXIApplication;
   Assets: {
     add(options: PIXIAssetAddOptions): void;
     load(aliases: string[]): Promise<void>;

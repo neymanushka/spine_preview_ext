@@ -12,7 +12,6 @@ export const tooltipStyles = `
     border: 1px solid var(--panel-border-color);
     border-radius: var(--radius-lg);
     box-shadow: var(--panel-shadow);
-    backdrop-filter: blur(12px);
     padding: var(--sp-2);
     font-size: 12px;
     line-height: 1.4;

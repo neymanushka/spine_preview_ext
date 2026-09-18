@@ -7,7 +7,6 @@ import { AnimationList } from './components/animation-list';
 import { SkinsPanel } from './components/skins-panel';
 import { TracksPanel } from './components/tracks-panel';
 import { clampZoom, ZOOM_WHEEL_SENSITIVITY } from './zoom';
-import type { CanvasBackground } from './canvas-background';
 
 const DEFAULT_BACKGROUND: BackgroundId = 'checker';
 const DEFAULT_ZOOM = 1;
@@ -21,9 +20,6 @@ const MIDDLE_MOUSE_BUTTON = 1;
 // animation list included, and the meter would become the thing it measures.
 const STATS_SMOOTHING = 0.1;
 const STATS_FLUSH_INTERVAL_MS = 250;
-
-// How long after the last resize event the renderer is considered settled.
-const RESIZE_SETTLE_MS = 150;
 
 export const appStyles = `
 .title-container {
@@ -77,11 +73,11 @@ function applyTransform(anim: SpineInstance, zoom: number, pan: Pan) {
 export function App({
   spineInstances,
   pixiApp,
-  canvasBackground,
+  canvasContainer,
 }: {
   spineInstances: Record<string, SpineInstance>;
   pixiApp: PIXIApplication;
-  canvasBackground: CanvasBackground;
+  canvasContainer: HTMLElement;
 }) {
   const [selectedFile, setSelectedFile] = useState(SPINES[0]?.name ?? '');
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
@@ -118,8 +114,8 @@ export function App({
   }, [zoom, pan]);
 
   useEffect(() => {
-    canvasBackground.apply(background);
-  }, [background, canvasBackground]);
+    canvasContainer.className = `bg-${background}`;
+  }, [background, canvasContainer]);
 
   useEffect(() => {
     if (!selectedFile) return;
@@ -182,51 +178,23 @@ export function App({
       if (isOverPanel(e.target)) return;
       resetView();
     };
+    const onResize = () => {
+      if (currentAnimRef.current) applyTransform(currentAnimRef.current, zoomRef.current, panRef.current);
+    };
+
     window.addEventListener('mousedown', onMouseDown);
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
     window.addEventListener('dblclick', onDblClick);
+    window.addEventListener('resize', onResize);
     return () => {
       window.removeEventListener('mousedown', onMouseDown);
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
       window.removeEventListener('dblclick', onDblClick);
+      window.removeEventListener('resize', onResize);
     };
   }, [resetView]);
-
-  useEffect(() => {
-    let settleTimer = 0;
-    let resizing = false;
-
-    const settle = () => {
-      resizing = false;
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      pixiApp.renderer.resize(width, height);
-      canvasBackground.resize(width, height);
-      if (currentAnimRef.current) applyTransform(currentAnimRef.current, zoomRef.current, panRef.current);
-      pixiApp.ticker.start();
-    };
-
-    const onResize = () => {
-      if (!resizing) {
-        resizing = true;
-        // Freeze the canvas for the duration of the drag. The old buffer stays
-        // on screen, stretched by CSS, instead of being reallocated and
-        // redrawn on every resize frame.
-        pixiApp.ticker.stop();
-      }
-      window.clearTimeout(settleTimer);
-      settleTimer = window.setTimeout(settle, RESIZE_SETTLE_MS);
-    };
-
-    window.addEventListener('resize', onResize);
-    return () => {
-      window.removeEventListener('resize', onResize);
-      window.clearTimeout(settleTimer);
-      pixiApp.ticker.start();
-    };
-  }, [pixiApp, canvasBackground]);
 
   useEffect(() => {
     let smoothedUpdateMs = 0;

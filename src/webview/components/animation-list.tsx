@@ -6,16 +6,10 @@ export const animationListStyles = `
     overflow-y: auto;
     padding: var(--sp-1);
     min-width: 220px;
-    /* Keeps a long list from relaying out the rest of the overlay on resize. */
-    contain: layout paint;
 }
 .list-item {
     display: flex;
     align-items: center;
-    /* Rows scrolled out of view skip layout and paint entirely, which is what
-       keeps a skeleton with a few hundred animations cheap to resize. */
-    content-visibility: auto;
-    contain-intrinsic-size: auto 24px;
     gap: var(--sp-1);
     color: var(--text-primary);
     border-radius: var(--radius);
