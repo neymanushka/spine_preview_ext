@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.3.0] - 2026-09-18
+
+### Features
+
+- Timeline panel with play/pause, frame stepping, a scrubber and the animation's
+  duration, driving the track selected in the tracks panel
+- Event markers under the scrubber: click one to jump to it, hover for the names,
+  and events authored on the same frame share a marker
+- Fired events are announced as toasts above the timeline and the marker they
+  came from flashes; repeats of one name collapse into a counter
+- Playback speed from 0.1x to 5x
+- Space toggles playback, left/right arrows step a frame, and a forward step
+  reports the events it crossed
+- Loop moves out of the toolbar into the timeline, and now governs only playback:
+  scrubbing and stepping stop on the first and last frame instead of wrapping
+
+### Internal
+
+- The demo ships two skeletons, fruits and vegetables, so the skeleton selector
+  and the skins panel have something to switch between
+- The demo's six textures are packed onto one atlas page instead of one page each
+
 ## [2.2.0] - 2026-09-16
 
 ### Features
