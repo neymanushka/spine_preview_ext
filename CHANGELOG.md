@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.3.1] - 2026-09-18
+
+### Fixes
+
+- An event firing steadily no longer holds a single toast open indefinitely: a
+  repeat replays the toast, which restarted its fade, so the counter climbed for
+  as long as the animation ran. Folding is now bounded by a window measured from
+  when the toast opened, and the queue turns over while the burst continues
+
 ## [2.3.0] - 2026-09-18
 
 ### Features
@@ -9,8 +18,7 @@
 - Event markers under the scrubber: click one to jump to it, hover for the names,
   and events authored on the same frame share a marker
 - Fired events are announced as toasts above the timeline and the marker they
-  came from flashes; repeats of one name fold into a counter that turns over as
-  the burst continues, instead of stacking up
+  came from flashes; repeats of one name collapse into a counter
 - Playback speed from 0.1x to 5x
 - Space toggles playback, left/right arrows step a frame, and a forward step
   reports the events it crossed
