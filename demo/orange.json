@@ -63,6 +63,15 @@
       }
     }
   ],
+  "events": {
+    "blink": {},
+    "spin-half": {},
+    "spin-done": {},
+    "launch": { "string": "up" },
+    "impact": { "int": 3, "float": 0.75 },
+    "squish": {},
+    "footstep": { "string": "left" }
+  },
   "animations": {
     "idle": {
       "bones": {
@@ -82,7 +91,11 @@
             { "time": 1.2, "x": 1, "y": 1 }
           ]
         }
-      }
+      },
+      "events": [
+        { "time": 0.3, "name": "blink" },
+        { "time": 0.9, "name": "blink" }
+      ]
     },
     "spin": {
       "bones": {
@@ -93,7 +106,11 @@
             { "time": 1.0, "angle": 360 }
           ]
         }
-      }
+      },
+      "events": [
+        { "time": 0.5, "name": "spin-half" },
+        { "time": 1.0, "name": "spin-done" }
+      ]
     },
     "bounce": {
       "bones": {
@@ -115,7 +132,13 @@
             { "time": 0.6, "x": 1, "y": 1 }
           ]
         }
-      }
+      },
+      "events": [
+        { "time": 0, "name": "launch" },
+        { "time": 0.3, "name": "impact" },
+        { "time": 0.3, "name": "squish" },
+        { "time": 0.5, "name": "footstep" }
+      ]
     },
     "squash": {
       "bones": {
