@@ -1,3 +1,7 @@
+// Ambient declarations for the UMD libraries the extension host injects as
+// <script> tags (see src/extension.ts) and for the globals it writes into the
+// page. Preact is bundled from npm, so its types come from the package itself.
+
 // --- Spine types ---
 interface SpineEventData {
   name: string;
@@ -37,12 +41,31 @@ interface SpineSkeleton {
 }
 
 interface SpineTrackEntry {
-  animation: { name: string };
+  animation: SpineAnimation;
+  loop: boolean;
+  // Seconds played on the track. It keeps growing past `animation.duration`
+  // when the entry loops, so the position inside the animation is the
+  // remainder - see positionInAnimation() in app.tsx.
+  trackTime: number;
+  // The window `apply()` fires events for. Scrubbing has to move both markers
+  // with `trackTime`, or every event between the old and the new position
+  // replays on the next frame.
+  animationLast: number;
+  nextAnimationLast: number;
+}
+
+// The runtime guards every callback with a truthiness check, so a listener may
+// declare only the ones it wants. The others (start, interrupt, end, dispose,
+// complete) are left out until something needs them.
+interface SpineAnimationStateListener {
+  event?(entry: SpineTrackEntry, event: SpineEvent): void;
 }
 
 interface SpineAnimationState {
-  setAnimation(trackIndex: number, name: string, loop: boolean): void;
+  setAnimation(trackIndex: number, name: string, loop: boolean): SpineTrackEntry;
   tracks: (SpineTrackEntry | null)[];
+  addListener(listener: SpineAnimationStateListener): void;
+  removeListener(listener: SpineAnimationStateListener): void;
 }
 
 interface SpineInstance {
@@ -79,7 +102,7 @@ interface PIXIApplication {
 }
 
 interface PIXINamespace {
-  Application: new (options: { background: string; resizeTo: HTMLElement }) => PIXIApplication;
+  Application: new (options: { backgroundAlpha: number; resizeTo: HTMLElement }) => PIXIApplication;
   Assets: {
     add(options: PIXIAssetAddOptions): void;
     load(aliases: string[]): Promise<void>;
@@ -92,24 +115,6 @@ interface SpineNamespace {
   };
   Skin: new (name: string) => SpineSkin;
 }
-
-// --- Preact types ---
-type VNode = object | string | number | boolean | null | undefined;
-
-declare const preact: {
-  h: (type: string | Function, props?: Record<string, unknown> | null, ...children: VNode[]) => VNode;
-  render: (vnode: VNode | null, parent: Element) => void;
-  Fragment: Function;
-};
-
-declare const preactHooks: {
-  useState: <T>(initialState: T | (() => T)) => [T, (value: T | ((prev: T) => T)) => void];
-  useRef: <T>(initialValue: T) => { current: T };
-  useEffect: (effect: () => void | (() => void), deps?: ReadonlyArray<unknown>) => void;
-  useCallback: <T extends (...args: unknown[]) => unknown>(callback: T, deps: ReadonlyArray<unknown>) => T;
-};
-
-declare const htm: { bind: (h: typeof preact.h) => (strings: TemplateStringsArray, ...values: unknown[]) => VNode };
 
 declare const PIXI: PIXINamespace;
 declare const spine: SpineNamespace;

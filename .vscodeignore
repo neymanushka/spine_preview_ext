@@ -1,1 +1,15 @@
 node_modules
+src
+demo
+.claude
+.vscode-test
+.gitignore
+.prettierrc.json
+eslint.config.mjs
+esbuild.webview.mjs
+tsconfig.json
+pnpm-lock.yaml
+preview.png
+out/**/*.map
+**/*.vsix
+CLAUDE.md
