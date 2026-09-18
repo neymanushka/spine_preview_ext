@@ -1,0 +1,16 @@
+demo.png
+size: 512, 256
+filter: Linear, Linear
+pma: false
+orange
+  bounds: 0, 0, 128, 128
+apple
+  bounds: 128, 0, 128, 128
+lime
+  bounds: 256, 0, 128, 128
+carrot
+  bounds: 384, 0, 128, 128
+eggplant
+  bounds: 0, 128, 128, 128
+broccoli
+  bounds: 128, 128, 128, 128
