@@ -1,4 +1,5 @@
 import { Tooltip } from './tooltip';
+import { collectEvents } from '../animation-events';
 
 export const animationListStyles = `
 .list-container {
@@ -50,13 +51,10 @@ export const animationListStyles = `
 }
 .list-empty { padding: var(--sp-2); color: var(--text-secondary); font-size: 12px; }`;
 
-function collectEvents(animation: SpineAnimation) {
-  const text = animation.timelines
-    .filter((t): t is SpineTimeline & { events: SpineEvent[] } => 'events' in t)
-    .flatMap((t) => t.events)
-    .map((e) => `event: ${e.data.name}   time: ${e.time.toFixed(3)}`)
-    .join('\n');
-  return text.length > 0 ? text : 'no events found';
+function describeEvents(animation: SpineAnimation) {
+  const events = collectEvents(animation);
+  if (events.length === 0) return 'no events found';
+  return events.map((e) => `event: ${e.name}   time: ${e.time.toFixed(3)}`).join('\n');
 }
 
 export function AnimationList({
@@ -95,7 +93,7 @@ export function AnimationList({
               <path d="M4 2h7l3 3v7a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm0 1v9h9V6h-3V3H4z" />
             </svg>
           </button>
-          <Tooltip text={collectEvents(a)}>
+          <Tooltip text={describeEvents(a)}>
             <div class="list-item-name">
               <span class="list-item-label">{a.name}</span>
               <span class="list-item-duration">{a.duration.toFixed(3)}s</span>

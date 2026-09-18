@@ -41,11 +41,21 @@ interface SpineSkeleton {
 }
 
 interface SpineTrackEntry {
-  animation: { name: string };
+  animation: SpineAnimation;
+  loop: boolean;
+  // Seconds played on the track. It keeps growing past `animation.duration`
+  // when the entry loops, so the position inside the animation is the
+  // remainder - see positionInAnimation() in app.tsx.
+  trackTime: number;
+  // The window `apply()` fires events for. Scrubbing has to move both markers
+  // with `trackTime`, or every event between the old and the new position
+  // replays on the next frame.
+  animationLast: number;
+  nextAnimationLast: number;
 }
 
 interface SpineAnimationState {
-  setAnimation(trackIndex: number, name: string, loop: boolean): void;
+  setAnimation(trackIndex: number, name: string, loop: boolean): SpineTrackEntry;
   tracks: (SpineTrackEntry | null)[];
 }
 

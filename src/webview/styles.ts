@@ -4,6 +4,7 @@ import { statusBarStyles } from './components/status-bar';
 import { animationListStyles } from './components/animation-list';
 import { skinsPanelStyles } from './components/skins-panel';
 import { tracksPanelStyles } from './components/tracks-panel';
+import { timelinePanelStyles } from './components/timeline-panel';
 import { tooltipStyles } from './components/tooltip';
 import { noticeStyles } from './components/notice';
 import { appStyles } from './app';
@@ -32,6 +33,7 @@ const globalStyles = `
     --text-primary: var(--vscode-foreground, #cccccc);
     --text-secondary: var(--vscode-descriptionForeground, #9d9d9d);
     --error-fg: var(--vscode-errorForeground, #f48771);
+    --event-marker: var(--vscode-charts-orange, #d18616);
 
     --accent: var(--vscode-focusBorder, #0078d4);
     --hover-bg: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.15));
@@ -113,6 +115,7 @@ export const allStyles = [
   animationListStyles,
   skinsPanelStyles,
   tracksPanelStyles,
+  timelinePanelStyles,
   tooltipStyles,
   noticeStyles,
 ].join('\n');

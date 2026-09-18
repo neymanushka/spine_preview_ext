@@ -53,16 +53,6 @@ export const controlsStyles = `
     background: var(--vscode-toolbar-hoverBackground, var(--hover-bg));
     color: var(--text-primary);
 }
-.controls-loop {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-1);
-    color: var(--text-secondary);
-    font-size: 12px;
-    white-space: nowrap;
-    cursor: pointer;
-}
-.controls-loop input { accent-color: var(--accent); cursor: pointer; margin: 0; }
 .bg-switch { display: flex; gap: 2px; }
 .bg-swatch {
     width: 18px;
@@ -89,16 +79,12 @@ export const controlsStyles = `
 export function Controls({
   zoom,
   onZoom,
-  loop,
-  onLoop,
   background,
   onBackground,
   onResetView,
 }: {
   zoom: number;
   onZoom: (value: number) => void;
-  loop: boolean;
-  onLoop: (value: boolean) => void;
   background: BackgroundId;
   onBackground: (value: BackgroundId) => void;
   onResetView: () => void;
@@ -136,10 +122,6 @@ export function Controls({
       >
         {Math.round(zoom * 100)}%
       </button>
-      <label class="controls-loop">
-        <input type="checkbox" checked={loop} onChange={(e) => onLoop((e.target as HTMLInputElement).checked)} />
-        loop
-      </label>
     </div>
   );
 }
