@@ -35,7 +35,15 @@ function getTooltipContainer() {
   return tooltipContainer;
 }
 
-export function Tooltip({ text, children }: { text: string; children: ComponentChildren }) {
+export function Tooltip({
+  text,
+  class: className,
+  children,
+}: {
+  text: string;
+  class?: string;
+  children: ComponentChildren;
+}) {
   const [visible, setVisible] = useState(false);
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const mounted = useRef(false);
@@ -72,7 +80,7 @@ export function Tooltip({ text, children }: { text: string; children: ComponentC
   };
 
   return (
-    <div onMouseEnter={show} onMouseLeave={() => setVisible(false)}>
+    <div class={className} onMouseEnter={show} onMouseLeave={() => setVisible(false)}>
       {children}
     </div>
   );

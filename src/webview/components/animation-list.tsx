@@ -93,11 +93,11 @@ export function AnimationList({
               <path d="M4 2h7l3 3v7a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm0 1v9h9V6h-3V3H4z" />
             </svg>
           </button>
-          <Tooltip text={describeEvents(a)}>
-            <div class="list-item-name">
-              <span class="list-item-label">{a.name}</span>
-              <span class="list-item-duration">{a.duration.toFixed(3)}s</span>
-            </div>
+          {/* The tooltip's wrapper is the flex item, so it has to carry the
+              shrinking styles itself or a long name pushes the duration out. */}
+          <Tooltip class="list-item-name" text={describeEvents(a)}>
+            <span class="list-item-label">{a.name}</span>
+            <span class="list-item-duration">{a.duration.toFixed(3)}s</span>
           </Tooltip>
         </div>
       ))}
