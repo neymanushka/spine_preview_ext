@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.0.1] - 2026-10-17
+
+### Fixes
+
+- Faster startup: the WebGL renderer is built directly instead of through
+  PIXI `Application`, skipping a throwaway WebGL context that cost 100-150 ms
+  inside a VS Code webview (renderer init ~870 ms -> ~650 ms)
+
 ## [3.0.0] - 2026-10-17
 
 ### Breaking
