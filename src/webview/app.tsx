@@ -1,4 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
+import { Skin } from '@esotericsoftware/spine-pixi-v8';
+import type { Animation, AnimationStateListener, Spine, TrackEntry } from '@esotericsoftware/spine-pixi-v8';
+import type { Application } from 'pixi.js';
 import { FileSelector } from './components/file-selector';
 import { Controls } from './components/controls';
 import type { BackgroundId } from './components/controls';
@@ -95,16 +98,22 @@ function isRangeInput(target: EventTarget | null) {
   return target instanceof HTMLInputElement && target.type === 'range';
 }
 
-function applyTransform(anim: SpineInstance, zoom: number, pan: Pan) {
+function applyTransform(anim: Spine, zoom: number, pan: Pan) {
   anim.x = window.innerWidth * 0.5 + pan.x;
   anim.y = window.innerHeight * 0.5 + pan.y;
   anim.scale.set(zoom);
 }
 
+// The runtime types `animation` as nullable - an entry that has been disposed
+// drops it - so a missing one reads as an empty animation.
+function entryDuration(entry: TrackEntry) {
+  return entry.animation?.duration ?? 0;
+}
+
 // A looping entry keeps counting past the end of the animation, so the position
 // on the timeline is the remainder rather than `trackTime` itself.
-function positionInAnimation(entry: SpineTrackEntry) {
-  const { duration } = entry.animation;
+function positionInAnimation(entry: TrackEntry) {
+  const duration = entryDuration(entry);
   if (duration <= 0) return 0;
   return entry.loop ? entry.trackTime % duration : Math.min(entry.trackTime, duration);
 }
@@ -122,8 +131,8 @@ export function App({
   pixiApp,
   canvasContainer,
 }: {
-  spineInstances: Record<string, SpineInstance>;
-  pixiApp: PIXIApplication;
+  spineInstances: Record<string, Spine>;
+  pixiApp: Application;
   canvasContainer: HTMLElement;
 }) {
   const [selectedFile, setSelectedFile] = useState(SPINES[0]?.name ?? '');
@@ -131,16 +140,16 @@ export function App({
   const [pan, setPan] = useState<Pan>(ORIGIN);
   const [background, setBackground] = useState<BackgroundId>(DEFAULT_BACKGROUND);
   const [version, setVersion] = useState('');
-  const [animations, setAnimations] = useState<readonly SpineAnimation[]>([]);
-  const [skins, setSkins] = useState<readonly SpineSkin[]>([]);
+  const [animations, setAnimations] = useState<readonly Animation[]>([]);
+  const [skins, setSkins] = useState<readonly Skin[]>([]);
   const [activeSkins, setActiveSkins] = useState<ReadonlySet<string>>(new Set());
   const [activeTrack, setActiveTrack] = useState(0);
   const [playing, setPlaying] = useState(true);
   const [loop, setLoop] = useState(true);
   const [speed, setSpeed] = useState(DEFAULT_SPEED);
-  const [trackAnimation, setTrackAnimation] = useState<SpineAnimation | null>(null);
+  const [trackAnimation, setTrackAnimation] = useState<Animation | null>(null);
 
-  const currentAnimRef = useRef<SpineInstance | null>(null);
+  const currentAnimRef = useRef<Spine | null>(null);
   const statsRef = useRef<HTMLSpanElement | null>(null);
   const scrubberRef = useRef<HTMLInputElement | null>(null);
   const timeLabelRef = useRef<HTMLSpanElement | null>(null);
@@ -209,7 +218,7 @@ export function App({
       if (!entry) return;
       applyPlaying(false);
       const from = positionInAnimation(entry);
-      const to = clampTime(from + frames * FRAME_SECONDS, entry.animation.duration);
+      const to = clampTime(from + frames * FRAME_SECONDS, entryDuration(entry));
       // Only a forward step reports what it crossed. Stepping back would have
       // to replay the whole span between the two positions to get there.
       seekTo(to, frames > 0 ? from : to);
@@ -220,7 +229,7 @@ export function App({
   const startPlaying = useCallback(() => {
     const entry = currentEntry();
     if (entry) {
-      const { duration } = entry.animation;
+      const duration = entryDuration(entry);
       // A finished one-shot and a manual step to the last frame both sit exactly
       // on the end; pressing play there should replay rather than do nothing.
       if (duration > 0 && entry.trackTime >= duration) seekTo(0);
@@ -319,7 +328,7 @@ export function App({
   useEffect(() => {
     const anim = spineInstances[selectedFile];
     if (!anim) return;
-    const listener: SpineAnimationStateListener = {
+    const listener: AnimationStateListener = {
       event: (entry, event) => {
         eventLogRef.current?.(event.data.name);
         // The timeline only draws the active track, so that is the only entry
@@ -451,7 +460,7 @@ export function App({
       else next.add(skinName);
       const anim = currentAnimRef.current;
       if (anim) {
-        const customSkin = new spine.Skin('custom');
+        const customSkin = new Skin('custom');
         next.forEach((partName) => {
           const part = anim.skeleton.data.findSkin(partName);
           if (part) customSkin.addSkin(part);

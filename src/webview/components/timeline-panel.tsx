@@ -1,3 +1,4 @@
+import type { Animation } from '@esotericsoftware/spine-pixi-v8';
 import { useEffect, useMemo, useRef } from 'preact/hooks';
 import { collectEvents } from '../animation-events';
 import type { AnimationEvent } from '../animation-events';
@@ -214,7 +215,7 @@ export function TimelinePanel({
   timeLabelRef,
   flashRef,
 }: {
-  animation: SpineAnimation | null;
+  animation: Animation | null;
   playing: boolean;
   loop: boolean;
   speed: number;

@@ -1,5 +1,21 @@
 # Changelog
 
+## [3.0.0] - 2026-10-17
+
+### Breaking
+
+- Rendering moves to PixiJS 8 and the official Spine runtime for it
+  (`@esotericsoftware/spine-pixi-v8` 4.2). The runtime targets Spine 4.2
+  exports; 4.1 exports generally load, but 4.0 and 3.x exports are no longer
+  supported
+
+### Internal
+
+- PixiJS and the Spine runtime are bundled into `out/webview/app.js` with the
+  UI, so the `libs/` folder is gone and the preview still needs no network
+- PIXI and Spine types come from their packages instead of hand-written
+  declarations
+
 ## [2.3.1] - 2026-09-18
 
 ### Fixes

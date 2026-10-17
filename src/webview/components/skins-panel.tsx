@@ -1,3 +1,5 @@
+import type { Skin } from '@esotericsoftware/spine-pixi-v8';
+
 export const skinsPanelStyles = `
 .skins-container {
     user-select: none;
@@ -24,7 +26,7 @@ export function SkinsPanel({
   activeSkins,
   onToggle,
 }: {
-  skins: readonly SpineSkin[];
+  skins: readonly Skin[];
   activeSkins: ReadonlySet<string>;
   onToggle: (name: string) => void;
 }) {

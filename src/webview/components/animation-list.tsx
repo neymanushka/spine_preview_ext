@@ -1,3 +1,4 @@
+import type { Animation } from '@esotericsoftware/spine-pixi-v8';
 import { Tooltip } from './tooltip';
 import { collectEvents } from '../animation-events';
 
@@ -51,7 +52,7 @@ export const animationListStyles = `
 }
 .list-empty { padding: var(--sp-2); color: var(--text-secondary); font-size: 12px; }`;
 
-function describeEvents(animation: SpineAnimation) {
+function describeEvents(animation: Animation) {
   const events = collectEvents(animation);
   if (events.length === 0) return 'no events found';
   return events.map((e) => `event: ${e.name}   time: ${e.time.toFixed(3)}`).join('\n');
@@ -61,7 +62,7 @@ export function AnimationList({
   animations,
   onSelect,
 }: {
-  animations: readonly SpineAnimation[];
+  animations: readonly Animation[];
   onSelect: (name: string) => void;
 }) {
   return (
