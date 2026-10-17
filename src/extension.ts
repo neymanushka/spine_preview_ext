@@ -2,9 +2,6 @@ import vscode = require('vscode');
 import path = require('path');
 import fs = require('fs');
 
-const PIXI_LIB = 'pixi.min.js';
-const SPINE_LIB = 'pixi-spine.min.js';
-
 // Only the first few KB are read: a Spine export declares "skeleton" or "bones"
 // up front, so an unrelated file such as package.json never reaches the loader.
 const SKELETON_PROBE_BYTES = 4096;
@@ -66,10 +63,6 @@ export class Provider implements vscode.CustomTextEditorProvider {
     webviewPanel.webview.html = await this.getHtmlForWebview(webviewPanel.webview, atlasUri, document.uri.fsPath);
   }
 
-  private libUri(webview: vscode.Webview, lib: string): string {
-    return webview.asWebviewUri(vscode.Uri.file(path.join(this.basePath, 'libs', lib))).toString();
-  }
-
   private async collectSpines(webview: vscode.Webview, directory: string): Promise<SpineEntry[]> {
     let entries: fs.Dirent[];
     try {
@@ -106,8 +99,6 @@ export class Provider implements vscode.CustomTextEditorProvider {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="${this.libUri(webview, PIXI_LIB)}"></script>
-    <script src="${this.libUri(webview, SPINE_LIB)}"></script>
 </head>
 <body>
     <div id="canvas-container"></div>

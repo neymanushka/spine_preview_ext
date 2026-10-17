@@ -1,4 +1,6 @@
 import { render } from 'preact';
+import { Application, Assets } from 'pixi.js';
+import { Spine } from '@esotericsoftware/spine-pixi-v8';
 import { allStyles } from './styles';
 import { App } from './app';
 import { Notice } from './components/notice';
@@ -30,17 +32,22 @@ async function boot(appRoot: HTMLElement, canvasContainer: HTMLElement) {
 
   render(<Notice kind="loading" title="Loading Spine assets" />, appRoot);
 
-  const pixiApp = new PIXI.Application({ backgroundAlpha: 0, resizeTo: canvasContainer });
-  canvasContainer.appendChild(pixiApp.view);
+  const pixiApp = new Application();
+  await pixiApp.init({ backgroundAlpha: 0, resizeTo: canvasContainer });
+  canvasContainer.appendChild(pixiApp.canvas);
 
-  PIXI.Assets.add({ alias: ATLAS_ALIAS, src: ATLAS_URI });
-  SPINES.forEach(({ name, uri }) => PIXI.Assets.add({ alias: name, src: uri }));
-  await PIXI.Assets.load([...SPINES.map((s) => s.name), ATLAS_ALIAS]);
+  // PIXI decodes textures in a Web Worker by default, but a worker's fetch never
+  // reaches the service worker that serves vscode-resource URIs to the webview,
+  // so the atlas page image timed out with a 408. Loading on the main thread
+  // goes through it like every other request.
+  Assets.setPreferences({ preferWorkers: false });
+  Assets.add({ alias: ATLAS_ALIAS, src: ATLAS_URI });
+  SPINES.forEach(({ name, uri }) => Assets.add({ alias: name, src: uri }));
+  await Assets.load([...SPINES.map((s) => s.name), ATLAS_ALIAS]);
 
-  const spineInstances: Record<string, SpineInstance> = {};
+  const spineInstances: Record<string, Spine> = {};
   SPINES.forEach(({ name }) => {
-    const anim = spine.Spine.from({ skeleton: name, atlas: ATLAS_ALIAS });
-    anim.autoUpdate = false;
+    const anim = Spine.from({ skeleton: name, atlas: ATLAS_ALIAS, autoUpdate: false });
     anim.visible = false;
     const firstAnim = anim.skeleton.data.animations[0];
     if (firstAnim) anim.state.setAnimation(0, firstAnim.name, true);

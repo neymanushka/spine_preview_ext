@@ -5,7 +5,7 @@ import tseslint from 'typescript-eslint';
 
 export default [
   {
-    ignores: ['**/node_modules/**', '**/libs/**', '**/out/**', 'esbuild.webview.mjs'],
+    ignores: ['**/node_modules/**', '**/out/**', 'esbuild.webview.mjs'],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
