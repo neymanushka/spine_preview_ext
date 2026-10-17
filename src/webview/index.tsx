@@ -1,11 +1,39 @@
 import { render } from 'preact';
-import { Application, Assets } from 'pixi.js';
+import { Assets, Container, Ticker, UPDATE_PRIORITY, WebGLRenderer } from 'pixi.js';
 import { Spine } from '@esotericsoftware/spine-pixi-v8';
 import { allStyles } from './styles';
 import { App } from './app';
 import { Notice } from './components/notice';
 
 const ATLAS_ALIAS = 'atlas';
+
+// The renderer is built by hand instead of through `Application`: its
+// autoDetectRenderer() first creates a throwaway WebGL context in
+// isWebGLSupported(), and inside a VS Code webview every context costs ~150 ms
+// because each synchronous GPU call waits on the GPU process the whole window
+// shares. WebGL is always available there, so the probe buys nothing.
+async function createRenderer(canvasContainer: HTMLElement) {
+  const renderer = new WebGLRenderer();
+  await renderer.init({
+    backgroundAlpha: 0,
+    width: canvasContainer.clientWidth,
+    height: canvasContainer.clientHeight,
+  });
+  canvasContainer.appendChild(renderer.canvas);
+
+  // Stands in for Application's resizeTo.
+  new ResizeObserver(() => renderer.resize(canvasContainer.clientWidth, canvasContainer.clientHeight)).observe(
+    canvasContainer,
+  );
+
+  const stage = new Container();
+  const ticker = new Ticker();
+  // LOW priority, as in Application: the app's own tick updates the skeleton
+  // first, and the frame is drawn from the pose it leaves behind.
+  ticker.add(() => renderer.render(stage), undefined, UPDATE_PRIORITY.LOW);
+  ticker.start();
+  return { stage, ticker };
+}
 
 function describeError(error: unknown) {
   return error instanceof Error ? error.message : String(error);
@@ -32,9 +60,7 @@ async function boot(appRoot: HTMLElement, canvasContainer: HTMLElement) {
 
   render(<Notice kind="loading" title="Loading Spine assets" />, appRoot);
 
-  const pixiApp = new Application();
-  await pixiApp.init({ backgroundAlpha: 0, resizeTo: canvasContainer });
-  canvasContainer.appendChild(pixiApp.canvas);
+  const { stage, ticker } = await createRenderer(canvasContainer);
 
   // PIXI decodes textures in a Web Worker by default, but a worker's fetch never
   // reaches the service worker that serves vscode-resource URIs to the webview,
@@ -52,10 +78,10 @@ async function boot(appRoot: HTMLElement, canvasContainer: HTMLElement) {
     const firstAnim = anim.skeleton.data.animations[0];
     if (firstAnim) anim.state.setAnimation(0, firstAnim.name, true);
     spineInstances[name] = anim;
-    pixiApp.stage.addChild(anim);
+    stage.addChild(anim);
   });
 
-  render(<App spineInstances={spineInstances} pixiApp={pixiApp} canvasContainer={canvasContainer} />, appRoot);
+  render(<App spineInstances={spineInstances} ticker={ticker} canvasContainer={canvasContainer} />, appRoot);
 }
 
 injectStyles();

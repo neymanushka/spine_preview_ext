@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import { Skin } from '@esotericsoftware/spine-pixi-v8';
 import type { Animation, AnimationStateListener, Spine, TrackEntry } from '@esotericsoftware/spine-pixi-v8';
-import type { Application } from 'pixi.js';
+import type { Ticker } from 'pixi.js';
 import { FileSelector } from './components/file-selector';
 import { Controls } from './components/controls';
 import type { BackgroundId } from './components/controls';
@@ -128,11 +128,11 @@ function clampTime(time: number, duration: number) {
 
 export function App({
   spineInstances,
-  pixiApp,
+  ticker,
   canvasContainer,
 }: {
   spineInstances: Record<string, Spine>;
-  pixiApp: Application;
+  ticker: Ticker;
   canvasContainer: HTMLElement;
 }) {
   const [selectedFile, setSelectedFile] = useState(SPINES[0]?.name ?? '');
@@ -434,12 +434,12 @@ export function App({
       const startedAt = performance.now();
       // Pausing is a zero delta rather than a skipped update, so the pose is
       // still re-applied and a scrub or a skin change lands on screen.
-      const delta = playingRef.current ? (pixiApp.ticker.deltaMS / 1000) * speedRef.current : 0;
+      const delta = playingRef.current ? (ticker.deltaMS / 1000) * speedRef.current : 0;
       anim.update(delta);
       const elapsed = performance.now() - startedAt;
       // While paused the playhead belongs to whoever is dragging it.
       if (playingRef.current) syncTimelineDom();
-      const fps = pixiApp.ticker.deltaMS > 0 ? 1000 / pixiApp.ticker.deltaMS : 0;
+      const fps = ticker.deltaMS > 0 ? 1000 / ticker.deltaMS : 0;
       smoothedUpdateMs += (elapsed - smoothedUpdateMs) * STATS_SMOOTHING;
       smoothedFps += (fps - smoothedFps) * STATS_SMOOTHING;
       if (startedAt - lastFlush < STATS_FLUSH_INTERVAL_MS) return;
@@ -449,9 +449,9 @@ export function App({
       }
     };
 
-    pixiApp.ticker.add(tick);
-    return () => pixiApp.ticker.remove(tick);
-  }, [pixiApp, syncTimelineDom]);
+    ticker.add(tick);
+    return () => ticker.remove(tick);
+  }, [ticker, syncTimelineDom]);
 
   const toggleSkin = useCallback((skinName: string) => {
     setActiveSkins((prev) => {
