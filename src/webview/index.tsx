@@ -75,8 +75,6 @@ async function boot(appRoot: HTMLElement, canvasContainer: HTMLElement) {
   SPINES.forEach(({ name }) => {
     const anim = Spine.from({ skeleton: name, atlas: ATLAS_ALIAS, autoUpdate: false });
     anim.visible = false;
-    const firstAnim = anim.skeleton.data.animations[0];
-    if (firstAnim) anim.state.setAnimation(0, firstAnim.name, true);
     spineInstances[name] = anim;
     stage.addChild(anim);
   });

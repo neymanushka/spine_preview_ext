@@ -1,5 +1,20 @@
 # Changelog
 
+## [3.1.0] - 2026-10-24
+
+### Features
+
+- The Tracks panel shows the name of the animation playing on each track, or
+  a dash for an empty one, so the tracks can be told apart without selecting
+  each of them
+
+### Fixes
+
+- Switching skeleton files resets the file being opened: its tracks are
+  cleared back to the first animation on track 0 and its skin to the default.
+  Before, a file came back with the tracks and skin left on it while the Skins
+  panel showed none selected
+
 ## [3.0.2] - 2026-10-24
 
 ### Fixes
