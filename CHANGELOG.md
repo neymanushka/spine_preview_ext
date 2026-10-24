@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.3.0] - 2026-10-24
+
+### Features
+
+- The animation tooltip opens with a summary of what the animation drives:
+  how many bones and slots, plus attachments, color, deform, sequence, draw
+  order, IK, transform, path and physics keys where present
+- Track conflicts in the animation list: badges mark the other tracks whose
+  animation keys the same properties as this one would on the active track.
+  A red badge counts the higher tracks that will hide it there, a yellow one
+  the lower tracks it will override - `T4` for one track, `T4 +3` for the
+  nearest plus three more. The tooltip names every track, its animation and
+  how many properties they share, in the colour of the matching badge
+
 ## [3.2.0] - 2026-10-24
 
 ### Features

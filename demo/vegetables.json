@@ -96,10 +96,10 @@
       "bones": {
         "body": {
           "rotate": [
-            { "time": 0, "angle": 0 },
-            { "time": 0.2, "angle": 14 },
-            { "time": 0.6, "angle": -14 },
-            { "time": 0.8, "angle": 0 }
+            { "time": 0, "value": 0 },
+            { "time": 0.2, "value": 14 },
+            { "time": 0.6, "value": -14 },
+            { "time": 0.8, "value": 0 }
           ]
         }
       },

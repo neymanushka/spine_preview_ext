@@ -36,11 +36,11 @@ function getTooltipContainer() {
 }
 
 export function Tooltip({
-  text,
+  content,
   class: className,
   children,
 }: {
-  text: string;
+  content: ComponentChildren;
   class?: string;
   children: ComponentChildren;
 }) {
@@ -56,19 +56,22 @@ export function Tooltip({
     };
   }, []);
 
+  // Every tooltip shares one container. `content` is fresh JSX on each parent
+  // render, so clearing has to key off `visible` alone - otherwise every hidden
+  // tooltip in the list would wipe the one being shown whenever the list re-rendered.
   useEffect(() => {
-    const container = getTooltipContainer();
-    if (!visible) {
-      render(null, container);
-      return;
-    }
+    if (!visible) render(null, getTooltipContainer());
+  }, [visible]);
+
+  useEffect(() => {
+    if (!visible) return;
     render(
       <div class="tooltip-popup visible" style={{ left: `${pos.x}px`, top: `${pos.y}px` }}>
-        {text}
+        {content}
       </div>,
-      container,
+      getTooltipContainer(),
     );
-  }, [visible, pos, text]);
+  }, [visible, pos, content]);
 
   const show = (e: MouseEvent) => {
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();

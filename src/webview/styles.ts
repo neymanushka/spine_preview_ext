@@ -35,6 +35,7 @@ const globalStyles = `
     --text-secondary: var(--vscode-descriptionForeground, #9d9d9d);
     --error-fg: var(--vscode-errorForeground, #f48771);
     --event-marker: var(--vscode-charts-orange, #d18616);
+    --warning-fg: var(--vscode-editorWarning-foreground, #cca700);
 
     --accent: var(--vscode-focusBorder, #0078d4);
     --hover-bg: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.15));

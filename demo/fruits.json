@@ -101,9 +101,9 @@
       "bones": {
         "body": {
           "rotate": [
-            { "time": 0, "angle": 0 },
-            { "time": 0.5, "angle": 180 },
-            { "time": 1.0, "angle": 360 }
+            { "time": 0, "value": 0 },
+            { "time": 0.5, "value": 180 },
+            { "time": 1.0, "value": 360 }
           ]
         }
       },

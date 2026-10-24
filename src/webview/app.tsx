@@ -523,7 +523,12 @@ export function App({
       </div>
       <div class="main-container">
         <div class="left-panel">
-          <AnimationList animations={animations} onSelect={selectAnimation} />
+          <AnimationList
+            animations={animations}
+            trackAnimations={trackAnimations}
+            activeTrack={activeTrack}
+            onSelect={selectAnimation}
+          />
           <SkinsPanel skins={skins} activeSkins={activeSkins} onToggle={toggleSkin} />
           <TracksPanel
             activeTrack={activeTrack}
