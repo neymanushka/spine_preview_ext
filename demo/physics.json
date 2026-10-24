@@ -1,0 +1,302 @@
+{
+  "skeleton": {
+    "spine": "4.2.0",
+    "x": -140,
+    "y": 0,
+    "width": 330,
+    "height": 300
+  },
+  "bones": [
+    {
+      "name": "root"
+    },
+    {
+      "name": "pivot",
+      "parent": "root",
+      "x": -70,
+      "y": 230
+    },
+    {
+      "name": "apple",
+      "parent": "pivot",
+      "rotation": -90,
+      "length": 100
+    },
+    {
+      "name": "comet",
+      "parent": "root",
+      "x": 120,
+      "y": 160
+    },
+    {
+      "name": "tail1",
+      "parent": "comet",
+      "rotation": -90,
+      "length": 38
+    },
+    {
+      "name": "tail2",
+      "parent": "tail1",
+      "x": 38,
+      "length": 38
+    },
+    {
+      "name": "tail3",
+      "parent": "tail2",
+      "x": 38,
+      "length": 38
+    },
+    {
+      "name": "tail4",
+      "parent": "tail3",
+      "x": 38,
+      "length": 38
+    }
+  ],
+  "slots": [
+    {
+      "name": "apple",
+      "bone": "apple",
+      "attachment": "apple"
+    },
+    {
+      "name": "orange",
+      "bone": "pivot",
+      "attachment": "orange"
+    },
+    {
+      "name": "tail4",
+      "bone": "tail4",
+      "attachment": "apple"
+    },
+    {
+      "name": "tail3",
+      "bone": "tail3",
+      "attachment": "lime"
+    },
+    {
+      "name": "tail2",
+      "bone": "tail2",
+      "attachment": "orange"
+    },
+    {
+      "name": "tail1",
+      "bone": "tail1",
+      "attachment": "apple"
+    },
+    {
+      "name": "comet",
+      "bone": "comet",
+      "attachment": "lime"
+    }
+  ],
+  "skins": [
+    {
+      "name": "default",
+      "attachments": {
+        "orange": {
+          "orange": {
+            "name": "orange",
+            "type": "region",
+            "width": 128,
+            "height": 128,
+            "scaleX": 0.5,
+            "scaleY": 0.5
+          }
+        },
+        "apple": {
+          "apple": {
+            "name": "apple",
+            "type": "region",
+            "width": 128,
+            "height": 128,
+            "x": 100,
+            "rotation": 90,
+            "scaleX": 0.55,
+            "scaleY": 0.55
+          }
+        },
+        "comet": {
+          "lime": {
+            "name": "lime",
+            "type": "region",
+            "width": 128,
+            "height": 128,
+            "scaleX": 0.45,
+            "scaleY": 0.45
+          }
+        },
+        "tail1": {
+          "apple": {
+            "name": "apple",
+            "type": "region",
+            "width": 128,
+            "height": 128,
+            "x": 38,
+            "rotation": 90,
+            "scaleX": 0.32,
+            "scaleY": 0.32
+          }
+        },
+        "tail2": {
+          "orange": {
+            "name": "orange",
+            "type": "region",
+            "width": 128,
+            "height": 128,
+            "x": 38,
+            "rotation": 90,
+            "scaleX": 0.27,
+            "scaleY": 0.27
+          }
+        },
+        "tail3": {
+          "lime": {
+            "name": "lime",
+            "type": "region",
+            "width": 128,
+            "height": 128,
+            "x": 38,
+            "rotation": 90,
+            "scaleX": 0.22,
+            "scaleY": 0.22
+          }
+        },
+        "tail4": {
+          "apple": {
+            "name": "apple",
+            "type": "region",
+            "width": 128,
+            "height": 128,
+            "x": 38,
+            "rotation": 90,
+            "scaleX": 0.17,
+            "scaleY": 0.17
+          }
+        }
+      }
+    }
+  ],
+  "physics": [
+    {
+      "name": "pendulum",
+      "bone": "apple",
+      "rotate": 1,
+      "inertia": 1,
+      "strength": 20,
+      "damping": 0.92,
+      "mass": 2,
+      "order": 0
+    },
+    {
+      "name": "tail1",
+      "bone": "tail1",
+      "rotate": 1,
+      "inertia": 1,
+      "strength": 30,
+      "damping": 0.9,
+      "mass": 1,
+      "order": 1
+    },
+    {
+      "name": "tail2",
+      "bone": "tail2",
+      "rotate": 1,
+      "inertia": 1,
+      "strength": 30,
+      "damping": 0.9,
+      "mass": 1,
+      "order": 2
+    },
+    {
+      "name": "tail3",
+      "bone": "tail3",
+      "rotate": 1,
+      "inertia": 1,
+      "strength": 30,
+      "damping": 0.9,
+      "mass": 1,
+      "order": 3
+    },
+    {
+      "name": "tail4",
+      "bone": "tail4",
+      "rotate": 1,
+      "inertia": 1,
+      "strength": 30,
+      "damping": 0.9,
+      "mass": 1,
+      "order": 4
+    }
+  ],
+  "events": {
+    "stop": {}
+  },
+  "animations": {
+    "still": {},
+    "shake": {
+      "bones": {
+        "pivot": {
+          "translate": [
+            { "time": 0, "x": 0, "y": 0 },
+            { "time": 0.083, "x": 44.845, "y": 0 },
+            { "time": 0.167, "x": 68.97, "y": 0 },
+            { "time": 0.25, "x": 60.622, "y": 0 },
+            { "time": 0.333, "x": 24.125, "y": 0 },
+            { "time": 0.417, "x": -24.125, "y": 0 },
+            { "time": 0.5, "x": -60.622, "y": 0 },
+            { "time": 0.583, "x": -68.97, "y": 0 },
+            { "time": 0.667, "x": -44.845, "y": 0 },
+            { "time": 0.75, "x": 0, "y": 0 },
+            { "time": 0.833, "x": 44.845, "y": 0 },
+            { "time": 0.917, "x": 68.97, "y": 0 },
+            { "time": 1, "x": 60.622, "y": 0 },
+            { "time": 1.083, "x": 24.125, "y": 0 },
+            { "time": 1.167, "x": -24.125, "y": 0 },
+            { "time": 1.25, "x": -60.622, "y": 0 },
+            { "time": 1.333, "x": -68.97, "y": 0 },
+            { "time": 1.417, "x": -44.845, "y": 0 },
+            { "time": 1.5, "x": 0, "y": 0 },
+            { "time": 3, "x": 0, "y": 0 }
+          ]
+        }
+      },
+      "events": [
+        { "time": 1.5, "name": "stop" }
+      ]
+    },
+    "orbit": {
+      "bones": {
+        "comet": {
+          "translate": [
+            { "time": 0, "x": 0, "y": 0 },
+            { "time": 0.083, "x": 12.89, "y": 1.69 },
+            { "time": 0.167, "x": 25.045, "y": 6.725 },
+            { "time": 0.25, "x": 35.355, "y": 14.645 },
+            { "time": 0.333, "x": 43.275, "y": 24.955 },
+            { "time": 0.417, "x": 48.31, "y": 37.11 },
+            { "time": 0.5, "x": 50, "y": 50 },
+            { "time": 0.583, "x": 48.31, "y": 62.89 },
+            { "time": 0.667, "x": 43.275, "y": 75.045 },
+            { "time": 0.75, "x": 35.355, "y": 85.355 },
+            { "time": 0.833, "x": 25.045, "y": 93.275 },
+            { "time": 0.917, "x": 12.89, "y": 98.31 },
+            { "time": 1, "x": 0, "y": 100 },
+            { "time": 1.083, "x": -12.89, "y": 98.31 },
+            { "time": 1.167, "x": -25.045, "y": 93.275 },
+            { "time": 1.25, "x": -35.355, "y": 85.355 },
+            { "time": 1.333, "x": -43.275, "y": 75.045 },
+            { "time": 1.417, "x": -48.31, "y": 62.89 },
+            { "time": 1.5, "x": -50, "y": 50 },
+            { "time": 1.583, "x": -48.31, "y": 37.11 },
+            { "time": 1.667, "x": -43.275, "y": 24.955 },
+            { "time": 1.75, "x": -35.355, "y": 14.645 },
+            { "time": 1.833, "x": -25.045, "y": 6.725 },
+            { "time": 1.917, "x": -12.89, "y": 1.69 },
+            { "time": 2, "x": 0, "y": 0 }
+          ]
+        }
+      }
+    }
+  }
+}

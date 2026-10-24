@@ -21,17 +21,20 @@ async function createRenderer(canvasContainer: HTMLElement) {
   });
   canvasContainer.appendChild(renderer.canvas);
 
-  // Stands in for Application's resizeTo.
-  new ResizeObserver(() => renderer.resize(canvasContainer.clientWidth, canvasContainer.clientHeight)).observe(
-    canvasContainer,
-  );
-
   const stage = new Container();
   const ticker = new Ticker();
   // LOW priority, as in Application: the app's own tick updates the skeleton
   // first, and the frame is drawn from the pose it leaves behind.
   ticker.add(() => renderer.render(stage), undefined, UPDATE_PRIORITY.LOW);
   ticker.start();
+
+  // Stands in for Application's resizeTo. Resizing the canvas clears it, and a
+  // ResizeObserver fires after this frame's ticker but before the paint, so
+  // without drawing again here every resize step showed an empty canvas.
+  new ResizeObserver(() => {
+    renderer.resize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+    renderer.render(stage);
+  }).observe(canvasContainer);
   return { stage, ticker };
 }
 

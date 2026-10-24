@@ -13,6 +13,7 @@ import { TimelinePanel } from './components/timeline-panel';
 import { EventLog } from './components/event-log';
 import type { EventLogHandle } from './components/event-log';
 import { clampZoom, ZOOM_WHEEL_SENSITIVITY } from './zoom';
+import type { PhysicsConstraintData } from './animation-info';
 
 const DEFAULT_BACKGROUND: BackgroundId = 'checker';
 const DEFAULT_ZOOM = 1;
@@ -151,6 +152,7 @@ export function App({
   const [background, setBackground] = useState<BackgroundId>(DEFAULT_BACKGROUND);
   const [version, setVersion] = useState('');
   const [animations, setAnimations] = useState<readonly Animation[]>([]);
+  const [physics, setPhysics] = useState<readonly PhysicsConstraintData[]>([]);
   const [skins, setSkins] = useState<readonly Skin[]>([]);
   const [activeSkins, setActiveSkins] = useState<ReadonlySet<string>>(new Set());
   const [activeTrack, setActiveTrack] = useState(0);
@@ -341,6 +343,7 @@ export function App({
     currentAnimRef.current = anim;
     setVersion(anim.skeleton.data.version || 'unknown');
     setAnimations([...anim.skeleton.data.animations]);
+    setPhysics([...anim.skeleton.data.physicsConstraints]);
     setSkins([...anim.skeleton.data.skins]);
     setActiveSkins(new Set());
     activeTrackRef.current = 0;
@@ -525,6 +528,7 @@ export function App({
         <div class="left-panel">
           <AnimationList
             animations={animations}
+            physics={physics}
             trackAnimations={trackAnimations}
             activeTrack={activeTrack}
             onSelect={selectAnimation}

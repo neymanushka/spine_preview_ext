@@ -1,8 +1,8 @@
 import type { Animation } from '@esotericsoftware/spine-pixi-v8';
 import { Tooltip } from './tooltip';
 import { collectEvents } from '../animation-events';
-import { describeAnimation, describeConflict, trackConflicts } from '../animation-info';
-import type { TrackConflict } from '../animation-info';
+import { describeAnimation, describeConflict, drivenPhysics, trackConflicts } from '../animation-info';
+import type { PhysicsConstraintData, TrackConflict } from '../animation-info';
 
 export const animationListStyles = `
 .list-container {
@@ -70,11 +70,20 @@ export const animationListStyles = `
 .list-tooltip-conflict.hidden { color: var(--error-fg); }
 .list-empty { padding: var(--sp-2); color: var(--text-secondary); font-size: 12px; }`;
 
-function describe(animation: Animation, conflicts: readonly TrackConflict[]) {
+function describe(
+  animation: Animation,
+  physics: readonly PhysicsConstraintData[],
+  conflicts: readonly TrackConflict[],
+) {
+  const driven = drivenPhysics(animation, physics);
   const events = collectEvents(animation).map((e) => `event: ${e.name}   time: ${e.time.toFixed(3)}`);
   return (
     <>
-      {[describeAnimation(animation), ...events].join('\n')}
+      {[
+        describeAnimation(animation),
+        ...(driven.length > 0 ? [`drives physics: ${driven.join(', ')}`] : []),
+        ...events,
+      ].join('\n')}
       {conflicts.map((c) => (
         <div key={c.track} class={`list-tooltip-conflict${c.hidden ? ' hidden' : ''}`}>
           {describeConflict(c)}
@@ -94,11 +103,13 @@ function badgeText(tracks: readonly number[]) {
 
 export function AnimationList({
   animations,
+  physics,
   trackAnimations,
   activeTrack,
   onSelect,
 }: {
   animations: readonly Animation[];
+  physics: readonly PhysicsConstraintData[];
   trackAnimations: readonly (string | null)[];
   activeTrack: number;
   onSelect: (name: string) => void;
@@ -145,7 +156,7 @@ export function AnimationList({
             </button>
             {/* The tooltip's wrapper is the flex item, so it has to carry the
               shrinking styles itself or a long name pushes the duration out. */}
-            <Tooltip class="list-item-name" content={describe(a, conflicts)}>
+            <Tooltip class="list-item-name" content={describe(a, physics, conflicts)}>
               <span class="list-item-label">{a.name}</span>
               <span class="list-item-duration">{a.duration.toFixed(3)}s</span>
               {below.length > 0 && <span class="list-item-conflict">{badgeText(below)}</span>}
