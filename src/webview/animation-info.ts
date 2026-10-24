@@ -17,7 +17,11 @@ import {
   SequenceTimeline,
   TransformConstraintTimeline,
 } from '@esotericsoftware/spine-pixi-v8';
-import type { Animation, Timeline } from '@esotericsoftware/spine-pixi-v8';
+import type { Animation, BoneData, SkeletonData, Timeline } from '@esotericsoftware/spine-pixi-v8';
+
+// The 4.2 runtime leaves PhysicsConstraintData out of its index, so the type is
+// reached through the skeleton data that holds it.
+export type PhysicsConstraintData = SkeletonData['physicsConstraints'][number];
 
 // Bone and slot transforms are counted rather than listed, so they are left out
 // of this table; everything else a timeline can drive gets a label, in the
@@ -47,15 +51,22 @@ function plural(count: number, noun: string, nouns = `${noun}s`) {
   return `${count} ${count === 1 ? noun : nouns}`;
 }
 
+// BoneTimeline and SlotTimeline are interfaces, so there is no class to test
+// with instanceof - the index field is what marks them.
+function keyedBones(animation: Animation) {
+  const bones = new Set<number>();
+  for (const timeline of animation.timelines) {
+    if ('boneIndex' in timeline && typeof timeline.boneIndex === 'number') bones.add(timeline.boneIndex);
+  }
+  return bones;
+}
+
 // One line naming what an animation drives, e.g. "6 bones · 2 slots · deform".
 export function describeAnimation(animation: Animation) {
-  const bones = new Set<number>();
+  const bones = keyedBones(animation);
   const slots = new Set<number>();
   const kinds = new Set<string>();
   for (const timeline of animation.timelines) {
-    // BoneTimeline and SlotTimeline are interfaces, so there is no class to
-    // test with instanceof - the index field is what marks them.
-    if ('boneIndex' in timeline && typeof timeline.boneIndex === 'number') bones.add(timeline.boneIndex);
     if ('slotIndex' in timeline && typeof timeline.slotIndex === 'number') slots.add(timeline.slotIndex);
     const kind = TIMELINE_KINDS.find(([type]) => timeline instanceof type)?.[1];
     if (kind) kinds.add(kind);
@@ -66,6 +77,16 @@ export function describeAnimation(animation: Animation) {
     ...KIND_ORDER.filter((kind) => kinds.has(kind)),
   ];
   return parts.length > 0 ? parts.join(' · ') : 'keys nothing';
+}
+
+// A physics constraint lives on the skeleton and reacts to its bone moving in
+// the world, so an animation sets it in motion by keying that bone or any of
+// its ancestors, with no physics timeline of its own.
+export function drivenPhysics(animation: Animation, constraints: readonly PhysicsConstraintData[]) {
+  const keyed = keyedBones(animation);
+  const movesChain = (bone: BoneData | null): boolean =>
+    bone !== null && (keyed.has(bone.index) || movesChain(bone.parent));
+  return constraints.filter((constraint) => movesChain(constraint.bone)).map((constraint) => constraint.name);
 }
 
 // A higher track overrides a lower one property by property, not bone by bone:

@@ -1,5 +1,20 @@
 # Changelog
 
+## [3.4.0] - 2026-10-24
+
+### Features
+
+- The animation tooltip names the physics constraints an animation sets
+  moving (`drives physics: pendulum`): a constraint reacts to its bone moving,
+  so an animation drives it by keying that bone or any of its parents, even
+  without physics keys of its own
+
+### Fixes
+
+- The animation no longer blinks out while the editor is being resized:
+  resizing the canvas clears it, and the frame was only redrawn on the next
+  tick, so every resize step showed an empty canvas first
+
 ## [3.3.0] - 2026-10-24
 
 ### Features
