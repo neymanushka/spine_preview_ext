@@ -13,3 +13,4 @@ preview.png
 out/**/*.map
 **/*.vsix
 CLAUDE.md
+.npmrc

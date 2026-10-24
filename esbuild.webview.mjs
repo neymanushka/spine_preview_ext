@@ -7,7 +7,7 @@ const options = {
   bundle: true,
   outfile: 'out/webview/app.js',
   format: 'iife',
-  target: 'es2020',
+  target: 'es2022',
   sourcemap: true,
   minify: !watch,
   jsx: 'automatic',

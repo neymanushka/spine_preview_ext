@@ -1,5 +1,4 @@
 import eslint from '@eslint/js';
-import tsParser from '@typescript-eslint/parser';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import tseslint from 'typescript-eslint';
 
@@ -13,7 +12,7 @@ export default [
   {
     files: ['src/*.ts'],
     languageOptions: {
-      parser: tsParser,
+      parser: tseslint.parser,
       ecmaVersion: 'latest',
       sourceType: 'module',
       parserOptions: {
@@ -28,7 +27,7 @@ export default [
   {
     files: ['src/webview/**/*.ts', 'src/webview/**/*.tsx'],
     languageOptions: {
-      parser: tsParser,
+      parser: tseslint.parser,
       ecmaVersion: 'latest',
       sourceType: 'module',
       parserOptions: {

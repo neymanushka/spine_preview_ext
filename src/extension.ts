@@ -9,6 +9,8 @@ const SKELETON_KEY_PATTERN = /"(?:skeleton|bones)"\s*:/;
 
 type SpineEntry = { name: string; uri: string };
 
+const toScriptLiteral = (value: unknown) => JSON.stringify(value).replace(/</g, '\\u003c');
+
 async function isSkeletonJson(filePath: string): Promise<boolean> {
   let handle: fs.promises.FileHandle | undefined;
   try {
@@ -28,9 +30,9 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand(
       'spinePreview.copyAnimationName',
-      (ctx: { webviewSection: string; animationName: string }) => {
+      async (ctx: { webviewSection: string; animationName: string }) => {
         if (ctx?.animationName) {
-          vscode.env.clipboard.writeText(ctx.animationName);
+          await vscode.env.clipboard.writeText(ctx.animationName);
         }
       },
     ),
@@ -47,7 +49,7 @@ export class Provider implements vscode.CustomTextEditorProvider {
 
   private static readonly viewType = 'spinePreview.preview';
 
-  constructor(private readonly context: vscode.ExtensionContext) {
+  constructor(context: vscode.ExtensionContext) {
     this.basePath = context.extensionUri.fsPath;
   }
 
@@ -104,8 +106,8 @@ export class Provider implements vscode.CustomTextEditorProvider {
     <div id="canvas-container"></div>
     <div id="app"></div>
     <script>
-    var SPINES = ${JSON.stringify(spines)};
-    var ATLAS_URI = '${atlasUri.toString()}';
+    var SPINES = ${toScriptLiteral(spines)};
+    var ATLAS_URI = ${toScriptLiteral(atlasUri.toString())};
     </script>
     <script src="${webviewScript}"></script>
 </body>
