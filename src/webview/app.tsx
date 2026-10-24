@@ -8,7 +8,7 @@ import type { BackgroundId } from './components/controls';
 import { StatusBar } from './components/status-bar';
 import { AnimationList } from './components/animation-list';
 import { SkinsPanel } from './components/skins-panel';
-import { TracksPanel } from './components/tracks-panel';
+import { TRACK_COUNT, TracksPanel } from './components/tracks-panel';
 import { TimelinePanel } from './components/timeline-panel';
 import { EventLog } from './components/event-log';
 import type { EventLogHandle } from './components/event-log';
@@ -110,6 +110,13 @@ function entryDuration(entry: TrackEntry) {
   return entry.animation?.duration ?? 0;
 }
 
+// The runtime never empties a track on its own - `setAnimation` leaves the
+// entry in place after a one-shot ends - so these names only change when a
+// selection or a file switch changes them.
+function trackAnimationNames(anim: Spine) {
+  return Array.from({ length: TRACK_COUNT }, (_, i) => anim.state.tracks[i]?.animation?.name ?? null);
+}
+
 // A looping entry keeps counting past the end of the animation, so the position
 // on the timeline is the remainder rather than `trackTime` itself.
 function positionInAnimation(entry: TrackEntry) {
@@ -148,6 +155,7 @@ export function App({
   const [loop, setLoop] = useState(true);
   const [speed, setSpeed] = useState(DEFAULT_SPEED);
   const [trackAnimation, setTrackAnimation] = useState<Animation | null>(null);
+  const [trackAnimations, setTrackAnimations] = useState<readonly (string | null)[]>([]);
 
   const currentAnimRef = useRef<Spine | null>(null);
   const statsRef = useRef<HTMLSpanElement | null>(null);
@@ -253,6 +261,7 @@ export function App({
       if (!anim) return;
       const entry = anim.state.setAnimation(activeTrackRef.current, name, loopRef.current);
       setTrackAnimation(entry.animation);
+      setTrackAnimations(trackAnimationNames(anim));
       applyPlaying(true);
     },
     [applyPlaying],
@@ -316,9 +325,16 @@ export function App({
     setActiveSkins(new Set());
     activeTrackRef.current = 0;
     setActiveTrack(0);
-    const entry = anim.state.tracks[0];
-    if (entry) entry.loop = loopRef.current;
+    // Every file keeps its own Spine instance alive, so without this a file
+    // came back with the tracks and skin left on it while the panels showed
+    // the reset state above.
+    anim.state.clearTracks();
+    anim.skeleton.setSkin(null);
+    anim.skeleton.setToSetupPose();
+    const firstAnim = anim.skeleton.data.animations[0];
+    const entry = firstAnim ? anim.state.setAnimation(0, firstAnim.name, loopRef.current) : null;
     setTrackAnimation(entry?.animation ?? null);
+    setTrackAnimations(trackAnimationNames(anim));
     applyPlaying(true);
   }, [selectedFile, spineInstances, applyPlaying]);
 
@@ -489,7 +505,7 @@ export function App({
         <div class="left-panel">
           <AnimationList animations={animations} onSelect={selectAnimation} />
           <SkinsPanel skins={skins} activeSkins={activeSkins} onToggle={toggleSkin} />
-          <TracksPanel activeTrack={activeTrack} onSelect={setActiveTrack} />
+          <TracksPanel activeTrack={activeTrack} trackAnimations={trackAnimations} onSelect={setActiveTrack} />
         </div>
         <div class="stage-column">
           <EventLog handleRef={eventLogRef} />
