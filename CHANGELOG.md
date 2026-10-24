@@ -1,5 +1,26 @@
 # Changelog
 
+## [3.0.2] - 2026-10-24
+
+### Fixes
+
+- Copying an animation name awaits the clipboard write instead of dropping the
+  promise
+
+### Internal
+
+- Hardening: the skeleton list and the atlas URI are written into the webview
+  page as JSON with `<` escaped, so the inline script no longer relies on how
+  VS Code encodes URIs
+- TypeScript 6.0, the newest version typescript-eslint supports
+- ESLint 10, typescript-eslint 8.72, esbuild 0.28, Prettier 3.9 and
+  `@types/node` 20 to match the Node version VS Code ships; the unused
+  `eslint-plugin-import` and the standalone `@typescript-eslint/parser` are gone
+- Stricter compiler checks (unused locals/parameters, `noImplicitOverride`,
+  `verbatimModuleSyntax` for the webview) and an es2022 target for the webview
+  bundle
+- Development needs Node 20.19+; the project `.npmrc` pins it for pnpm
+
 ## [3.0.1] - 2026-10-17
 
 ### Fixes
