@@ -8,7 +8,7 @@ import type { BackgroundId } from './components/controls';
 import { StatusBar } from './components/status-bar';
 import { AnimationList } from './components/animation-list';
 import { SkinsPanel } from './components/skins-panel';
-import { TRACK_COUNT, TracksPanel } from './components/tracks-panel';
+import { TracksPanel } from './components/tracks-panel';
 import { TimelinePanel } from './components/timeline-panel';
 import { EventLog } from './components/event-log';
 import type { EventLogHandle } from './components/event-log';
@@ -112,9 +112,12 @@ function entryDuration(entry: TrackEntry) {
 
 // The runtime never empties a track on its own - `setAnimation` leaves the
 // entry in place after a one-shot ends - so these names only change when a
-// selection or a file switch changes them.
+// selection, a cleared track or a file switch changes them. `state.tracks` can end in empty
+// slots, which are trimmed so the length is the number of tracks in use.
 function trackAnimationNames(anim: Spine) {
-  return Array.from({ length: TRACK_COUNT }, (_, i) => anim.state.tracks[i]?.animation?.name ?? null);
+  const names = anim.state.tracks.map((entry) => entry?.animation?.name ?? null);
+  while (names.length > 0 && names[names.length - 1] === null) names.pop();
+  return names;
 }
 
 // A looping entry keeps counting past the end of the animation, so the position
@@ -266,6 +269,23 @@ export function App({
     },
     [applyPlaying],
   );
+
+  const clearTrack = useCallback((track: number) => {
+    const anim = currentAnimRef.current;
+    if (!anim) return;
+    anim.state.clearTrack(track);
+    // clearTrack leaves the skeleton in its current pose. Going back to setup
+    // and re-applying the remaining tracks drops only what this one keyed, and
+    // the zero delta does it even while paused.
+    anim.skeleton.setToSetupPose();
+    anim.update(0);
+    const names = trackAnimationNames(anim);
+    setTrackAnimations(names);
+    // The list ends one past the last track in use; if that free track was the
+    // active one, it would drop out of the list as it shrinks.
+    if (activeTrackRef.current > names.length) setActiveTrack(names.length);
+    else if (track === activeTrackRef.current) setTrackAnimation(null);
+  }, []);
 
   const handleLoop = useCallback(
     (value: boolean) => {
@@ -505,7 +525,12 @@ export function App({
         <div class="left-panel">
           <AnimationList animations={animations} onSelect={selectAnimation} />
           <SkinsPanel skins={skins} activeSkins={activeSkins} onToggle={toggleSkin} />
-          <TracksPanel activeTrack={activeTrack} trackAnimations={trackAnimations} onSelect={setActiveTrack} />
+          <TracksPanel
+            activeTrack={activeTrack}
+            trackAnimations={trackAnimations}
+            onSelect={setActiveTrack}
+            onClear={clearTrack}
+          />
         </div>
         <div class="stage-column">
           <EventLog handleRef={eventLogRef} />

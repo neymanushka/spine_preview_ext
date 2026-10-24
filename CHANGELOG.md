@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.2.0] - 2026-10-24
+
+### Features
+
+- The Tracks panel lists only the tracks in use plus one free track after
+  them, instead of a fixed five. Starting an animation on the free track adds
+  the next one, so there is no upper limit on tracks
+- A track can be cleared with the × button that appears on hover. The pose
+  drops what that track animated straight away, even while paused, and the
+  list shrinks back when the last track in use is cleared
+
 ## [3.1.0] - 2026-10-24
 
 ### Features
