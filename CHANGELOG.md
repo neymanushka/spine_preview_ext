@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.4.1] - 2026-10-27
+
+### Internal
+
+- Packaging moves to `@vscode/vsce` 4, which needs Node 22: the project now
+  pins Node 22.23.4 and `engines.node` requires `>=22`
+
 ## [3.4.0] - 2026-10-24
 
 ### Features
