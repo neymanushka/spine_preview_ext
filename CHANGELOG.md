@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.5.1] - 2026-10-31
+
+### Internal
+
+- Restrict webview scripts and styles with per-page CSP nonces, limit asset
+  requests to VS Code resources, and disable dynamic JavaScript evaluation
+  using PixiJS's CSP-compatible helpers.
+
 ## [3.5.0] - 2026-10-29
 
 ### Features
