@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { Skin } from '@esotericsoftware/spine-pixi-v8';
 import type { Animation, AnimationStateListener, Spine, TrackEntry } from '@esotericsoftware/spine-pixi-v8';
 import type { Ticker } from 'pixi.js';
 import { FileSelector } from './components/file-selector';
 import { Notice } from './components/notice';
+import { OverlaysPanel } from './components/overlays-panel';
+import { DebugOverlays, DEFAULT_OVERLAYS, overlayAvailability } from './debug-overlays';
 import { Controls } from './components/controls';
 import type { BackgroundId } from './components/controls';
 import { StatusBar } from './components/status-bar';
@@ -37,6 +39,7 @@ const STATS_FLUSH_INTERVAL_MS = 250;
 
 export const appStyles = `
 .title-container {
+    z-index: 2;
     display: flex;
     align-items: center;
     gap: var(--sp-3);
@@ -155,6 +158,8 @@ export function App({
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
   const [pan, setPan] = useState<Pan>(ORIGIN);
   const [background, setBackground] = useState<BackgroundId>(DEFAULT_BACKGROUND);
+  const [overlays, setOverlays] = useState(DEFAULT_OVERLAYS);
+  const [overlaysHidden, setOverlaysHidden] = useState(false);
   const [version, setVersion] = useState('');
   const [animations, setAnimations] = useState<readonly Animation[]>([]);
   const [physics, setPhysics] = useState<readonly PhysicsConstraintData[]>([]);
@@ -168,6 +173,13 @@ export function App({
   const [trackAnimations, setTrackAnimations] = useState<readonly (string | null)[]>([]);
 
   const currentAnimRef = useRef<Spine | null>(null);
+  const debugRef = useRef<DebugOverlays | null>(null);
+  const overlaysRef = useRef(overlays);
+  const overlaysHiddenRef = useRef(overlaysHidden);
+  const availableOverlays = useMemo(
+    () => overlayAvailability(spineInstances[selectedFile]),
+    [selectedFile, spineInstances],
+  );
   const statsRef = useRef<HTMLSpanElement | null>(null);
   const scrubberRef = useRef<HTMLInputElement | null>(null);
   const timeLabelRef = useRef<HTMLSpanElement | null>(null);
@@ -339,6 +351,22 @@ export function App({
   }, [background, canvasContainer]);
 
   useEffect(() => {
+    overlaysRef.current = overlays;
+    overlaysHiddenRef.current = overlaysHidden;
+  }, [overlays, overlaysHidden]);
+
+  useEffect(() => {
+    const anim = spineInstances[selectedFile];
+    if (!anim) return;
+    const debug = new DebugOverlays(anim);
+    debugRef.current = debug;
+    return () => {
+      debugRef.current = null;
+      debug.destroy();
+    };
+  }, [selectedFile, spineInstances]);
+
+  useEffect(() => {
     if (!selectedFile) return;
     if (currentAnimRef.current) currentAnimRef.current.visible = false;
     currentAnimRef.current = null;
@@ -481,6 +509,7 @@ export function App({
       // still re-applied and a scrub or a skin change lands on screen.
       const delta = playingRef.current ? (ticker.deltaMS / 1000) * speedRef.current : 0;
       anim.update(delta);
+      debugRef.current?.render(overlaysRef.current, overlaysHiddenRef.current);
       const elapsed = performance.now() - startedAt;
       // While paused the playhead belongs to whoever is dragging it.
       if (playingRef.current) syncTimelineDom();
@@ -539,6 +568,13 @@ export function App({
           background={background}
           onBackground={setBackground}
           onResetView={resetView}
+        />
+        <OverlaysPanel
+          options={overlays}
+          hidden={overlaysHidden}
+          available={availableOverlays}
+          onChange={setOverlays}
+          onHiddenChange={setOverlaysHidden}
         />
       </div>
       <div class="main-container">
