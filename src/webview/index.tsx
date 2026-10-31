@@ -54,7 +54,7 @@ async function boot(appRoot: HTMLElement, canvasContainer: HTMLElement) {
       <Notice
         kind="empty"
         title="No skeleton found"
-        detail="This atlas has no Spine skeleton (.json) next to it. Export the skeleton into the same folder and reopen the file."
+        detail="This atlas has no Spine skeleton (.json or .skel) next to it. Export the skeleton into the same folder and reopen the file."
       />,
       appRoot,
     );
