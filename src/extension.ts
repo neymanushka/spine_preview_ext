@@ -73,14 +73,14 @@ export class Provider implements vscode.CustomTextEditorProvider {
       return [];
     }
 
-    const candidates = entries.filter((e) => e.isFile() && e.name.toLowerCase().endsWith('.json'));
+    const candidates = entries.filter((e) => e.isFile() && /\.(json|skel)$/i.test(e.name));
     const probed = await Promise.all(
       candidates.map(async (e) => {
         const filePath = path.join(directory, e.name);
         return {
           name: e.name,
           uri: webview.asWebviewUri(vscode.Uri.file(filePath)).toString(),
-          isSkeleton: await isSkeletonJson(filePath),
+          isSkeleton: e.name.toLowerCase().endsWith('.skel') || (await isSkeletonJson(filePath)),
         };
       }),
     );

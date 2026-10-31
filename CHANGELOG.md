@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.5.0] - 2026-10-29
+
+### Features
+
+- Load binary Spine `.skel` skeletons alongside `.json` files next to an atlas.
+
 ## [3.4.1] - 2026-10-27
 
 ### Internal

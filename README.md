@@ -4,8 +4,14 @@
 
 ## usage
 
-Open any `.atlas` file. Every Spine skeleton (`.json`) next to it is loaded and
+Open any `.atlas` file. Every Spine skeleton (`.json` or binary `.skel`) next to it is loaded and
 listed in the dropdown, so one atlas can serve several skeletons.
+
+Use Spine 4.2 exports to match the bundled runtime. JSON and binary skeletons
+can share the same folder and atlas.
+
+For a binary test scene, open `demo/demo.atlas` and select `fruits.skel` or
+`vegetables.skel`.
 
 ## panels
 
