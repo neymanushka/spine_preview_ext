@@ -8,6 +8,7 @@ import { timelinePanelStyles } from './components/timeline-panel';
 import { eventLogStyles } from './components/event-log';
 import { tooltipStyles } from './components/tooltip';
 import { noticeStyles } from './components/notice';
+import { overlaysPanelStyles } from './components/overlays-panel';
 import { appStyles } from './app';
 
 // Every colour is sourced from the VS Code theme so the preview matches the
@@ -113,6 +114,7 @@ export const allStyles = [
   appStyles,
   fileSelectorStyles,
   controlsStyles,
+  overlaysPanelStyles,
   statusBarStyles,
   animationListStyles,
   skinsPanelStyles,

@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.6.0] - 2026-10-31
+
+### Features
+
+- Debug overlays for bones, mesh wireframes, exported bounding box attachments
+  and the skeleton origin. Choose layers from the Overlays panel, temporarily
+  hide them without losing the selection, and keep the selection when switching
+  skeletons. Overlays follow playback, scrubbing, zoom and pan.
+
 ## [3.5.2] - 2026-10-31
 
 ### Fixes
