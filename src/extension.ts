@@ -1,6 +1,7 @@
 import vscode = require('vscode');
 import path = require('path');
 import fs = require('fs');
+import crypto = require('crypto');
 
 // Only the first few KB are read: a Spine export declares "skeleton" or "bones"
 // up front, so an unrelated file such as package.json never reaches the loader.
@@ -95,21 +96,33 @@ export class Provider implements vscode.CustomTextEditorProvider {
   ): Promise<string> {
     const spines = await this.collectSpines(webview, path.dirname(documentPath));
     const webviewScript = webview.asWebviewUri(vscode.Uri.file(path.join(this.basePath, 'out', 'webview', 'app.js')));
+    const nonce = crypto.randomBytes(32).toString('base64');
+    const csp = [
+      "default-src 'none'",
+      "base-uri 'none'",
+      "form-action 'none'",
+      `script-src 'nonce-${nonce}'`,
+      `style-src 'nonce-${nonce}'`,
+      `img-src ${webview.cspSource} blob: data:`,
+      `connect-src ${webview.cspSource}`,
+    ].join('; ');
 
     return /* html */ `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="${csp}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style id="app-styles" nonce="${nonce}"></style>
 </head>
 <body>
     <div id="canvas-container"></div>
     <div id="app"></div>
-    <script>
+    <script nonce="${nonce}">
     var SPINES = ${toScriptLiteral(spines)};
     var ATLAS_URI = ${toScriptLiteral(atlasUri.toString())};
     </script>
-    <script src="${webviewScript}"></script>
+    <script nonce="${nonce}" src="${webviewScript}"></script>
 </body>
 </html>`;
   }

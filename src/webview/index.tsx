@@ -1,4 +1,6 @@
 import { render } from 'preact';
+// Static shader/uniform helpers let Pixi run without CSP's unsafe-eval permission.
+import 'pixi.js/unsafe-eval';
 import { Assets, Container, Ticker, UPDATE_PRIORITY, WebGLRenderer } from 'pixi.js';
 import { Spine } from '@esotericsoftware/spine-pixi-v8';
 import { allStyles } from './styles';
@@ -43,9 +45,10 @@ function describeError(error: unknown) {
 }
 
 function injectStyles() {
-  const styleEl = document.createElement('style');
+  // The host creates this element with a per-page CSP nonce.
+  const styleEl = document.getElementById('app-styles');
+  if (!(styleEl instanceof HTMLStyleElement)) throw new Error('Missing webview stylesheet');
   styleEl.textContent = allStyles;
-  document.head.appendChild(styleEl);
 }
 
 async function boot(appRoot: HTMLElement, canvasContainer: HTMLElement) {
