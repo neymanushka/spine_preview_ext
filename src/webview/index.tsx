@@ -75,17 +75,34 @@ async function boot(appRoot: HTMLElement, canvasContainer: HTMLElement) {
   Assets.setPreferences({ preferWorkers: false });
   Assets.add({ alias: ATLAS_ALIAS, src: ATLAS_URI });
   SPINES.forEach(({ name, uri }) => Assets.add({ alias: name, src: uri }));
-  await Assets.load([...SPINES.map((s) => s.name), ATLAS_ALIAS]);
+  // An atlas failure affects every skeleton; individual skeleton failures do not.
+  await Assets.load(ATLAS_ALIAS);
 
-  const spineInstances: Record<string, Spine> = {};
-  SPINES.forEach(({ name }) => {
-    const anim = Spine.from({ skeleton: name, atlas: ATLAS_ALIAS, autoUpdate: false });
-    anim.visible = false;
-    spineInstances[name] = anim;
-    stage.addChild(anim);
-  });
+  const spineInstances: Record<string, Spine> = Object.create(null);
+  const skeletonErrors: Record<string, string> = Object.create(null);
+  await Promise.all(
+    SPINES.map(async ({ name }) => {
+      try {
+        await Assets.load(name);
+        const anim = Spine.from({ skeleton: name, atlas: ATLAS_ALIAS, autoUpdate: false });
+        anim.visible = false;
+        spineInstances[name] = anim;
+        stage.addChild(anim);
+      } catch (error: unknown) {
+        skeletonErrors[name] = describeError(error);
+      }
+    }),
+  );
 
-  render(<App spineInstances={spineInstances} ticker={ticker} canvasContainer={canvasContainer} />, appRoot);
+  render(
+    <App
+      spineInstances={spineInstances}
+      skeletonErrors={skeletonErrors}
+      ticker={ticker}
+      canvasContainer={canvasContainer}
+    />,
+    appRoot,
+  );
 }
 
 injectStyles();

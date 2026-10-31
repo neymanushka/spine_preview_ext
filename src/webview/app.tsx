@@ -3,6 +3,7 @@ import { Skin } from '@esotericsoftware/spine-pixi-v8';
 import type { Animation, AnimationStateListener, Spine, TrackEntry } from '@esotericsoftware/spine-pixi-v8';
 import type { Ticker } from 'pixi.js';
 import { FileSelector } from './components/file-selector';
+import { Notice } from './components/notice';
 import { Controls } from './components/controls';
 import type { BackgroundId } from './components/controls';
 import { StatusBar } from './components/status-bar';
@@ -139,14 +140,18 @@ function clampTime(time: number, duration: number) {
 
 export function App({
   spineInstances,
+  skeletonErrors,
   ticker,
   canvasContainer,
 }: {
   spineInstances: Record<string, Spine>;
+  skeletonErrors: Readonly<Record<string, string>>;
   ticker: Ticker;
   canvasContainer: HTMLElement;
 }) {
-  const [selectedFile, setSelectedFile] = useState(SPINES[0]?.name ?? '');
+  const [selectedFile, setSelectedFile] = useState(
+    SPINES.find(({ name }) => spineInstances[name])?.name ?? SPINES[0]?.name ?? '',
+  );
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
   const [pan, setPan] = useState<Pan>(ORIGIN);
   const [background, setBackground] = useState<BackgroundId>(DEFAULT_BACKGROUND);
@@ -336,6 +341,7 @@ export function App({
   useEffect(() => {
     if (!selectedFile) return;
     if (currentAnimRef.current) currentAnimRef.current.visible = false;
+    currentAnimRef.current = null;
     const anim = spineInstances[selectedFile];
     if (!anim) return;
     anim.visible = true;
@@ -511,10 +517,21 @@ export function App({
     });
   }, []);
 
+  if (skeletonErrors[selectedFile] !== undefined) {
+    return (
+      <>
+        <div class="panel title-container" data-panel>
+          <FileSelector files={SPINES} errors={skeletonErrors} selected={selectedFile} onChange={setSelectedFile} />
+        </div>
+        <Notice kind="error" title={`Could not load ${selectedFile}`} detail={skeletonErrors[selectedFile]} />
+      </>
+    );
+  }
+
   return (
     <>
       <div class="panel title-container" data-panel>
-        <FileSelector files={SPINES} selected={selectedFile} onChange={setSelectedFile} />
+        <FileSelector files={SPINES} errors={skeletonErrors} selected={selectedFile} onChange={setSelectedFile} />
         <StatusBar version={version} statsRef={statsRef} />
         <Controls
           zoom={zoom}

@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.5.2] - 2026-10-31
+
+### Fixes
+
+- A broken or incompatible skeleton no longer blocks other skeletons next to
+  the same atlas. Failed files are marked in the selector and show their own
+  error when selected; the first working skeleton opens automatically.
+
 ## [3.5.1] - 2026-10-31
 
 ### Internal

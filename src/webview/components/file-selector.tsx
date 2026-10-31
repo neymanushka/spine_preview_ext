@@ -17,10 +17,12 @@ export const fileSelectorStyles = `
 
 export function FileSelector({
   files,
+  errors,
   selected,
   onChange,
 }: {
   files: ReadonlyArray<{ name: string }>;
+  errors: Readonly<Record<string, string>>;
   selected: string;
   onChange: (value: string) => void;
 }) {
@@ -33,7 +35,7 @@ export function FileSelector({
     >
       {files.map((f) => (
         <option key={f.name} value={f.name}>
-          {f.name}
+          {errors[f.name] !== undefined ? `${f.name} (failed)` : f.name}
         </option>
       ))}
     </select>
