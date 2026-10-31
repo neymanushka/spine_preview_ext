@@ -10,6 +10,10 @@ listed in the dropdown, so one atlas can serve several skeletons.
 Use Spine 4.2 exports to match the bundled runtime. JSON and binary skeletons
 can share the same folder and atlas.
 
+If a skeleton fails to load, it is marked `(failed)` in the dropdown. Select it
+to see its error, or choose another skeleton to continue previewing. A missing
+or broken shared atlas still prevents the whole preview from loading.
+
 For a binary test scene, open `demo/demo.atlas` and select `fruits.skel` or
 `vegetables.skel`.
 
