@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
-import type { OverlayOptions } from '../debug-overlays';
+import type { OverlayOptions, overlayAvailability } from '../debug-overlays';
 
 export const overlaysPanelStyles = `
 .overlays-button, .overlays-visibility {
@@ -54,6 +54,14 @@ const OPTIONS = [
   { id: 'bones', label: 'Bones', hint: 'Bone lengths and joints in the current pose.' },
   { id: 'mesh', label: 'Mesh wireframe', hint: 'Triangles of the currently attached meshes.' },
   {
+    id: 'hull',
+    label: 'Mesh hull',
+    hint: 'Outer contours of the currently attached meshes, without internal triangles.',
+  },
+  { id: 'regions', label: 'Region attachments', hint: 'Outlines of ordinary image attachments in the current pose.' },
+  { id: 'clipping', label: 'Clipping', hint: 'Clipping attachment polygons that trim the artwork.' },
+  { id: 'paths', label: 'Paths', hint: 'Path attachment curves (orange) and control handles (purple).' },
+  {
     id: 'bounds',
     label: 'Bounding boxes',
     hint: 'Bounding box attachments exported from Spine, not the overall artwork bounds.',
@@ -70,7 +78,7 @@ export function OverlaysPanel({
 }: {
   options: OverlayOptions;
   hidden: boolean;
-  available: { mesh: boolean; bounds: boolean };
+  available: ReturnType<typeof overlayAvailability>;
   onChange: (options: OverlayOptions) => void;
   onHiddenChange: (hidden: boolean) => void;
 }) {
@@ -137,7 +145,7 @@ export function OverlaysPanel({
               />
               <span class="overlays-option-text">
                 <span>{label}</span>
-                {(id === 'mesh' || id === 'bounds') && !available[id] && (
+                {id !== 'bones' && id !== 'origin' && !available[id] && (
                   <span class="overlays-unavailable">None in this skeleton</span>
                 )}
               </span>

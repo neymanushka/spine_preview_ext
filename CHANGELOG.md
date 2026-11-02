@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.7.0] - 2026-11-02
+
+### Features
+
+- Add mesh hulls, region attachment outlines, clipping polygons and path curves
+  with control handles to the Overlays panel. Each layer can be enabled separately
+  and indicates when its attachment type is absent from the skeleton.
+
 ## [3.6.0] - 2026-10-31
 
 ### Features
