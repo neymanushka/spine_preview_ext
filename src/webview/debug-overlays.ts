@@ -1,20 +1,46 @@
-import { BoundingBoxAttachment, MeshAttachment } from '@esotericsoftware/spine-pixi-v8';
-import type { Spine, VertexAttachment } from '@esotericsoftware/spine-pixi-v8';
-import { Graphics, GraphicsPath } from 'pixi.js';
+import {
+  BoundingBoxAttachment,
+  ClippingAttachment,
+  MeshAttachment,
+  PathAttachment,
+  RegionAttachment,
+  VertexAttachment,
+} from '@esotericsoftware/spine-pixi-v8';
+import type { Bone, Spine } from '@esotericsoftware/spine-pixi-v8';
+import { Container, Graphics, GraphicsPath, Text } from 'pixi.js';
 
 export type OverlayOptions = {
   bones: boolean;
+  boneNames: boolean;
   mesh: boolean;
+  hull: boolean;
+  regions: boolean;
+  clipping: boolean;
+  paths: boolean;
   bounds: boolean;
   origin: boolean;
 };
 
-export const DEFAULT_OVERLAYS: OverlayOptions = { bones: false, mesh: false, bounds: false, origin: false };
+export const DEFAULT_OVERLAYS: OverlayOptions = {
+  bones: false,
+  boneNames: false,
+  mesh: false,
+  hull: false,
+  regions: false,
+  clipping: false,
+  paths: false,
+  bounds: false,
+  origin: false,
+};
 
 export function overlayAvailability(spine: Spine | undefined) {
   const attachments = spine?.skeleton.data.skins.flatMap((skin) => skin.getAttachments()) ?? [];
   return {
     mesh: attachments.some(({ attachment }) => attachment instanceof MeshAttachment),
+    hull: attachments.some(({ attachment }) => attachment instanceof MeshAttachment && attachment.hullLength >= 6),
+    regions: attachments.some(({ attachment }) => attachment instanceof RegionAttachment),
+    clipping: attachments.some(({ attachment }) => attachment instanceof ClippingAttachment),
+    paths: attachments.some(({ attachment }) => attachment instanceof PathAttachment),
     bounds: attachments.some(({ attachment }) => attachment instanceof BoundingBoxAttachment),
   };
 }
@@ -23,22 +49,59 @@ export function overlayAvailability(spine: Spine | undefined) {
 // alpha or attachments. Coordinates are local to the Spine display object.
 export class DebugOverlays {
   private readonly graphics = new Graphics({ label: 'Debug overlays' });
-  private readonly vertices = new WeakMap<VertexAttachment, Float32Array>();
+  private readonly names = new Container({ label: 'Bone names' });
+  private readonly boneLabels = new Map<Bone, Text>();
+  private readonly vertices = new WeakMap<VertexAttachment | RegionAttachment, Float32Array>();
 
   constructor(private readonly spine: Spine) {
     this.graphics.eventMode = 'none';
     this.graphics.accessible = false;
+    this.names.eventMode = 'none';
+    this.names.interactiveChildren = false;
+    this.names.accessibleChildren = false;
     spine.addChild(this.graphics);
+    spine.addChild(this.names);
   }
 
   render(options: OverlayOptions, hidden: boolean) {
     const g = this.graphics;
     g.clear();
     g.visible = !hidden && Object.values(options).some(Boolean);
+    this.names.visible = !hidden && options.boneNames;
     if (!g.visible) return;
     const scale = Math.max(Math.abs(this.spine.scale.x), 0.001);
     const dot = 2.5 / scale;
     const skeleton = this.spine.skeleton;
+
+    if (options.boneNames) {
+      for (const bone of skeleton.bones) {
+        let label = this.boneLabels.get(bone);
+        if (!bone.active) {
+          if (label) label.visible = false;
+          continue;
+        }
+        if (!label) {
+          label = new Text({
+            text: bone.data.name,
+            style: {
+              fontFamily: 'sans-serif',
+              fontSize: 12,
+              fill: 0xffffff,
+              stroke: { color: 0x181818, width: 3 },
+            },
+            resolution: 2,
+          });
+          label.anchor.set(0, 1);
+          label.eventMode = 'none';
+          label.accessible = false;
+          this.boneLabels.set(bone, label);
+          this.names.addChild(label);
+        }
+        label.visible = true;
+        label.scale.set(1 / scale);
+        label.position.set(bone.worldX + 6 / scale, bone.worldY - 6 / scale);
+      }
+    }
 
     if (options.bones) {
       const path = new GraphicsPath();
@@ -56,33 +119,47 @@ export class DebugOverlays {
     for (const slot of skeleton.slots) {
       if (!slot.bone.active) continue;
       const attachment = slot.getAttachment();
-      const mesh = options.mesh && attachment instanceof MeshAttachment;
-      const bounds = options.bounds && attachment instanceof BoundingBoxAttachment;
-      if (!mesh && !bounds) continue;
-      // The instanceof checks above narrow to vertex attachments at runtime.
-      const vertexAttachment = attachment as MeshAttachment | BoundingBoxAttachment;
-      let vertices = this.vertices.get(vertexAttachment);
-      if (!vertices || vertices.length !== vertexAttachment.worldVerticesLength) {
-        vertices = new Float32Array(vertexAttachment.worldVerticesLength);
-        this.vertices.set(vertexAttachment, vertices);
+      if (options.regions && attachment instanceof RegionAttachment) {
+        const vertices = this.vertexBuffer(attachment, 8);
+        attachment.computeWorldVertices(slot, vertices, 0, 2);
+        this.stroke(new GraphicsPath().poly(Array.from(vertices)), 0x599dff, scale);
+        continue;
       }
-      vertexAttachment.computeWorldVertices(slot, 0, vertices.length, vertices, 0, 2);
+      const mesh = (options.mesh || options.hull) && attachment instanceof MeshAttachment;
+      const bounds = options.bounds && attachment instanceof BoundingBoxAttachment;
+      const clipping = options.clipping && attachment instanceof ClippingAttachment;
+      const paths = options.paths && attachment instanceof PathAttachment;
+      if ((!mesh && !bounds && !clipping && !paths) || !(attachment instanceof VertexAttachment)) continue;
+      const vertices = this.vertexBuffer(attachment, attachment.worldVerticesLength);
+      attachment.computeWorldVertices(slot, 0, vertices.length, vertices, 0, 2);
       if (mesh && attachment instanceof MeshAttachment) {
-        const path = new GraphicsPath();
-        const triangles = attachment.triangles;
-        for (let i = 0; i < triangles.length; i += 3) {
-          const a = triangles[i]! * 2;
-          const b = triangles[i + 1]! * 2;
-          const c = triangles[i + 2]! * 2;
-          path
-            .moveTo(vertices[a]!, vertices[a + 1]!)
-            .lineTo(vertices[b]!, vertices[b + 1]!)
-            .lineTo(vertices[c]!, vertices[c + 1]!)
-            .closePath();
+        if (options.mesh) {
+          const path = new GraphicsPath();
+          const triangles = attachment.triangles;
+          for (let i = 0; i < triangles.length; i += 3) {
+            const a = triangles[i]! * 2;
+            const b = triangles[i + 1]! * 2;
+            const c = triangles[i + 2]! * 2;
+            path
+              .moveTo(vertices[a]!, vertices[a + 1]!)
+              .lineTo(vertices[b]!, vertices[b + 1]!)
+              .lineTo(vertices[c]!, vertices[c + 1]!)
+              .closePath();
+          }
+          this.stroke(path, 0xe4a52b, scale);
         }
-        this.stroke(path, 0xe4a52b, scale);
-      } else if (bounds && vertices.length >= 6) {
-        this.stroke(new GraphicsPath().poly(Array.from(vertices)), 0xd765d5, scale);
+        // Spine stores hull vertices first; hullLength counts coordinate values.
+        if (options.hull && attachment.hullLength >= 6) {
+          this.stroke(
+            new GraphicsPath().poly(Array.from(vertices.subarray(0, attachment.hullLength))),
+            0x65d68c,
+            scale,
+          );
+        }
+      } else if (paths && attachment instanceof PathAttachment) {
+        this.drawPath(attachment, vertices, scale);
+      } else if ((bounds || clipping) && vertices.length >= 6) {
+        this.stroke(new GraphicsPath().poly(Array.from(vertices)), clipping ? 0xff7979 : 0xd765d5, scale);
       }
     }
 
@@ -96,6 +173,41 @@ export class DebugOverlays {
     }
   }
 
+  private vertexBuffer(attachment: VertexAttachment | RegionAttachment, length: number) {
+    let vertices = this.vertices.get(attachment);
+    if (!vertices || vertices.length !== length) {
+      vertices = new Float32Array(length);
+      this.vertices.set(attachment, vertices);
+    }
+    return vertices;
+  }
+
+  private drawPath(attachment: PathAttachment, vertices: Float32Array, scale: number) {
+    if (vertices.length < (attachment.closed ? 6 : 12)) return;
+    const curve = new GraphicsPath();
+    const handles = new GraphicsPath();
+    const segment = (start: number, control1: number, control2: number, end: number) => {
+      curve
+        .moveTo(vertices[start]!, vertices[start + 1]!)
+        .bezierCurveTo(
+          vertices[control1]!,
+          vertices[control1 + 1]!,
+          vertices[control2]!,
+          vertices[control2 + 1]!,
+          vertices[end]!,
+          vertices[end + 1]!,
+        );
+      handles.moveTo(vertices[start]!, vertices[start + 1]!).lineTo(vertices[control1]!, vertices[control1 + 1]!);
+      handles.moveTo(vertices[end]!, vertices[end + 1]!).lineTo(vertices[control2]!, vertices[control2 + 1]!);
+    };
+    // Open paths have an unused point at each end. Closed paths wrap the
+    // last anchor to the first using the last and first control points.
+    for (let i = 4; i < vertices.length - 4; i += 6) segment(i - 2, i, i + 2, i + 4);
+    if (attachment.closed) segment(vertices.length - 4, vertices.length - 2, 0, 2);
+    this.stroke(handles, 0xc09bff, scale);
+    this.stroke(curve, 0xff884d, scale);
+  }
+
   private stroke(path: GraphicsPath, color: number, scale: number) {
     // A dark outer stroke keeps coloured lines visible over matching artwork
     // and light backgrounds. Both widths remain constant in screen pixels.
@@ -105,5 +217,7 @@ export class DebugOverlays {
 
   destroy() {
     this.graphics.destroy();
+    this.names.destroy({ children: true });
+    this.boneLabels.clear();
   }
 }
