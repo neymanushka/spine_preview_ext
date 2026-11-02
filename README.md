@@ -26,7 +26,7 @@ For a binary test scene, open `demo/demo.atlas` and select `fruits.skel` or
 - Event markers sit under the scrubber; click one to jump to it, and events
   authored on the same frame share a marker
 - Fired events pop up above the timeline and flash the marker they came from
-- Overlays - toggle bones, mesh wireframes, mesh hulls, region attachment outlines,
+- Overlays - toggle bones, bone names, mesh wireframes, mesh hulls, region attachment outlines,
   clipping polygons, paths with control handles, bounding box attachments and the
   skeleton's local origin. Layers without matching geometry are marked
   "None in this skeleton". Hide/show all layers without clearing their selection;
@@ -34,6 +34,8 @@ For a binary test scene, open `demo/demo.atlas` and select `fruits.skel` or
   or a click outside it. Bounding boxes are attachments exported from Spine,
   rather than the overall bounds of the artwork. Origin axes: red +X (right),
   green +Y (up).
+  Bone names follow active joints and stay the same size when zooming; they can
+  be enabled independently of bone lines.
 
 Loop governs playback only: scrubbing and stepping stop on the first and last
 frame rather than wrapping around.

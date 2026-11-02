@@ -52,6 +52,11 @@ export const overlaysPanelStyles = `
 
 const OPTIONS = [
   { id: 'bones', label: 'Bones', hint: 'Bone lengths and joints in the current pose.' },
+  {
+    id: 'boneNames',
+    label: 'Bone names',
+    hint: 'Names beside active bone joints, with a constant text size when zooming.',
+  },
   { id: 'mesh', label: 'Mesh wireframe', hint: 'Triangles of the currently attached meshes.' },
   {
     id: 'hull',
@@ -145,7 +150,7 @@ export function OverlaysPanel({
               />
               <span class="overlays-option-text">
                 <span>{label}</span>
-                {id !== 'bones' && id !== 'origin' && !available[id] && (
+                {id !== 'bones' && id !== 'boneNames' && id !== 'origin' && !available[id] && (
                   <span class="overlays-unavailable">None in this skeleton</span>
                 )}
               </span>

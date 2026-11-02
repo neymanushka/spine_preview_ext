@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.8.0] - 2026-11-02
+
+### Features
+
+- Add an independent Bone names overlay. Labels follow active bone joints during
+  playback and scrubbing, keep a constant screen size when zooming, and use light
+  text with a dark outline for contrast.
+
 ## [3.7.0] - 2026-11-02
 
 ### Features

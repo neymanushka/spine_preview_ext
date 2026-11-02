@@ -6,11 +6,12 @@ import {
   RegionAttachment,
   VertexAttachment,
 } from '@esotericsoftware/spine-pixi-v8';
-import type { Spine } from '@esotericsoftware/spine-pixi-v8';
-import { Graphics, GraphicsPath } from 'pixi.js';
+import type { Bone, Spine } from '@esotericsoftware/spine-pixi-v8';
+import { Container, Graphics, GraphicsPath, Text } from 'pixi.js';
 
 export type OverlayOptions = {
   bones: boolean;
+  boneNames: boolean;
   mesh: boolean;
   hull: boolean;
   regions: boolean;
@@ -22,6 +23,7 @@ export type OverlayOptions = {
 
 export const DEFAULT_OVERLAYS: OverlayOptions = {
   bones: false,
+  boneNames: false,
   mesh: false,
   hull: false,
   regions: false,
@@ -47,22 +49,59 @@ export function overlayAvailability(spine: Spine | undefined) {
 // alpha or attachments. Coordinates are local to the Spine display object.
 export class DebugOverlays {
   private readonly graphics = new Graphics({ label: 'Debug overlays' });
+  private readonly names = new Container({ label: 'Bone names' });
+  private readonly boneLabels = new Map<Bone, Text>();
   private readonly vertices = new WeakMap<VertexAttachment | RegionAttachment, Float32Array>();
 
   constructor(private readonly spine: Spine) {
     this.graphics.eventMode = 'none';
     this.graphics.accessible = false;
+    this.names.eventMode = 'none';
+    this.names.interactiveChildren = false;
+    this.names.accessibleChildren = false;
     spine.addChild(this.graphics);
+    spine.addChild(this.names);
   }
 
   render(options: OverlayOptions, hidden: boolean) {
     const g = this.graphics;
     g.clear();
     g.visible = !hidden && Object.values(options).some(Boolean);
+    this.names.visible = !hidden && options.boneNames;
     if (!g.visible) return;
     const scale = Math.max(Math.abs(this.spine.scale.x), 0.001);
     const dot = 2.5 / scale;
     const skeleton = this.spine.skeleton;
+
+    if (options.boneNames) {
+      for (const bone of skeleton.bones) {
+        let label = this.boneLabels.get(bone);
+        if (!bone.active) {
+          if (label) label.visible = false;
+          continue;
+        }
+        if (!label) {
+          label = new Text({
+            text: bone.data.name,
+            style: {
+              fontFamily: 'sans-serif',
+              fontSize: 12,
+              fill: 0xffffff,
+              stroke: { color: 0x181818, width: 3 },
+            },
+            resolution: 2,
+          });
+          label.anchor.set(0, 1);
+          label.eventMode = 'none';
+          label.accessible = false;
+          this.boneLabels.set(bone, label);
+          this.names.addChild(label);
+        }
+        label.visible = true;
+        label.scale.set(1 / scale);
+        label.position.set(bone.worldX + 6 / scale, bone.worldY - 6 / scale);
+      }
+    }
 
     if (options.bones) {
       const path = new GraphicsPath();
@@ -178,5 +217,7 @@ export class DebugOverlays {
 
   destroy() {
     this.graphics.destroy();
+    this.names.destroy({ children: true });
+    this.boneLabels.clear();
   }
 }
