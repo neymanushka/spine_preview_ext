@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.9.0] - 2026-11-05
+
+### Features
+
+- Add an on-demand Performance side panel with actual WebGL draw calls per
+  rendered frame, peak count and Reset. Collection starts when opened and stops
+  completely when closed. Visible overlays are included and can be hidden from
+  the panel. The counter works while paused and after context restore.
+
 ## [3.8.0] - 2026-11-02
 
 ### Features
