@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.10.4] - 2026-11-06
+
+### Maintenance
+
+- Read version, animations, physics constraints and available skins directly
+  from the selected skeleton instead of copying export metadata into UI state.
+
 ## [3.10.3] - 2026-11-06
 
 ### Maintenance

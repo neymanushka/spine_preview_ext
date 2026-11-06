@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'preact/hooks';
 import type { RefObject } from 'preact';
 import { Skin } from '@esotericsoftware/spine-pixi-v8';
-import type { Animation, Spine } from '@esotericsoftware/spine-pixi-v8';
-import type { PhysicsConstraintData } from '../animation-info';
+import type { Spine } from '@esotericsoftware/spine-pixi-v8';
 import type { PerformanceProfiler } from '../performance-stats';
+
+const EMPTY_ITEMS = [] as const;
 
 export function useSelectedSkeleton({
   skeleton,
@@ -16,10 +17,6 @@ export function useSelectedSkeleton({
   applyView: (anim: Spine) => void;
   profiler: PerformanceProfiler;
 }) {
-  const [version, setVersion] = useState('');
-  const [animations, setAnimations] = useState<readonly Animation[]>([]);
-  const [physics, setPhysics] = useState<readonly PhysicsConstraintData[]>([]);
-  const [skins, setSkins] = useState<readonly Skin[]>([]);
   const [activeSkins, setActiveSkins] = useState<ReadonlySet<string>>(new Set());
 
   useEffect(() => {
@@ -28,10 +25,6 @@ export function useSelectedSkeleton({
     anim.visible = true;
     applyView(anim);
     currentAnimRef.current = anim;
-    setVersion(anim.skeleton.data.version || 'unknown');
-    setAnimations([...anim.skeleton.data.animations]);
-    setPhysics([...anim.skeleton.data.physicsConstraints]);
-    setSkins([...anim.skeleton.data.skins]);
     setActiveSkins(new Set());
     // Instances are reused; switching back starts with clean tracks and skin.
     anim.state.clearTracks();
@@ -66,5 +59,14 @@ export function useSelectedSkeleton({
     [currentAnimRef],
   );
 
-  return { version, animations, physics, skins, activeSkins, toggleSkin };
+  // Export metadata belongs to SkeletonData; it does not need UI state or synchronization.
+  const data = skeleton?.skeleton.data;
+  return {
+    version: data?.version || 'unknown',
+    animations: data?.animations ?? EMPTY_ITEMS,
+    physics: data?.physicsConstraints ?? EMPTY_ITEMS,
+    skins: data?.skins ?? EMPTY_ITEMS,
+    activeSkins,
+    toggleSkin,
+  };
 }
