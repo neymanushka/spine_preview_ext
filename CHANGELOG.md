@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.10.2] - 2026-11-06
+
+### Fixes
+
+- Make animation selection accessible with native buttons and keyboard controls.
+  Show animation tooltips on focus, associate their descriptions with the buttons,
+  and dismiss them with Escape. Focused buttons retain their native Space action.
+
 ## [3.10.1] - 2026-11-06
 
 ### Maintenance

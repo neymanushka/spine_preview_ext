@@ -289,7 +289,8 @@ export function usePlayback({
       if (e.ctrlKey || e.altKey || e.metaKey) return;
       if (isTextEntry(e.target)) return;
       if (e.code === 'Space') {
-        // Also stops the focused button from firing its own click.
+        // Focused buttons own Space; canvas and range inputs keep the playback shortcut.
+        if (e.target instanceof Element && e.target.closest('button')) return;
         e.preventDefault();
         togglePlay();
         return;

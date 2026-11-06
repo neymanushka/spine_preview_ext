@@ -1,9 +1,8 @@
 import { render } from 'preact';
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useId, useLayoutEffect, useState } from 'preact/hooks';
 import type { ComponentChildren } from 'preact';
 
 const TOOLTIP_GAP = 8;
-const ESTIMATED_TOOLTIP_HEIGHT = 60;
 
 export const tooltipStyles = `
 .tooltip-popup {
@@ -19,21 +18,9 @@ export const tooltipStyles = `
     white-space: pre;
     pointer-events: none;
     z-index: 1000;
-    opacity: 0;
-    transition: opacity 0.15s;
     max-width: 350px;
     overflow: hidden;
-}
-.tooltip-popup.visible { opacity: 1; }`;
-
-let tooltipContainer: HTMLElement | null = null;
-function getTooltipContainer() {
-  if (!tooltipContainer) {
-    tooltipContainer = document.createElement('div');
-    document.body.appendChild(tooltipContainer);
-  }
-  return tooltipContainer;
-}
+}`;
 
 export function Tooltip({
   content,
@@ -42,49 +29,60 @@ export function Tooltip({
 }: {
   content: ComponentChildren;
   class?: string;
-  children: ComponentChildren;
+  children: (tooltipId: string) => ComponentChildren;
 }) {
-  const [visible, setVisible] = useState(false);
-  const [pos, setPos] = useState({ x: 0, y: 0 });
-  const mounted = useRef(false);
+  const id = useId();
+  const [anchor, setAnchor] = useState<DOMRect | null>(null);
 
-  useEffect(() => {
-    mounted.current = true;
-    return () => {
-      mounted.current = false;
-      render(null, getTooltipContainer());
-    };
-  }, []);
-
-  // Every tooltip shares one container. `content` is fresh JSX on each parent
-  // render, so clearing has to key off `visible` alone - otherwise every hidden
-  // tooltip in the list would wipe the one being shown whenever the list re-rendered.
-  useEffect(() => {
-    if (!visible) render(null, getTooltipContainer());
-  }, [visible]);
-
-  useEffect(() => {
-    if (!visible) return;
+  useLayoutEffect(() => {
+    if (!anchor) return;
+    // Each visible tooltip owns its DOM root; another instance cannot clear it.
+    const container = document.createElement('div');
+    document.body.appendChild(container);
     render(
-      <div class="tooltip-popup visible" style={{ left: `${pos.x}px`, top: `${pos.y}px` }}>
+      <div
+        id={id}
+        role="tooltip"
+        class="tooltip-popup"
+        style={{ left: `${anchor.right + TOOLTIP_GAP}px`, top: `${anchor.top}px` }}
+      >
         {content}
       </div>,
-      getTooltipContainer(),
+      container,
     );
-  }, [visible, pos, content]);
+    const popup = container.firstElementChild as HTMLElement;
+    popup.style.left = `${Math.max(0, Math.min(anchor.right + TOOLTIP_GAP, window.innerWidth - popup.offsetWidth))}px`;
+    popup.style.top = `${Math.max(0, Math.min(anchor.top, window.innerHeight - popup.offsetHeight))}px`;
+    const dismiss = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      event.stopPropagation();
+      setAnchor(null);
+    };
+    document.addEventListener('keydown', dismiss, true);
+    return () => {
+      document.removeEventListener('keydown', dismiss, true);
+      render(null, container);
+      container.remove();
+    };
+  }, [anchor, content, id]);
 
-  const show = (e: MouseEvent) => {
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const tooltipEl = getTooltipContainer().firstElementChild as HTMLElement | null;
-    const height = tooltipEl ? tooltipEl.offsetHeight : ESTIMATED_TOOLTIP_HEIGHT;
-    const y = rect.top + height > window.innerHeight ? rect.bottom - height : rect.top;
-    setPos({ x: rect.right + TOOLTIP_GAP, y });
-    setVisible(true);
-  };
-
+  const show = (event: MouseEvent | FocusEvent) =>
+    setAnchor((event.currentTarget as HTMLElement).getBoundingClientRect());
   return (
-    <div class={className} onMouseEnter={show} onMouseLeave={() => setVisible(false)}>
-      {children}
+    <div
+      class={className}
+      onMouseEnter={show}
+      onMouseLeave={(event) => {
+        if (!event.currentTarget.matches(':focus-within')) setAnchor(null);
+      }}
+      onFocusIn={show}
+      onFocusOut={(event) => {
+        if (event.relatedTarget instanceof Node && event.currentTarget.contains(event.relatedTarget)) return;
+        if (!event.currentTarget.matches(':hover')) setAnchor(null);
+      }}
+    >
+      {children(id)}
     </div>
   );
 }
