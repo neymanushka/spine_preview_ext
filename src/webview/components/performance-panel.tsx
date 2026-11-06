@@ -32,8 +32,6 @@ export const performancePanelStyles = `
 .performance-values > div { display: flex; justify-content: space-between; gap: var(--sp-3); margin: var(--sp-2) 0; }
 .performance-values dd { margin: 0; font-weight: 600; white-space: nowrap; }
 .performance-peak { color: var(--text-secondary); font-weight: 400; }
-.performance-note { color: var(--text-secondary); line-height: 1.5; margin: var(--sp-3) 0; }
-.performance-live { color: var(--accent); font-size: 12px; margin: 0 0 var(--sp-3); }
 `;
 
 export function PerformancePanel({
@@ -106,42 +104,23 @@ export function PerformancePanel({
             </button>
           </div>
           <div class="performance-content">
-            <p class="performance-live">● Live · collecting while this panel is open</p>
             <h3 class="performance-section">Rendering</h3>
             <dl class="performance-values">
               <div>
                 <dt>Draw calls / frame</dt>
                 <dd>
                   {stats.drawCalls ?? '—'}
-                  <span class="performance-peak" title="Peak since reset">
+                  <span class="performance-peak" title="Peak since opening this panel or switching skeletons">
                     {' '}
                     · peak {stats.peak ?? '—'}
                   </span>
                 </dd>
               </div>
             </dl>
-            <button
-              type="button"
-              class="performance-action"
-              onClick={() => {
-                profiler.reset();
-                setStats({ ...profiler.stats });
-              }}
-            >
-              Reset
-            </button>
-            <p class="performance-note">
-              Actual WebGL draw calls after batching. Peak resets when you open this panel or switch skeletons.
-            </p>
-            {overlaysVisible ? (
-              <>
-                <p class="performance-note">Visible overlays are included. Hide them to measure the animation alone.</p>
-                <button type="button" class="performance-action" onClick={onHideOverlays}>
-                  Hide overlays
-                </button>
-              </>
-            ) : (
-              <p class="performance-note">Overlays are hidden or disabled.</p>
+            {overlaysVisible && (
+              <button type="button" class="performance-action" onClick={onHideOverlays}>
+                Hide overlays
+              </button>
             )}
           </div>
         </section>
