@@ -17,6 +17,8 @@ import { EventLog } from './components/event-log';
 import type { EventLogHandle } from './components/event-log';
 import { clampZoom, ZOOM_WHEEL_SENSITIVITY } from './zoom';
 import type { PhysicsConstraintData } from './animation-info';
+import type { DrawCallProfiler } from './draw-call-stats';
+import { PerformancePanel } from './components/performance-panel';
 
 const DEFAULT_BACKGROUND: BackgroundId = 'checker';
 const DEFAULT_ZOOM = 1;
@@ -145,11 +147,13 @@ export function App({
   spineInstances,
   skeletonErrors,
   ticker,
+  profiler,
   canvasContainer,
 }: {
   spineInstances: Record<string, Spine>;
   skeletonErrors: Readonly<Record<string, string>>;
   ticker: Ticker;
+  profiler: DrawCallProfiler;
   canvasContainer: HTMLElement;
 }) {
   const [selectedFile, setSelectedFile] = useState(
@@ -393,7 +397,8 @@ export function App({
     setTrackAnimation(entry?.animation ?? null);
     setTrackAnimations(trackAnimationNames(anim));
     applyPlaying(true);
-  }, [selectedFile, spineInstances, applyPlaying]);
+    profiler.reset();
+  }, [selectedFile, spineInstances, applyPlaying, profiler]);
 
   // Only the runtime knows an event actually fired: deriving it from the
   // playhead would mean re-implementing the wrapping rules that decide when
@@ -568,6 +573,11 @@ export function App({
           background={background}
           onBackground={setBackground}
           onResetView={resetView}
+        />
+        <PerformancePanel
+          profiler={profiler}
+          overlaysVisible={!overlaysHidden && Object.values(overlays).some(Boolean)}
+          onHideOverlays={() => setOverlaysHidden(true)}
         />
         <OverlaysPanel
           options={overlays}

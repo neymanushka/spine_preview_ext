@@ -45,9 +45,6 @@ export const overlaysPanelStyles = `
     .status-bar-stats { display: none; }
     .title-container { gap: var(--sp-2); }
 }
-@media (max-width: 550px) {
-    .status-bar { display: none; }
-}
 `;
 
 const OPTIONS = [

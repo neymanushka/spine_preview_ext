@@ -40,6 +40,15 @@ For a binary test scene, open `demo/demo.atlas` and select `fruits.skel` or
 Loop governs playback only: scrubbing and stepping stop on the first and last
 frame rather than wrapping around.
 
+Open Performance to collect actual WebGL draw calls per rendered frame, after
+batching. The side panel shows the latest frame and the peak.
+Opening the panel or switching skeletons starts a fresh measurement.
+Close the panel with its close button, Performance, or Escape to stop collection
+and remove the WebGL hooks. You can keep it open while using playback and overlays.
+Visible overlays are included; use Hide overlays in the panel to measure the
+animation alone. Values refresh four times per second, including while paused.
+These are draw submissions, not attachment counts or GPU execution time.
+
 ## controls
 
 - Mouse wheel - zoom towards the cursor (5% to 800%)

@@ -1,6 +1,7 @@
 import { fileSelectorStyles } from './components/file-selector';
 import { controlsStyles } from './components/controls';
 import { statusBarStyles } from './components/status-bar';
+import { performancePanelStyles } from './components/performance-panel';
 import { animationListStyles } from './components/animation-list';
 import { skinsPanelStyles } from './components/skins-panel';
 import { tracksPanelStyles } from './components/tracks-panel';
@@ -116,6 +117,7 @@ export const allStyles = [
   controlsStyles,
   overlaysPanelStyles,
   statusBarStyles,
+  performancePanelStyles,
   animationListStyles,
   skinsPanelStyles,
   tracksPanelStyles,

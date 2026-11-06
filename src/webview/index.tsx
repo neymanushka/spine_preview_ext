@@ -6,6 +6,7 @@ import { Spine } from '@esotericsoftware/spine-pixi-v8';
 import { allStyles } from './styles';
 import { App } from './app';
 import { Notice } from './components/notice';
+import { createDrawCallStats } from './draw-call-stats';
 
 const ATLAS_ALIAS = 'atlas';
 
@@ -22,12 +23,15 @@ async function createRenderer(canvasContainer: HTMLElement) {
     height: canvasContainer.clientHeight,
   });
   canvasContainer.appendChild(renderer.canvas);
+  const drawCallStats = createDrawCallStats(renderer);
 
   const stage = new Container();
+  const renderStage = () => renderer.render(stage);
+  const drawStage = () => drawCallStats.render(renderStage);
   const ticker = new Ticker();
   // LOW priority, as in Application: the app's own tick updates the skeleton
   // first, and the frame is drawn from the pose it leaves behind.
-  ticker.add(() => renderer.render(stage), undefined, UPDATE_PRIORITY.LOW);
+  ticker.add(drawStage, undefined, UPDATE_PRIORITY.LOW);
   ticker.start();
 
   // Stands in for Application's resizeTo. Resizing the canvas clears it, and a
@@ -35,9 +39,9 @@ async function createRenderer(canvasContainer: HTMLElement) {
   // without drawing again here every resize step showed an empty canvas.
   new ResizeObserver(() => {
     renderer.resize(canvasContainer.clientWidth, canvasContainer.clientHeight);
-    renderer.render(stage);
+    drawStage();
   }).observe(canvasContainer);
-  return { stage, ticker };
+  return { stage, ticker, profiler: drawCallStats };
 }
 
 function describeError(error: unknown) {
@@ -66,7 +70,7 @@ async function boot(appRoot: HTMLElement, canvasContainer: HTMLElement) {
 
   render(<Notice kind="loading" title="Loading Spine assets" />, appRoot);
 
-  const { stage, ticker } = await createRenderer(canvasContainer);
+  const { stage, ticker, profiler } = await createRenderer(canvasContainer);
 
   // PIXI decodes textures in a Web Worker by default, but a worker's fetch never
   // reaches the service worker that serves vscode-resource URIs to the webview,
@@ -99,6 +103,7 @@ async function boot(appRoot: HTMLElement, canvasContainer: HTMLElement) {
       spineInstances={spineInstances}
       skeletonErrors={skeletonErrors}
       ticker={ticker}
+      profiler={profiler}
       canvasContainer={canvasContainer}
     />,
     appRoot,

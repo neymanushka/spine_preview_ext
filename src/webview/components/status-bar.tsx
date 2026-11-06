@@ -5,6 +5,7 @@ export const statusBarStyles = `
     gap: var(--sp-3);
     flex: 1;
     min-width: 0;
+    overflow: hidden;
     color: var(--text-secondary);
     font-size: 12px;
     font-variant-numeric: tabular-nums;
@@ -14,7 +15,10 @@ export const statusBarStyles = `
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.status-bar-stats { min-width: 108px; }`;
+.status-bar-stats { min-width: 108px; }
+@media (max-width: 800px) {
+    .status-bar { display: none; }
+}`;
 
 export function StatusBar({
   version,
