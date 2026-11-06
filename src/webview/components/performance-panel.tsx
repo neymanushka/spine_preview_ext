@@ -44,7 +44,12 @@ export function PerformancePanel({
   onHideOverlays: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [stats, setStats] = useState<DrawCallStats>({ drawCalls: null, peak: null });
+  const [stats, setStats] = useState<DrawCallStats>({
+    drawCalls: null,
+    peak: null,
+    cpuUpdateMs: null,
+    cpuUpdatePeakMs: null,
+  });
   const trigger = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLElement>(null);
   const close = () => {
@@ -112,7 +117,25 @@ export function PerformancePanel({
                   {stats.drawCalls ?? '—'}
                   <span class="performance-peak" title="Peak since opening this panel or switching skeletons">
                     {' '}
-                    · peak {stats.peak ?? '—'}
+                    · {stats.peak ?? '—'}
+                  </span>
+                </dd>
+              </div>
+            </dl>
+            <h3 class="performance-section">Animation</h3>
+            <dl class="performance-values">
+              <div>
+                <dt title="Smoothed CPU time for the per-frame animation and skeleton pose update, including while paused. Excludes overlays and rendering.">
+                  CPU update / frame
+                </dt>
+                <dd>
+                  {stats.cpuUpdateMs === null ? '—' : `${stats.cpuUpdateMs.toFixed(2)} ms`}
+                  <span
+                    class="performance-peak"
+                    title="Highest single update time since opening this panel or switching skeletons"
+                  >
+                    {' '}
+                    · {stats.cpuUpdatePeakMs === null ? '—' : `${stats.cpuUpdatePeakMs.toFixed(2)} ms`}
                   </span>
                 </dd>
               </div>
