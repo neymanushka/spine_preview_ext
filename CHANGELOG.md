@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.10.3] - 2026-11-06
+
+### Maintenance
+
+- Give selected-skeleton activation, visibility and skins their own hook, keeping
+  playback and track control separate.
+
 ## [3.10.2] - 2026-11-06
 
 ### Fixes

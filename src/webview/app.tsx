@@ -15,6 +15,7 @@ import { EventLog } from './components/event-log';
 import type { PerformanceProfiler } from './performance-stats';
 import { PerformancePanel } from './components/performance-panel';
 import { usePlayback } from './hooks/use-playback';
+import { useSelectedSkeleton } from './hooks/use-selected-skeleton';
 import { usePreviewCamera } from './hooks/use-preview-camera';
 import { usePreviewFrame } from './hooks/use-preview-frame';
 
@@ -98,12 +99,14 @@ export function App({
     currentAnimRef,
     canvasContainer,
   );
+  const skeleton = spineInstances[selectedFile];
+  const { version, animations, physics, skins, activeSkins, toggleSkin } = useSelectedSkeleton({
+    skeleton,
+    currentAnimRef,
+    applyView,
+    profiler,
+  });
   const {
-    version,
-    animations,
-    physics,
-    skins,
-    activeSkins,
     activeTrack,
     playing,
     loop,
@@ -118,7 +121,6 @@ export function App({
     flashMarkerRef,
     syncTimelineDom,
     selectAnimation,
-    toggleSkin,
     setActiveTrack,
     clearTrack,
     togglePlay,
@@ -126,7 +128,7 @@ export function App({
     stepFrames,
     handleLoop,
     handleSpeed,
-  } = usePlayback({ selectedFile, spineInstances, currentAnimRef, profiler, applyView });
+  } = usePlayback({ skeleton, currentAnimRef });
   const statsRef = usePreviewFrame({
     selectedFile,
     spineInstances,

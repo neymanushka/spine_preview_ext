@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import type { RefObject } from 'preact';
-import { Skin } from '@esotericsoftware/spine-pixi-v8';
 import type { Animation, AnimationStateListener, Spine, TrackEntry } from '@esotericsoftware/spine-pixi-v8';
-import type { PhysicsConstraintData } from '../animation-info';
-import type { PerformanceProfiler } from '../performance-stats';
 import type { EventLogHandle } from '../components/event-log';
 
 const DEFAULT_SPEED = 1;
@@ -57,23 +54,12 @@ function clampTime(time: number, duration: number) {
 }
 
 export function usePlayback({
-  selectedFile,
-  spineInstances,
+  skeleton,
   currentAnimRef,
-  profiler,
-  applyView,
 }: {
-  selectedFile: string;
-  spineInstances: Record<string, Spine>;
+  skeleton: Spine | undefined;
   currentAnimRef: RefObject<Spine>;
-  profiler: PerformanceProfiler;
-  applyView: (anim: Spine) => void;
 }) {
-  const [version, setVersion] = useState('');
-  const [animations, setAnimations] = useState<readonly Animation[]>([]);
-  const [physics, setPhysics] = useState<readonly PhysicsConstraintData[]>([]);
-  const [skins, setSkins] = useState<readonly Skin[]>([]);
-  const [activeSkins, setActiveSkins] = useState<ReadonlySet<string>>(new Set());
   const [activeTrack, setActiveTrack] = useState(0);
   const [playing, setPlaying] = useState(true);
   const [loop, setLoop] = useState(true);
@@ -237,40 +223,21 @@ export function usePlayback({
   }, [trackAnimation, syncTimelineDom]);
 
   useEffect(() => {
-    if (!selectedFile) return;
-    if (currentAnimRef.current) currentAnimRef.current.visible = false;
-    currentAnimRef.current = null;
-    const anim = spineInstances[selectedFile];
-    if (!anim) return;
-    anim.visible = true;
-    applyView(anim);
-    currentAnimRef.current = anim;
-    setVersion(anim.skeleton.data.version || 'unknown');
-    setAnimations([...anim.skeleton.data.animations]);
-    setPhysics([...anim.skeleton.data.physicsConstraints]);
-    setSkins([...anim.skeleton.data.skins]);
-    setActiveSkins(new Set());
+    if (!skeleton) return;
     activeTrackRef.current = 0;
     setActiveTrack(0);
-    // Every file keeps its own Spine instance alive, so without this a file
-    // came back with the tracks and skin left on it while the panels showed
-    // the reset state above.
-    anim.state.clearTracks();
-    anim.skeleton.setSkin(null);
-    anim.skeleton.setToSetupPose();
-    const firstAnim = anim.skeleton.data.animations[0];
-    const entry = firstAnim ? anim.state.setAnimation(0, firstAnim.name, loopRef.current) : null;
+    const firstAnim = skeleton.skeleton.data.animations[0];
+    const entry = firstAnim ? skeleton.state.setAnimation(0, firstAnim.name, loopRef.current) : null;
     setTrackAnimation(entry?.animation ?? null);
-    setTrackAnimations(trackAnimationNames(anim));
+    setTrackAnimations(trackAnimationNames(skeleton));
     applyPlaying(true);
-    profiler.reset();
-  }, [selectedFile, spineInstances, currentAnimRef, applyPlaying, profiler, applyView]);
+  }, [skeleton, applyPlaying]);
 
   // Only the runtime knows an event actually fired: deriving it from the
   // playhead would mean re-implementing the wrapping rules that decide when
   // `apply()` reports one.
   useEffect(() => {
-    const anim = spineInstances[selectedFile];
+    const anim = skeleton;
     if (!anim) return;
     const listener: AnimationStateListener = {
       event: (entry, event) => {
@@ -282,7 +249,7 @@ export function usePlayback({
     };
     anim.state.addListener(listener);
     return () => anim.state.removeListener(listener);
-  }, [selectedFile, spineInstances, currentEntry]);
+  }, [skeleton, currentEntry]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -309,34 +276,7 @@ export function usePlayback({
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [togglePlay, stepFrames]);
 
-  const toggleSkin = useCallback(
-    (skinName: string) => {
-      setActiveSkins((prev) => {
-        const next = new Set(prev);
-        if (next.has(skinName)) next.delete(skinName);
-        else next.add(skinName);
-        const anim = currentAnimRef.current;
-        if (anim) {
-          const customSkin = new Skin('custom');
-          next.forEach((partName) => {
-            const part = anim.skeleton.data.findSkin(partName);
-            if (part) customSkin.addSkin(part);
-          });
-          anim.skeleton.setSkin(customSkin);
-          anim.skeleton.setSlotsToSetupPose();
-        }
-        return next;
-      });
-    },
-    [currentAnimRef],
-  );
-
   return {
-    version,
-    animations,
-    physics,
-    skins,
-    activeSkins,
     activeTrack,
     playing,
     loop,
@@ -351,7 +291,6 @@ export function usePlayback({
     flashMarkerRef,
     syncTimelineDom,
     selectAnimation,
-    toggleSkin,
     setActiveTrack,
     clearTrack,
     togglePlay,
