@@ -1,23 +1,5 @@
 export const tracksPanelStyles = `
-.tracks-container {
-    user-select: none;
-    overflow-y: auto;
-    padding: var(--sp-1);
-    min-width: 180px;
-}
-.track-item {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-2);
-    color: var(--text-primary);
-    border-radius: var(--radius);
-    padding: var(--sp-1) var(--sp-2);
-    cursor: pointer;
-    transition: background-color 0.15s;
-}
-.track-item:hover { background-color: var(--hover-bg); }
 .track-item.track-active { background-color: var(--active-bg); color: var(--active-fg); }
-.track-item input { accent-color: var(--accent); cursor: pointer; margin: 0; }
 .track-label { white-space: nowrap; }
 .track-animation {
     flex: 1;
@@ -30,19 +12,14 @@ export const tracksPanelStyles = `
 }
 .track-active .track-animation { color: inherit; }
 .track-clear {
-    display: flex;
     flex-shrink: 0;
     padding: 2px;
-    background: none;
     border: none;
-    border-radius: var(--radius);
     color: inherit;
-    cursor: pointer;
     opacity: 0;
 }
 .track-item:hover .track-clear { opacity: 1; }
 .track-clear:focus-visible { opacity: 1; }
-.track-clear:hover { background: var(--vscode-toolbar-hoverBackground, var(--hover-bg)); }
 /* Kept in the layout on empty tracks so every name lines up on the right. */
 .track-clear:disabled { visibility: hidden; }`;
 
@@ -65,12 +42,12 @@ export function TracksPanel({
   onClear: (track: number) => void;
 }) {
   return (
-    <div class="panel tracks-container" data-panel>
+    <div class="panel ui-list-panel tracks-container" data-panel>
       <div class="panel-header">Tracks</div>
       {Array.from({ length: trackAnimations.length + FREE_TRACKS }, (_, i) => {
         const animationName = trackAnimations[i] ?? null;
         return (
-          <label key={i} class={`track-item${activeTrack === i ? ' track-active' : ''}`}>
+          <label key={i} class={`ui-choice-row track-item${activeTrack === i ? ' track-active' : ''}`}>
             <input type="radio" name="track" checked={activeTrack === i} onChange={() => onSelect(i)} />
             <span class="track-label">Track {i}</span>
             <span class="track-animation" title={animationName ?? undefined}>
@@ -78,7 +55,7 @@ export function TracksPanel({
             </span>
             <button
               type="button"
-              class="track-clear"
+              class="ui-icon-button track-clear"
               title={animationName ? `Remove "${animationName}" from track ${i}` : undefined}
               aria-label={`Clear track ${i}`}
               disabled={animationName === null}

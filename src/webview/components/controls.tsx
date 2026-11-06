@@ -18,24 +18,9 @@ export const controlsStyles = `
     gap: var(--sp-2);
     flex-shrink: 0;
 }
-.controls-zoom {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 110px;
-    height: 4px;
-    background: var(--input-bg);
-    border: 1px solid var(--input-border-color);
-    border-radius: 2px;
-    outline: none;
-    cursor: pointer;
-}
-.controls-zoom::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--accent);
-    cursor: pointer;
+.controls-zoom { width: 110px; }
+@media (max-width: 700px) {
+    .controls-zoom { width: 60px; }
 }
 .controls-reset {
     min-width: 48px;
@@ -105,7 +90,7 @@ export function Controls({
         ))}
       </div>
       <input
-        class="controls-zoom"
+        class="ui-range controls-zoom"
         type="range"
         min="0"
         max="1"

@@ -11,6 +11,8 @@ import { tooltipStyles } from './components/tooltip';
 import { noticeStyles } from './components/notice';
 import { overlaysPanelStyles } from './components/overlays-panel';
 import { appStyles } from './app';
+import { uiStyles } from './components/ui-styles';
+import { metricRowStyles } from './components/metric-row';
 
 // Every colour is sourced from the VS Code theme so the preview matches the
 // editor the user actually runs. The literals are fallbacks only - they apply
@@ -112,6 +114,8 @@ body {
 
 export const allStyles = [
   globalStyles,
+  uiStyles,
+  metricRowStyles,
   appStyles,
   fileSelectorStyles,
   controlsStyles,

@@ -1,5 +1,35 @@
 # Changelog
 
+## [3.10.4] - 2026-11-06
+
+### Maintenance
+
+- Read version, animations, physics constraints and available skins directly
+  from the selected skeleton instead of copying export metadata into UI state.
+
+## [3.10.3] - 2026-11-06
+
+### Maintenance
+
+- Give selected-skeleton activation, visibility and skins their own hook, keeping
+  playback and track control separate.
+
+## [3.10.2] - 2026-11-06
+
+### Fixes
+
+- Make animation selection accessible with native buttons and keyboard controls.
+  Show animation tooltips on focus, associate their descriptions with the buttons,
+  and dismiss them with Escape. Focused buttons retain their native Space action.
+
+## [3.10.1] - 2026-11-06
+
+### Maintenance
+
+- Share button, slider and list styles, and reuse metric rows in Performance.
+- Separate playback, camera controls and frame updates from the preview layout.
+- Rename the profiler module to reflect both draw-call and CPU update metrics.
+
 ## [3.10.0] - 2026-11-06
 
 ### Features

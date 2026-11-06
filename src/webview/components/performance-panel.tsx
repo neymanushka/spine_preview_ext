@@ -1,19 +1,10 @@
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
-import type { DrawCallProfiler, DrawCallStats } from '../draw-call-stats';
+import type { PerformanceProfiler, PerformanceStats } from '../performance-stats';
+import { MetricRow } from './metric-row';
 
 export const performancePanelStyles = `
-.performance-button, .performance-action {
-    font: inherit;
-    color: var(--text-primary);
-    background: var(--input-bg);
-    border: 1px solid var(--input-border-color);
-    border-radius: var(--radius);
-    padding: var(--sp-1) var(--sp-2);
-    cursor: pointer;
-}
 .performance-button { white-space: nowrap; flex-shrink: 0; }
 .performance-button[aria-expanded="true"] { border-color: var(--accent); }
-.performance-button:hover, .performance-action:hover { background: var(--hover-bg); }
 .performance-panel {
     position: fixed;
     top: 58px;
@@ -28,10 +19,6 @@ export const performancePanelStyles = `
 .performance-heading { display: flex; align-items: center; justify-content: space-between; }
 .performance-content { padding: var(--sp-3); }
 .performance-section { margin: 0 0 var(--sp-3); font-size: 13px; }
-.performance-values { margin: 0; font-variant-numeric: tabular-nums; }
-.performance-values > div { display: flex; justify-content: space-between; gap: var(--sp-3); margin: var(--sp-2) 0; }
-.performance-values dd { margin: 0; font-weight: 600; white-space: nowrap; }
-.performance-peak { color: var(--text-secondary); font-weight: 400; }
 `;
 
 export function PerformancePanel({
@@ -39,12 +26,12 @@ export function PerformancePanel({
   overlaysVisible,
   onHideOverlays,
 }: {
-  profiler: DrawCallProfiler;
+  profiler: PerformanceProfiler;
   overlaysVisible: boolean;
   onHideOverlays: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [stats, setStats] = useState<DrawCallStats>({
+  const [stats, setStats] = useState<PerformanceStats>({
     drawCalls: null,
     peak: null,
     cpuUpdateMs: null,
@@ -86,7 +73,7 @@ export function PerformancePanel({
       <button
         ref={trigger}
         type="button"
-        class="performance-button"
+        class="ui-button performance-button"
         aria-expanded={open}
         aria-controls="performance-panel"
         onClick={() => setOpen(!open)}
@@ -104,44 +91,34 @@ export function PerformancePanel({
         >
           <div class="panel-header performance-heading">
             Performance
-            <button type="button" class="performance-action" aria-label="Close Performance" onClick={close}>
+            <button type="button" class="ui-button performance-action" aria-label="Close Performance" onClick={close}>
               ×
             </button>
           </div>
           <div class="performance-content">
             <h3 class="performance-section">Rendering</h3>
-            <dl class="performance-values">
-              <div>
-                <dt>Draw calls / frame</dt>
-                <dd>
-                  {stats.drawCalls ?? '—'}
-                  <span class="performance-peak" title="Peak since opening this panel or switching skeletons">
-                    {' '}
-                    · {stats.peak ?? '—'}
-                  </span>
-                </dd>
-              </div>
+            <dl class="metric-list">
+              <MetricRow
+                label="Draw calls / frame"
+                current={stats.drawCalls}
+                maximum={stats.peak}
+                maximumHint="Peak since opening this panel or switching skeletons"
+              />
             </dl>
             <h3 class="performance-section">Animation</h3>
-            <dl class="performance-values">
-              <div>
-                <dt title="Smoothed CPU time for the per-frame animation and skeleton pose update, including while paused. Excludes overlays and rendering.">
-                  CPU update / frame
-                </dt>
-                <dd>
-                  {stats.cpuUpdateMs === null ? '—' : `${stats.cpuUpdateMs.toFixed(2)} ms`}
-                  <span
-                    class="performance-peak"
-                    title="Highest single update time since opening this panel or switching skeletons"
-                  >
-                    {' '}
-                    · {stats.cpuUpdatePeakMs === null ? '—' : `${stats.cpuUpdatePeakMs.toFixed(2)} ms`}
-                  </span>
-                </dd>
-              </div>
+            <dl class="metric-list">
+              <MetricRow
+                label="CPU update / frame"
+                hint="Smoothed CPU time for the per-frame animation and skeleton pose update, including while paused. Excludes overlays and rendering."
+                current={stats.cpuUpdateMs}
+                maximum={stats.cpuUpdatePeakMs}
+                maximumHint="Highest single update time since opening this panel or switching skeletons"
+                digits={2}
+                unit="ms"
+              />
             </dl>
             {overlaysVisible && (
-              <button type="button" class="performance-action" onClick={onHideOverlays}>
+              <button type="button" class="ui-button performance-action" onClick={onHideOverlays}>
                 Hide overlays
               </button>
             )}

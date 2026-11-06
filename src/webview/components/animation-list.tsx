@@ -5,12 +5,7 @@ import { describeAnimation, describeConflict, drivenPhysics, trackConflicts } fr
 import type { PhysicsConstraintData, TrackConflict } from '../animation-info';
 
 export const animationListStyles = `
-.list-container {
-    user-select: none;
-    overflow-y: auto;
-    padding: var(--sp-1);
-    min-width: 220px;
-}
+.list-container { min-width: 220px; }
 .list-item {
     display: flex;
     align-items: center;
@@ -24,19 +19,15 @@ export const animationListStyles = `
 .list-item:hover { background-color: var(--hover-bg); }
 .list-item:active { background-color: var(--active-bg); color: var(--active-fg); }
 .list-item-copy {
-    display: flex;
     flex-shrink: 0;
     padding: var(--sp-1);
-    background: none;
     border: none;
-    border-radius: var(--radius);
     color: var(--text-secondary);
-    cursor: pointer;
     opacity: 0;
 }
 .list-item:hover .list-item-copy { opacity: 1; }
 .list-item-copy:focus-visible { opacity: 1; }
-.list-item-copy:hover { background: var(--vscode-toolbar-hoverBackground, var(--hover-bg)); color: var(--text-primary); }
+.list-item-copy:hover { color: var(--text-primary); }
 .list-item-name {
     flex: 1;
     min-width: 0;
@@ -44,6 +35,20 @@ export const animationListStyles = `
     align-items: baseline;
     gap: var(--sp-2);
     padding: 2px 0;
+}
+.list-item-select {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
 }
 /* overflow: hidden drops the flex minimum to zero, so without a floor the
    badges after it could squeeze the name out entirely. */
@@ -117,7 +122,7 @@ export function AnimationList({
   const byName = new Map(animations.map((a) => [a.name, a]));
   const onTracks = trackAnimations.map((name) => (name === null ? null : (byName.get(name) ?? null)));
   return (
-    <div class="panel list-container" data-panel>
+    <div class="panel ui-list-panel list-container" data-panel>
       <div class="panel-header">Animations</div>
       {animations.length === 0 && <div class="list-empty">This skeleton has no animations.</div>}
       {animations.map((a) => {
@@ -133,7 +138,6 @@ export function AnimationList({
           <div
             key={a.name}
             class="list-item"
-            onClick={() => onSelect(a.name)}
             data-vscode-context={JSON.stringify({
               webviewSection: 'animationItem',
               animationName: a.name,
@@ -142,7 +146,7 @@ export function AnimationList({
           >
             <button
               type="button"
-              class="list-item-copy"
+              class="ui-icon-button list-item-copy"
               title={`Copy "${a.name}"`}
               aria-label={`Copy animation name ${a.name}`}
               onClick={(e) => {
@@ -157,10 +161,20 @@ export function AnimationList({
             {/* The tooltip's wrapper is the flex item, so it has to carry the
               shrinking styles itself or a long name pushes the duration out. */}
             <Tooltip class="list-item-name" content={describe(a, physics, conflicts)}>
-              <span class="list-item-label">{a.name}</span>
-              <span class="list-item-duration">{a.duration.toFixed(3)}s</span>
-              {below.length > 0 && <span class="list-item-conflict">{badgeText(below)}</span>}
-              {above.length > 0 && <span class="list-item-conflict hidden">{badgeText(above)}</span>}
+              {(tooltipId) => (
+                <button
+                  type="button"
+                  class="list-item-select"
+                  aria-label={`Play animation ${a.name}`}
+                  aria-describedby={tooltipId}
+                  onClick={() => onSelect(a.name)}
+                >
+                  <span class="list-item-label">{a.name}</span>
+                  <span class="list-item-duration">{a.duration.toFixed(3)}s</span>
+                  {below.length > 0 && <span class="list-item-conflict">{badgeText(below)}</span>}
+                  {above.length > 0 && <span class="list-item-conflict hidden">{badgeText(above)}</span>}
+                </button>
+              )}
             </Tooltip>
           </div>
         );

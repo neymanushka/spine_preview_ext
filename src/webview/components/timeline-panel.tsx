@@ -23,21 +23,16 @@ export const timelinePanelStyles = `
     user-select: none;
 }
 .timeline-button {
-    display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
     width: 24px;
     height: 24px;
     padding: 0;
-    background: none;
     border: 1px solid transparent;
-    border-radius: var(--radius);
     color: var(--text-secondary);
-    cursor: pointer;
 }
 .timeline-button:hover:not(:disabled) {
-    background: var(--vscode-toolbar-hoverBackground, var(--hover-bg));
     color: var(--text-primary);
 }
 .timeline-button:disabled { opacity: 0.4; cursor: default; }
@@ -52,27 +47,7 @@ export const timelinePanelStyles = `
 }
 .timeline-time-current { text-align: right; color: var(--text-primary); }
 .timeline-track { flex: 1; min-width: 0; padding-top: var(--sp-1); }
-.timeline-range {
-    -webkit-appearance: none;
-    appearance: none;
-    display: block;
-    width: 100%;
-    height: 4px;
-    margin: 0;
-    background: var(--input-bg);
-    border: 1px solid var(--input-border-color);
-    border-radius: 2px;
-    outline: none;
-    cursor: pointer;
-}
-.timeline-range::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--accent);
-    cursor: pointer;
-}
+.timeline-range { display: block; width: 100%; margin: 0; }
 /* Markers sit under the track rather than over it, so a click still lands on
    the slider and each tick keeps a hit area worth aiming at. */
 .timeline-markers { position: relative; height: 9px; margin-top: 3px; }
@@ -224,7 +199,7 @@ export function TimelinePanel({
   onStep: (frames: number) => void;
   onLoop: (value: boolean) => void;
   onSpeed: (value: number) => void;
-  // Both are written to by the render loop - see the ticker effect in app.tsx.
+  // Both are written to by the render loop - see the ticker effect in use-preview-frame.ts.
   scrubberRef: { current: HTMLInputElement | null };
   timeLabelRef: { current: HTMLSpanElement | null };
   // Filled in below so <App> can flash a marker straight from the Spine event
@@ -257,7 +232,7 @@ export function TimelinePanel({
     <div class="panel timeline-container" data-panel>
       <button
         type="button"
-        class="timeline-button"
+        class="ui-icon-button timeline-button"
         title="Step back one frame (Left arrow)"
         aria-label="Step back one frame"
         disabled={idle}
@@ -269,7 +244,7 @@ export function TimelinePanel({
           selected track is empty - only the per-track controls go dim. */}
       <button
         type="button"
-        class="timeline-button is-play"
+        class="ui-icon-button timeline-button is-play"
         title={playing ? 'Pause (Space)' : 'Play (Space)'}
         aria-label={playing ? 'Pause' : 'Play'}
         onClick={onTogglePlay}
@@ -278,7 +253,7 @@ export function TimelinePanel({
       </button>
       <button
         type="button"
-        class="timeline-button"
+        class="ui-icon-button timeline-button"
         title="Step forward one frame (Right arrow)"
         aria-label="Step forward one frame"
         disabled={idle}
@@ -294,7 +269,7 @@ export function TimelinePanel({
           <span class="timeline-time timeline-time-current" ref={timeLabelRef} />
           <div class="timeline-track">
             <input
-              class="timeline-range"
+              class="ui-range timeline-range"
               type="range"
               min="0"
               max={duration}
@@ -340,7 +315,7 @@ export function TimelinePanel({
       </select>
       <button
         type="button"
-        class={`timeline-button${loop ? ' is-active' : ''}`}
+        class={`ui-icon-button timeline-button${loop ? ' is-active' : ''}`}
         title="Loop the animation"
         aria-label="Loop the animation"
         aria-pressed={loop}

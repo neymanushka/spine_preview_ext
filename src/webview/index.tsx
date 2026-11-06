@@ -6,7 +6,7 @@ import { Spine } from '@esotericsoftware/spine-pixi-v8';
 import { allStyles } from './styles';
 import { App } from './app';
 import { Notice } from './components/notice';
-import { createDrawCallStats } from './draw-call-stats';
+import { createPerformanceStats } from './performance-stats';
 
 const ATLAS_ALIAS = 'atlas';
 
@@ -23,11 +23,11 @@ async function createRenderer(canvasContainer: HTMLElement) {
     height: canvasContainer.clientHeight,
   });
   canvasContainer.appendChild(renderer.canvas);
-  const drawCallStats = createDrawCallStats(renderer);
+  const performanceStats = createPerformanceStats(renderer);
 
   const stage = new Container();
   const renderStage = () => renderer.render(stage);
-  const drawStage = () => drawCallStats.render(renderStage);
+  const drawStage = () => performanceStats.render(renderStage);
   const ticker = new Ticker();
   // LOW priority, as in Application: the app's own tick updates the skeleton
   // first, and the frame is drawn from the pose it leaves behind.
@@ -41,7 +41,7 @@ async function createRenderer(canvasContainer: HTMLElement) {
     renderer.resize(canvasContainer.clientWidth, canvasContainer.clientHeight);
     drawStage();
   }).observe(canvasContainer);
-  return { stage, ticker, profiler: drawCallStats };
+  return { stage, ticker, profiler: performanceStats };
 }
 
 function describeError(error: unknown) {
