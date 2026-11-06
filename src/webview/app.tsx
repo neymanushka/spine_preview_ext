@@ -513,7 +513,7 @@ export function App({
       // Pausing is a zero delta rather than a skipped update, so the pose is
       // still re-applied and a scrub or a skin change lands on screen.
       const delta = playingRef.current ? (ticker.deltaMS / 1000) * speedRef.current : 0;
-      anim.update(delta);
+      profiler.update(() => anim.update(delta));
       debugRef.current?.render(overlaysRef.current, overlaysHiddenRef.current);
       const elapsed = performance.now() - startedAt;
       // While paused the playhead belongs to whoever is dragging it.
@@ -530,7 +530,7 @@ export function App({
 
     ticker.add(tick);
     return () => ticker.remove(tick);
-  }, [ticker, syncTimelineDom]);
+  }, [ticker, syncTimelineDom, profiler]);
 
   const toggleSkin = useCallback((skinName: string) => {
     setActiveSkins((prev) => {

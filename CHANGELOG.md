@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.10.0] - 2026-11-06
+
+### Features
+
+- Add CPU update time to Performance: smoothed animation and skeleton pose update
+  time and single-update peak in milliseconds. Excludes overlays and rendering;
+  collected only while the panel is open, with reset on skeleton changes.
+
 ## [3.9.0] - 2026-11-05
 
 ### Features

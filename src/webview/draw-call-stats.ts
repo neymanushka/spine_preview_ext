@@ -1,12 +1,17 @@
 import type { WebGLRenderer } from 'pixi.js';
 
-export type DrawCallStats = { drawCalls: number | null; peak: number | null };
+export type DrawCallStats = {
+  drawCalls: number | null;
+  peak: number | null;
+  cpuUpdateMs: number | null;
+  cpuUpdatePeakMs: number | null;
+};
 export type DrawCallProfiler = ReturnType<typeof createDrawCallStats>;
 
 type DrawCallFn = 'drawArrays' | 'drawElements' | 'drawArraysInstanced' | 'drawElementsInstanced';
 
 export function createDrawCallStats(renderer: WebGLRenderer) {
-  const stats: DrawCallStats = { drawCalls: null, peak: null };
+  const stats: DrawCallStats = { drawCalls: null, peak: null, cpuUpdateMs: null, cpuUpdatePeakMs: null };
   let active = false;
   let count = 0;
   let restore: (() => void)[] = [];
@@ -43,6 +48,8 @@ export function createDrawCallStats(renderer: WebGLRenderer) {
   const reset = () => {
     stats.drawCalls = null;
     stats.peak = null;
+    stats.cpuUpdateMs = null;
+    stats.cpuUpdatePeakMs = null;
   };
   const stop = () => {
     if (!active) return;
@@ -65,6 +72,18 @@ export function createDrawCallStats(renderer: WebGLRenderer) {
       active = true;
     },
     stop,
+    update(update: () => void) {
+      if (!active) {
+        update();
+        return;
+      }
+      const startedAt = performance.now();
+      update();
+      const elapsed = performance.now() - startedAt;
+      stats.cpuUpdateMs =
+        stats.cpuUpdateMs === null ? elapsed : stats.cpuUpdateMs + (elapsed - stats.cpuUpdateMs) * 0.1;
+      stats.cpuUpdatePeakMs = Math.max(stats.cpuUpdatePeakMs ?? 0, elapsed);
+    },
     render(draw: () => void) {
       if (!active) {
         draw();

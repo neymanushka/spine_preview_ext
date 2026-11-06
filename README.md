@@ -49,6 +49,12 @@ Visible overlays are included; use Hide overlays in the panel to measure the
 animation alone. Values refresh four times per second, including while paused.
 These are draw submissions, not attachment counts or GPU execution time.
 
+CPU update / frame measures the animation and skeleton pose update, excluding
+overlays and rendering. It shows an exponentially smoothed time in milliseconds
+and the highest single update since opening the panel or switching skeletons.
+Paused frames still update the pose and are measured. Timing collection stops
+when the panel is closed; this is CPU elapsed time, not GPU time or CPU usage percent.
+
 ## controls
 
 - Mouse wheel - zoom towards the cursor (5% to 800%)
