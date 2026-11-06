@@ -2,16 +2,6 @@ import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { OverlayOptions, overlayAvailability } from '../debug-overlays';
 
 export const overlaysPanelStyles = `
-.overlays-button, .overlays-visibility {
-    font: inherit;
-    color: var(--text-primary);
-    background: var(--input-bg);
-    border: 1px solid var(--input-border-color);
-    border-radius: var(--radius);
-    padding: var(--sp-1) var(--sp-2);
-    cursor: pointer;
-}
-.overlays-button:hover, .overlays-visibility:hover { background: var(--hover-bg); }
 .overlays-control { flex-shrink: 0; }
 .overlays-button { white-space: nowrap; }
 .overlays-button.has-overlays { border-color: var(--accent); }
@@ -40,11 +30,6 @@ export const overlaysPanelStyles = `
 .overlays-unavailable { color: var(--text-secondary); font-size: 11px; }
 .overlays-visibility { margin: var(--sp-2) var(--sp-3) 0; }
 .overlays-visibility:disabled { opacity: 0.5; cursor: default; }
-@media (max-width: 700px) {
-    .controls-zoom { width: 60px; }
-    .status-bar-stats { display: none; }
-    .title-container { gap: var(--sp-2); }
-}
 `;
 
 const OPTIONS = [
@@ -120,7 +105,7 @@ export function OverlaysPanel({
       <button
         ref={trigger}
         type="button"
-        class={`overlays-button${count ? ' has-overlays' : ''}${count && hidden ? ' is-hidden' : ''}`}
+        class={`ui-button overlays-button${count ? ' has-overlays' : ''}${count && hidden ? ' is-hidden' : ''}`}
         aria-expanded={open}
         aria-controls="debug-overlays-panel"
         title="Debug overlays"
@@ -155,7 +140,7 @@ export function OverlaysPanel({
           ))}
           <button
             type="button"
-            class="overlays-visibility"
+            class="ui-button overlays-visibility"
             disabled={count === 0}
             onClick={() => onHiddenChange(!hidden)}
           >

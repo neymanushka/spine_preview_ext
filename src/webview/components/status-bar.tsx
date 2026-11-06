@@ -25,7 +25,7 @@ export function StatusBar({
   statsRef,
 }: {
   version: string;
-  // Written to directly by the render loop — see the ticker effect in app.tsx.
+  // Written to directly by the render loop — see the ticker effect in use-preview-frame.ts.
   statsRef: { current: HTMLSpanElement | null };
 }) {
   return (

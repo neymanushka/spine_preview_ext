@@ -5,12 +5,7 @@ import { describeAnimation, describeConflict, drivenPhysics, trackConflicts } fr
 import type { PhysicsConstraintData, TrackConflict } from '../animation-info';
 
 export const animationListStyles = `
-.list-container {
-    user-select: none;
-    overflow-y: auto;
-    padding: var(--sp-1);
-    min-width: 220px;
-}
+.list-container { min-width: 220px; }
 .list-item {
     display: flex;
     align-items: center;
@@ -24,19 +19,15 @@ export const animationListStyles = `
 .list-item:hover { background-color: var(--hover-bg); }
 .list-item:active { background-color: var(--active-bg); color: var(--active-fg); }
 .list-item-copy {
-    display: flex;
     flex-shrink: 0;
     padding: var(--sp-1);
-    background: none;
     border: none;
-    border-radius: var(--radius);
     color: var(--text-secondary);
-    cursor: pointer;
     opacity: 0;
 }
 .list-item:hover .list-item-copy { opacity: 1; }
 .list-item-copy:focus-visible { opacity: 1; }
-.list-item-copy:hover { background: var(--vscode-toolbar-hoverBackground, var(--hover-bg)); color: var(--text-primary); }
+.list-item-copy:hover { color: var(--text-primary); }
 .list-item-name {
     flex: 1;
     min-width: 0;
@@ -117,7 +108,7 @@ export function AnimationList({
   const byName = new Map(animations.map((a) => [a.name, a]));
   const onTracks = trackAnimations.map((name) => (name === null ? null : (byName.get(name) ?? null)));
   return (
-    <div class="panel list-container" data-panel>
+    <div class="panel ui-list-panel list-container" data-panel>
       <div class="panel-header">Animations</div>
       {animations.length === 0 && <div class="list-empty">This skeleton has no animations.</div>}
       {animations.map((a) => {
@@ -142,7 +133,7 @@ export function AnimationList({
           >
             <button
               type="button"
-              class="list-item-copy"
+              class="ui-icon-button list-item-copy"
               title={`Copy "${a.name}"`}
               aria-label={`Copy animation name ${a.name}`}
               onClick={(e) => {

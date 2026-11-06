@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.10.1] - 2026-11-06
+
+### Maintenance
+
+- Share button, slider and list styles, and reuse metric rows in Performance.
+- Separate playback, camera controls and frame updates from the preview layout.
+- Rename the profiler module to reflect both draw-call and CPU update metrics.
+
 ## [3.10.0] - 2026-11-06
 
 ### Features

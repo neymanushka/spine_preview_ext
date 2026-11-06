@@ -1,17 +1,17 @@
 import type { WebGLRenderer } from 'pixi.js';
 
-export type DrawCallStats = {
+export type PerformanceStats = {
   drawCalls: number | null;
   peak: number | null;
   cpuUpdateMs: number | null;
   cpuUpdatePeakMs: number | null;
 };
-export type DrawCallProfiler = ReturnType<typeof createDrawCallStats>;
+export type PerformanceProfiler = ReturnType<typeof createPerformanceStats>;
 
 type DrawCallFn = 'drawArrays' | 'drawElements' | 'drawArraysInstanced' | 'drawElementsInstanced';
 
-export function createDrawCallStats(renderer: WebGLRenderer) {
-  const stats: DrawCallStats = { drawCalls: null, peak: null, cpuUpdateMs: null, cpuUpdatePeakMs: null };
+export function createPerformanceStats(renderer: WebGLRenderer) {
+  const stats: PerformanceStats = { drawCalls: null, peak: null, cpuUpdateMs: null, cpuUpdatePeakMs: null };
   let active = false;
   let count = 0;
   let restore: (() => void)[] = [];
