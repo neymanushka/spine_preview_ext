@@ -1211,6 +1211,31 @@
       "name": "tile-099",
       "bone": "tile-099",
       "blend": "screen"
+    },
+    {
+      "name": "blend-background",
+      "bone": "root",
+      "blend": "normal"
+    },
+    {
+      "name": "blend-normal",
+      "bone": "root",
+      "blend": "normal"
+    },
+    {
+      "name": "blend-additive",
+      "bone": "root",
+      "blend": "additive"
+    },
+    {
+      "name": "blend-multiply",
+      "bone": "root",
+      "blend": "multiply"
+    },
+    {
+      "name": "blend-screen",
+      "bone": "root",
+      "blend": "screen"
     }
   ],
   "skins": [
@@ -2214,6 +2239,58 @@
             "path": "carrot",
             "type": "region",
             "height": 128
+          }
+        },
+        "blend-normal": {
+          "orange": {
+            "type": "region",
+            "path": "orange",
+            "x": -120,
+            "scaleX": 0.6,
+            "scaleY": 0.6,
+            "width": 128,
+            "height": 128
+          }
+        },
+        "blend-additive": {
+          "orange": {
+            "type": "region",
+            "path": "orange",
+            "x": -40,
+            "scaleX": 0.6,
+            "scaleY": 0.6,
+            "width": 128,
+            "height": 128
+          }
+        },
+        "blend-multiply": {
+          "orange": {
+            "type": "region",
+            "path": "orange",
+            "x": 40,
+            "scaleX": 0.6,
+            "scaleY": 0.6,
+            "width": 128,
+            "height": 128
+          }
+        },
+        "blend-screen": {
+          "orange": {
+            "type": "region",
+            "path": "orange",
+            "x": 120,
+            "scaleX": 0.6,
+            "scaleY": 0.6,
+            "width": 128,
+            "height": 128
+          }
+        },
+        "blend-background": {
+          "blend-background": {
+            "type": "region",
+            "path": "blend-background",
+            "width": 360,
+            "height": 120
           }
         }
       },
@@ -7523,7 +7600,1626 @@
             }
           ]
         }
+      },
+      "slots": {
+        "tile-000": {
+          "attachment": [
+            {
+              "name": "orange"
+            }
+          ]
+        },
+        "tile-001": {
+          "attachment": [
+            {
+              "name": "apple"
+            }
+          ]
+        },
+        "tile-002": {
+          "attachment": [
+            {
+              "name": "lime"
+            }
+          ]
+        },
+        "tile-003": {
+          "attachment": [
+            {
+              "name": "carrot"
+            }
+          ]
+        },
+        "tile-004": {
+          "attachment": [
+            {
+              "name": "eggplant"
+            }
+          ]
+        },
+        "tile-005": {
+          "attachment": [
+            {
+              "name": "broccoli"
+            }
+          ]
+        },
+        "tile-006": {
+          "attachment": [
+            {
+              "name": "orange"
+            }
+          ]
+        },
+        "tile-007": {
+          "attachment": [
+            {
+              "name": "apple"
+            }
+          ]
+        },
+        "tile-008": {
+          "attachment": [
+            {
+              "name": "lime"
+            }
+          ]
+        },
+        "tile-009": {
+          "attachment": [
+            {
+              "name": "carrot"
+            }
+          ]
+        },
+        "tile-010": {
+          "attachment": [
+            {
+              "name": "eggplant"
+            }
+          ]
+        },
+        "tile-011": {
+          "attachment": [
+            {
+              "name": "broccoli"
+            }
+          ]
+        },
+        "tile-012": {
+          "attachment": [
+            {
+              "name": "orange"
+            }
+          ]
+        },
+        "tile-013": {
+          "attachment": [
+            {
+              "name": "apple"
+            }
+          ]
+        },
+        "tile-014": {
+          "attachment": [
+            {
+              "name": "lime"
+            }
+          ]
+        },
+        "tile-015": {
+          "attachment": [
+            {
+              "name": "carrot"
+            }
+          ]
+        },
+        "tile-016": {
+          "attachment": [
+            {
+              "name": "eggplant"
+            }
+          ]
+        },
+        "tile-017": {
+          "attachment": [
+            {
+              "name": "broccoli"
+            }
+          ]
+        },
+        "tile-018": {
+          "attachment": [
+            {
+              "name": "orange"
+            }
+          ]
+        },
+        "tile-019": {
+          "attachment": [
+            {
+              "name": "apple"
+            }
+          ]
+        },
+        "tile-020": {
+          "attachment": [
+            {
+              "name": "lime"
+            }
+          ]
+        },
+        "tile-021": {
+          "attachment": [
+            {
+              "name": "carrot"
+            }
+          ]
+        },
+        "tile-022": {
+          "attachment": [
+            {
+              "name": "eggplant"
+            }
+          ]
+        },
+        "tile-023": {
+          "attachment": [
+            {
+              "name": "broccoli"
+            }
+          ]
+        },
+        "tile-024": {
+          "attachment": [
+            {
+              "name": "orange"
+            }
+          ]
+        },
+        "tile-025": {
+          "attachment": [
+            {
+              "name": "apple"
+            }
+          ]
+        },
+        "tile-026": {
+          "attachment": [
+            {
+              "name": "lime"
+            }
+          ]
+        },
+        "tile-027": {
+          "attachment": [
+            {
+              "name": "carrot"
+            }
+          ]
+        },
+        "tile-028": {
+          "attachment": [
+            {
+              "name": "eggplant"
+            }
+          ]
+        },
+        "tile-029": {
+          "attachment": [
+            {
+              "name": "broccoli"
+            }
+          ]
+        },
+        "tile-030": {
+          "attachment": [
+            {
+              "name": "orange"
+            }
+          ]
+        },
+        "tile-031": {
+          "attachment": [
+            {
+              "name": "apple"
+            }
+          ]
+        },
+        "tile-032": {
+          "attachment": [
+            {
+              "name": "lime"
+            }
+          ]
+        },
+        "tile-033": {
+          "attachment": [
+            {
+              "name": "carrot"
+            }
+          ]
+        },
+        "tile-034": {
+          "attachment": [
+            {
+              "name": "eggplant"
+            }
+          ]
+        },
+        "tile-035": {
+          "attachment": [
+            {
+              "name": "broccoli"
+            }
+          ]
+        },
+        "tile-036": {
+          "attachment": [
+            {
+              "name": "orange"
+            }
+          ]
+        },
+        "tile-037": {
+          "attachment": [
+            {
+              "name": "apple"
+            }
+          ]
+        },
+        "tile-038": {
+          "attachment": [
+            {
+              "name": "lime"
+            }
+          ]
+        },
+        "tile-039": {
+          "attachment": [
+            {
+              "name": "carrot"
+            }
+          ]
+        },
+        "tile-040": {
+          "attachment": [
+            {
+              "name": "eggplant"
+            }
+          ]
+        },
+        "tile-041": {
+          "attachment": [
+            {
+              "name": "broccoli"
+            }
+          ]
+        },
+        "tile-042": {
+          "attachment": [
+            {
+              "name": "orange"
+            }
+          ]
+        },
+        "tile-043": {
+          "attachment": [
+            {
+              "name": "apple"
+            }
+          ]
+        },
+        "tile-044": {
+          "attachment": [
+            {
+              "name": "lime"
+            }
+          ]
+        },
+        "tile-045": {
+          "attachment": [
+            {
+              "name": "carrot"
+            }
+          ]
+        },
+        "tile-046": {
+          "attachment": [
+            {
+              "name": "eggplant"
+            }
+          ]
+        },
+        "tile-047": {
+          "attachment": [
+            {
+              "name": "broccoli"
+            }
+          ]
+        },
+        "tile-048": {
+          "attachment": [
+            {
+              "name": "orange"
+            }
+          ]
+        },
+        "tile-049": {
+          "attachment": [
+            {
+              "name": "apple"
+            }
+          ]
+        },
+        "tile-050": {
+          "attachment": [
+            {
+              "name": "lime"
+            }
+          ]
+        },
+        "tile-051": {
+          "attachment": [
+            {
+              "name": "carrot"
+            }
+          ]
+        },
+        "tile-052": {
+          "attachment": [
+            {
+              "name": "eggplant"
+            }
+          ]
+        },
+        "tile-053": {
+          "attachment": [
+            {
+              "name": "broccoli"
+            }
+          ]
+        },
+        "tile-054": {
+          "attachment": [
+            {
+              "name": "orange"
+            }
+          ]
+        },
+        "tile-055": {
+          "attachment": [
+            {
+              "name": "apple"
+            }
+          ]
+        },
+        "tile-056": {
+          "attachment": [
+            {
+              "name": "lime"
+            }
+          ]
+        },
+        "tile-057": {
+          "attachment": [
+            {
+              "name": "carrot"
+            }
+          ]
+        },
+        "tile-058": {
+          "attachment": [
+            {
+              "name": "eggplant"
+            }
+          ]
+        },
+        "tile-059": {
+          "attachment": [
+            {
+              "name": "broccoli"
+            }
+          ]
+        },
+        "tile-060": {
+          "attachment": [
+            {
+              "name": "orange"
+            }
+          ]
+        },
+        "tile-061": {
+          "attachment": [
+            {
+              "name": "apple"
+            }
+          ]
+        },
+        "tile-062": {
+          "attachment": [
+            {
+              "name": "lime"
+            }
+          ]
+        },
+        "tile-063": {
+          "attachment": [
+            {
+              "name": "carrot"
+            }
+          ]
+        },
+        "tile-064": {
+          "attachment": [
+            {
+              "name": "eggplant"
+            }
+          ]
+        },
+        "tile-065": {
+          "attachment": [
+            {
+              "name": "broccoli"
+            }
+          ]
+        },
+        "tile-066": {
+          "attachment": [
+            {
+              "name": "orange"
+            }
+          ]
+        },
+        "tile-067": {
+          "attachment": [
+            {
+              "name": "apple"
+            }
+          ]
+        },
+        "tile-068": {
+          "attachment": [
+            {
+              "name": "lime"
+            }
+          ]
+        },
+        "tile-069": {
+          "attachment": [
+            {
+              "name": "carrot"
+            }
+          ]
+        },
+        "tile-070": {
+          "attachment": [
+            {
+              "name": "eggplant"
+            }
+          ]
+        },
+        "tile-071": {
+          "attachment": [
+            {
+              "name": "broccoli"
+            }
+          ]
+        },
+        "tile-072": {
+          "attachment": [
+            {
+              "name": "orange"
+            }
+          ]
+        },
+        "tile-073": {
+          "attachment": [
+            {
+              "name": "apple"
+            }
+          ]
+        },
+        "tile-074": {
+          "attachment": [
+            {
+              "name": "lime"
+            }
+          ]
+        },
+        "tile-075": {
+          "attachment": [
+            {
+              "name": "carrot"
+            }
+          ]
+        },
+        "tile-076": {
+          "attachment": [
+            {
+              "name": "eggplant"
+            }
+          ]
+        },
+        "tile-077": {
+          "attachment": [
+            {
+              "name": "broccoli"
+            }
+          ]
+        },
+        "tile-078": {
+          "attachment": [
+            {
+              "name": "orange"
+            }
+          ]
+        },
+        "tile-079": {
+          "attachment": [
+            {
+              "name": "apple"
+            }
+          ]
+        },
+        "tile-080": {
+          "attachment": [
+            {
+              "name": "lime"
+            }
+          ]
+        },
+        "tile-081": {
+          "attachment": [
+            {
+              "name": "carrot"
+            }
+          ]
+        },
+        "tile-082": {
+          "attachment": [
+            {
+              "name": "eggplant"
+            }
+          ]
+        },
+        "tile-083": {
+          "attachment": [
+            {
+              "name": "broccoli"
+            }
+          ]
+        },
+        "tile-084": {
+          "attachment": [
+            {
+              "name": "orange"
+            }
+          ]
+        },
+        "tile-085": {
+          "attachment": [
+            {
+              "name": "apple"
+            }
+          ]
+        },
+        "tile-086": {
+          "attachment": [
+            {
+              "name": "lime"
+            }
+          ]
+        },
+        "tile-087": {
+          "attachment": [
+            {
+              "name": "carrot"
+            }
+          ]
+        },
+        "tile-088": {
+          "attachment": [
+            {
+              "name": "eggplant"
+            }
+          ]
+        },
+        "tile-089": {
+          "attachment": [
+            {
+              "name": "broccoli"
+            }
+          ]
+        },
+        "tile-090": {
+          "attachment": [
+            {
+              "name": "orange"
+            }
+          ]
+        },
+        "tile-091": {
+          "attachment": [
+            {
+              "name": "apple"
+            }
+          ]
+        },
+        "tile-092": {
+          "attachment": [
+            {
+              "name": "lime"
+            }
+          ]
+        },
+        "tile-093": {
+          "attachment": [
+            {
+              "name": "carrot"
+            }
+          ]
+        },
+        "tile-094": {
+          "attachment": [
+            {
+              "name": "eggplant"
+            }
+          ]
+        },
+        "tile-095": {
+          "attachment": [
+            {
+              "name": "broccoli"
+            }
+          ]
+        },
+        "tile-096": {
+          "attachment": [
+            {
+              "name": "orange"
+            }
+          ]
+        },
+        "tile-097": {
+          "attachment": [
+            {
+              "name": "apple"
+            }
+          ]
+        },
+        "tile-098": {
+          "attachment": [
+            {
+              "name": "lime"
+            }
+          ]
+        },
+        "tile-099": {
+          "attachment": [
+            {
+              "name": "carrot"
+            }
+          ]
+        },
+        "blend-normal": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "blend-additive": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "blend-multiply": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "blend-screen": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "blend-background": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        }
       }
+    },
+    "blend-modes-test": {
+      "slots": {
+        "tile-000": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-001": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-002": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-003": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-004": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-005": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-006": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-007": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-008": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-009": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-010": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-011": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-012": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-013": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-014": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-015": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-016": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-017": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-018": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-019": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-020": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-021": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-022": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-023": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-024": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-025": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-026": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-027": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-028": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-029": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-030": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-031": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-032": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-033": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-034": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-035": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-036": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-037": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-038": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-039": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-040": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-041": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-042": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-043": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-044": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-045": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-046": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-047": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-048": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-049": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-050": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-051": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-052": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-053": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-054": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-055": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-056": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-057": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-058": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-059": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-060": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-061": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-062": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-063": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-064": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-065": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-066": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-067": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-068": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-069": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-070": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-071": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-072": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-073": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-074": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-075": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-076": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-077": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-078": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-079": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-080": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-081": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-082": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-083": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-084": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-085": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-086": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-087": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-088": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-089": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-090": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-091": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-092": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-093": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-094": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-095": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-096": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-097": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-098": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "tile-099": {
+          "attachment": [
+            {
+              "name": null
+            }
+          ]
+        },
+        "blend-normal": {
+          "attachment": [
+            {
+              "time": 0,
+              "name": "orange"
+            },
+            {
+              "time": 1,
+              "name": null
+            },
+            {
+              "time": 2,
+              "name": null
+            },
+            {
+              "time": 3,
+              "name": null
+            },
+            {
+              "time": 4,
+              "name": "orange"
+            },
+            {
+              "time": 5,
+              "name": null
+            },
+            {
+              "time": 6,
+              "name": "orange"
+            }
+          ]
+        },
+        "blend-additive": {
+          "attachment": [
+            {
+              "time": 0,
+              "name": null
+            },
+            {
+              "time": 1,
+              "name": "orange"
+            },
+            {
+              "time": 2,
+              "name": null
+            },
+            {
+              "time": 3,
+              "name": null
+            },
+            {
+              "time": 4,
+              "name": "orange"
+            },
+            {
+              "time": 5,
+              "name": null
+            },
+            {
+              "time": 6,
+              "name": null
+            }
+          ]
+        },
+        "blend-multiply": {
+          "attachment": [
+            {
+              "time": 0,
+              "name": null
+            },
+            {
+              "time": 1,
+              "name": null
+            },
+            {
+              "time": 2,
+              "name": "orange"
+            },
+            {
+              "time": 3,
+              "name": null
+            },
+            {
+              "time": 4,
+              "name": "orange"
+            },
+            {
+              "time": 5,
+              "name": null
+            },
+            {
+              "time": 6,
+              "name": null
+            }
+          ]
+        },
+        "blend-screen": {
+          "attachment": [
+            {
+              "time": 0,
+              "name": null
+            },
+            {
+              "time": 1,
+              "name": null
+            },
+            {
+              "time": 2,
+              "name": null
+            },
+            {
+              "time": 3,
+              "name": "orange"
+            },
+            {
+              "time": 4,
+              "name": "orange"
+            },
+            {
+              "time": 5,
+              "name": null
+            },
+            {
+              "time": 6,
+              "name": null
+            }
+          ]
+        },
+        "blend-background": {
+          "attachment": [
+            {
+              "time": 0,
+              "name": "blend-background"
+            },
+            {
+              "time": 5,
+              "name": null
+            },
+            {
+              "time": 6,
+              "name": "blend-background"
+            }
+          ]
+        }
+      },
+      "events": [
+        {
+          "time": 0,
+          "name": "blend-normal"
+        },
+        {
+          "time": 1,
+          "name": "blend-additive"
+        },
+        {
+          "time": 2,
+          "name": "blend-multiply"
+        },
+        {
+          "time": 3,
+          "name": "blend-screen"
+        },
+        {
+          "time": 4,
+          "name": "blend-all"
+        },
+        {
+          "time": 5,
+          "name": "blend-none"
+        }
+      ]
     }
+  },
+  "events": {
+    "blend-normal": {},
+    "blend-additive": {},
+    "blend-multiply": {},
+    "blend-screen": {},
+    "blend-all": {},
+    "blend-none": {}
   }
 }
