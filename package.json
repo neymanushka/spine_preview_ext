@@ -1,7 +1,7 @@
 {
   "name": "spine-animation-preview",
   "description": "spine animation preview for vscode",
-  "version": "3.10.5",
+  "version": "3.10.7",
   "publisher": "neymanushka",
   "private": true,
   "scripts": {
@@ -27,7 +27,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.7",
     "pixi.js": "^8.22.0",
-    "preact": "^10.29.8",
+    "preact": "^11.2.0",
     "prettier": "^3.9.10",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.72.0"

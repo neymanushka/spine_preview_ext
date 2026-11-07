@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.10.7] - 2026-11-07
+
+### Fixes
+
+- Make the entire animation row select its animation, including padding around
+  the label, while keeping Copy as an independent button.
+
+## [3.10.6] - 2026-11-07
+
+### Maintenance
+
+- Upgrade Preact to 11.2 and explicitly type nullable skeleton refs for the new API.
+
 ## [3.10.5] - 2026-11-07
 
 ### Fixes

@@ -58,7 +58,7 @@ export function usePlayback({
   currentAnimRef,
 }: {
   skeleton: Spine | undefined;
-  currentAnimRef: RefObject<Spine>;
+  currentAnimRef: RefObject<Spine | null>;
 }) {
   const [activeTrack, setActiveTrack] = useState(0);
   const [playing, setPlaying] = useState(true);
