@@ -7,6 +7,7 @@ import type { PhysicsConstraintData, TrackConflict } from '../animation-info';
 export const animationListStyles = `
 .list-container { min-width: 220px; }
 .list-item {
+    position: relative;
     display: flex;
     align-items: center;
     gap: var(--sp-1);
@@ -19,6 +20,8 @@ export const animationListStyles = `
 .list-item:hover { background-color: var(--hover-bg); }
 .list-item:active { background-color: var(--active-bg); color: var(--active-fg); }
 .list-item-copy {
+    position: relative;
+    z-index: 1;
     flex-shrink: 0;
     padding: var(--sp-1);
     border: none;
@@ -50,6 +53,8 @@ export const animationListStyles = `
     text-align: left;
     cursor: pointer;
 }
+/* Extend the native button across the row's padding; Copy stays above it. */
+.list-item-select::after { content: ''; position: absolute; inset: 0; }
 /* overflow: hidden drops the flex minimum to zero, so without a floor the
    badges after it could squeeze the name out entirely. */
 .list-item-label { min-width: 4em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

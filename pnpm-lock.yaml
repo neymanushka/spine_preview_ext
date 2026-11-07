@@ -12,7 +12,7 @@ specifiers:
   eslint-config-prettier: ^10.1.8
   eslint-plugin-prettier: ^5.5.7
   pixi.js: ^8.22.0
-  preact: ^10.29.8
+  preact: ^11.2.0
   prettier: ^3.9.10
   typescript: ~6.0.3
   typescript-eslint: ^8.72.0
@@ -29,7 +29,7 @@ devDependencies:
   eslint-config-prettier: 10.1.8_eslint@10.13.0
   eslint-plugin-prettier: 5.5.7_blpqdatmlijcouvddxp4wblk4e
   pixi.js: 8.22.0
-  preact: 10.29.8
+  preact: 11.2.0
   prettier: 3.9.10
   typescript: 6.0.3
   typescript-eslint: 8.72.0_hzhvdzlylzz6zdk4kho46outkq
@@ -1852,10 +1852,10 @@ packages:
     engines: {node: '>=20'}
     dev: true
 
-  /preact/10.29.8:
-    resolution: {integrity: sha512-ej2aVZ+vZ8WO7tvlQWRM9N63A0KzF9q4mWJfDUHgYaIofWY9hu74QdnQrjoPMmZi2/nZ5gN0bJCQF49xQqx09Q==}
+  /preact/11.2.0:
+    resolution: {integrity: sha512-/HfHI/7N84e6GrWBJ3J280z3mLaRJiDcSvj/A+y/4AbLnND/1UlGHe1sR6oYuTGwId0nP7dqDU9OnLxMPZ7xBg==}
     peerDependencies:
-      preact-render-to-string: '>=5'
+      preact-render-to-string: '>=6.7.0'
     peerDependenciesMeta:
       preact-render-to-string:
         optional: true

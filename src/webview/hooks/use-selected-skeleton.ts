@@ -13,7 +13,7 @@ export function useSelectedSkeleton({
   profiler,
 }: {
   skeleton: Spine | undefined;
-  currentAnimRef: RefObject<Spine>;
+  currentAnimRef: RefObject<Spine | null>;
   applyView: (anim: Spine) => void;
   profiler: PerformanceProfiler;
 }) {

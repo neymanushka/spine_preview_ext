@@ -27,7 +27,7 @@ export function usePreviewFrame({
 }: {
   selectedFile: string;
   spineInstances: Record<string, Spine>;
-  currentAnimRef: RefObject<Spine>;
+  currentAnimRef: RefObject<Spine | null>;
   ticker: Ticker;
   profiler: PerformanceProfiler;
   playingRef: { current: boolean };

@@ -21,7 +21,7 @@ function applyTransform(anim: Spine, zoom: number, pan: Pan) {
   anim.scale.set(zoom);
 }
 
-export function usePreviewCamera(currentAnimRef: RefObject<Spine>, canvasContainer: HTMLElement) {
+export function usePreviewCamera(currentAnimRef: RefObject<Spine | null>, canvasContainer: HTMLElement) {
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
   const [pan, setPan] = useState<Pan>(ORIGIN);
   const [background, setBackground] = useState<BackgroundId>(DEFAULT_BACKGROUND);
