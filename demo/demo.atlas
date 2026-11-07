@@ -14,3 +14,5 @@ eggplant
   bounds: 0, 128, 128, 128
 broccoli
   bounds: 128, 128, 128, 128
+blend-background
+  bounds: 258, 130, 8, 8

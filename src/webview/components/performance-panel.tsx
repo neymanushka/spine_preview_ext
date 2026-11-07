@@ -1,6 +1,12 @@
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { PerformanceProfiler, PerformanceStats } from '../performance-stats';
 import { MetricRow } from './metric-row';
+import type { Spine } from '@esotericsoftware/spine-pixi-v8';
+import { collectBlendModes } from '../blend-mode-stats';
+import { BlendModesRow } from './blend-modes-row';
+
+// Refresh four times per second to keep metrics readable without rendering UI every frame.
+const PERFORMANCE_REFRESH_INTERVAL_MS = 250;
 
 export const performancePanelStyles = `
 .performance-button { white-space: nowrap; flex-shrink: 0; }
@@ -23,19 +29,22 @@ export const performancePanelStyles = `
 
 export function PerformancePanel({
   profiler,
+  skeleton,
   overlaysVisible,
   onHideOverlays,
 }: {
   profiler: PerformanceProfiler;
+  skeleton: Spine | undefined;
   overlaysVisible: boolean;
   onHideOverlays: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [stats, setStats] = useState<PerformanceStats>({
+  const [stats, setStats] = useState<PerformanceStats & { blendModes: ReturnType<typeof collectBlendModes> | null }>({
     drawCalls: null,
     peak: null,
     cpuUpdateMs: null,
     cpuUpdatePeakMs: null,
+    blendModes: null,
   });
   const trigger = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLElement>(null);
@@ -47,13 +56,16 @@ export function PerformancePanel({
   useLayoutEffect(() => {
     if (!open) return;
     profiler.start();
-    setStats({ ...profiler.stats });
-    const timer = window.setInterval(() => setStats({ ...profiler.stats }), 250);
+    setStats({ ...profiler.stats, blendModes: null });
+    const timer = window.setInterval(
+      () => setStats({ ...profiler.stats, blendModes: collectBlendModes(skeleton) }),
+      PERFORMANCE_REFRESH_INTERVAL_MS,
+    );
     return () => {
       window.clearInterval(timer);
       profiler.stop();
     };
-  }, [open, profiler]);
+  }, [open, profiler, skeleton]);
 
   useLayoutEffect(() => {
     if (!open) return;
@@ -104,6 +116,7 @@ export function PerformancePanel({
                 maximum={stats.peak}
                 maximumHint="Peak since opening this panel or switching skeletons"
               />
+              <BlendModesRow groups={stats.blendModes} />
             </dl>
             <h3 class="performance-section">Animation</h3>
             <dl class="metric-list">

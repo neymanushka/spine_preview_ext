@@ -49,11 +49,32 @@ Visible overlays are included; use Hide overlays in the panel to measure the
 animation alone. Values refresh four times per second, including while paused.
 These are draw submissions, not attachment counts or GPU execution time.
 
+Blend modes counts rendered slots in the current pose by Normal, Additive,
+Multiply and Screen. Unused modes are omitted; hover or focus the values to see
+slot names for non-normal modes. Fully transparent or clipped-away attachments
+are excluded. These counts describe the skeleton, excluding debug overlays,
+and are sampled only while Performance is open.
+
 CPU update / frame measures the animation and skeleton pose update, excluding
 overlays and rendering. It shows an exponentially smoothed time in milliseconds
 and the highest single update since opening the panel or switching skeletons.
 Paused frames still update the pose and are measured. Timing collection stops
 when the panel is closed; this is CPU elapsed time, not GPU time or CPU usage percent.
+
+## blend mode demo
+
+Open `demo/demo.atlas`, select `drawcall-stress.json`, then play `blend-modes-test`
+on Track 0 with other tracks empty and Performance open. Each phase lasts one
+second: Normal, Additive, Multiply, Screen, all four, then no rendered slots.
+The six-second loop has named event markers for seeking. A light-gray Normal
+attachment is drawn behind the samples inside the canvas so Multiply has an
+opaque surface to blend with. It adds one Normal slot: the Normal phase shows
+Normal 2, the other single-mode phases show Normal 1 plus that mode, and the
+combined phase shows Normal 2 plus one of each other mode. The empty phase hides
+the backdrop too and shows None. The CSS checkerboard is not a blending surface.
+Hover Blend modes to check the `blend-additive`, `blend-multiply` and
+`blend-screen` slot names. Switching back to `stress-100-drawcalls` restores the
+original 100-tile test (50 Normal and 50 Screen).
 
 ## controls
 

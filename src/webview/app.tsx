@@ -166,6 +166,7 @@ export function App({
           onResetView={resetView}
         />
         <PerformancePanel
+          skeleton={skeleton}
           profiler={profiler}
           overlaysVisible={!overlaysHidden && Object.values(overlays).some(Boolean)}
           onHideOverlays={() => setOverlaysHidden(true)}

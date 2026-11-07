@@ -1,5 +1,5 @@
 import { render } from 'preact';
-import { useCallback, useId, useLayoutEffect, useState } from 'preact/hooks';
+import { useCallback, useId, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { ComponentChildren } from 'preact';
 
 const TOOLTIP_GAP = 8;
@@ -19,7 +19,9 @@ export const tooltipStyles = `
     white-space: pre;
     pointer-events: none;
     z-index: 1000;
-    max-width: 350px;
+    width: max-content;
+    max-width: min(350px, 100vw);
+    box-sizing: border-box;
     overflow: hidden;
 }`;
 
@@ -35,6 +37,8 @@ export function Tooltip({
   const id = useId();
   const [anchor, setAnchor] = useState<DOMRect | null>(null);
   const hide = useCallback(() => setAnchor(null), []);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const visible = anchor !== null;
 
   useLayoutEffect(
     () => () => {
@@ -44,10 +48,29 @@ export function Tooltip({
   );
 
   useLayoutEffect(() => {
-    if (!anchor) return;
+    if (!visible) return;
     // Each visible tooltip owns its DOM root; another instance cannot clear it.
     const container = document.createElement('div');
+    containerRef.current = container;
     document.body.appendChild(container);
+    const dismiss = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      event.stopPropagation();
+      hide();
+    };
+    document.addEventListener('keydown', dismiss, true);
+    return () => {
+      document.removeEventListener('keydown', dismiss, true);
+      render(null, container);
+      container.remove();
+      containerRef.current = null;
+    };
+  }, [visible, hide]);
+
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (!anchor || !container) return;
     render(
       <div
         id={id}
@@ -60,20 +83,13 @@ export function Tooltip({
       container,
     );
     const popup = container.firstElementChild as HTMLElement;
-    popup.style.left = `${Math.max(0, Math.min(anchor.right + TOOLTIP_GAP, window.innerWidth - popup.offsetWidth))}px`;
-    popup.style.top = `${Math.max(0, Math.min(anchor.top, window.innerHeight - popup.offsetHeight))}px`;
-    const dismiss = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      event.preventDefault();
-      event.stopPropagation();
-      setAnchor(null);
-    };
-    document.addEventListener('keydown', dismiss, true);
-    return () => {
-      document.removeEventListener('keydown', dismiss, true);
-      render(null, container);
-      container.remove();
-    };
+    const fitsRight = anchor.right + TOOLTIP_GAP + popup.offsetWidth <= window.innerWidth;
+    const fitsLeft = anchor.left - TOOLTIP_GAP - popup.offsetWidth >= 0;
+    const fallbackLeft = fitsLeft ? anchor.left - TOOLTIP_GAP - popup.offsetWidth : anchor.left;
+    const left = fitsRight ? anchor.right + TOOLTIP_GAP : fallbackLeft;
+    const top = fitsRight || fitsLeft ? anchor.top : anchor.bottom + TOOLTIP_GAP;
+    popup.style.left = `${Math.max(0, Math.min(left, window.innerWidth - popup.offsetWidth))}px`;
+    popup.style.top = `${Math.max(0, Math.min(top, window.innerHeight - popup.offsetHeight))}px`;
   }, [anchor, content, id]);
 
   const show = (event: MouseEvent | FocusEvent) => {

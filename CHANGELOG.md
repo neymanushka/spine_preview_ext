@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.11.1] - 2026-11-07
+
+### Maintenance
+
+- Give blend mode display its own component and keep tooltip containers and
+  Escape listeners stable while live content updates.
+
+## [3.11.0] - 2026-11-07
+
+### Features
+
+- Show rendered slot counts by blend mode in Performance, with non-normal slot
+  names in a hover or keyboard-focus tooltip. Sample only while the panel is open.
+
 ## [3.10.7] - 2026-11-07
 
 ### Fixes
