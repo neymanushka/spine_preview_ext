@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.10.5] - 2026-11-07
+
+### Fixes
+
+- Prevent animation tooltips from overlapping after clicking an animation and
+  hovering another. Keep keyboard focus descriptions and Escape dismissal.
+
 ## [3.10.4] - 2026-11-06
 
 ### Maintenance

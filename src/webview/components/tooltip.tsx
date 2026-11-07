@@ -1,8 +1,9 @@
 import { render } from 'preact';
-import { useId, useLayoutEffect, useState } from 'preact/hooks';
+import { useCallback, useId, useLayoutEffect, useState } from 'preact/hooks';
 import type { ComponentChildren } from 'preact';
 
 const TOOLTIP_GAP = 8;
+let dismissActiveTooltip: (() => void) | undefined;
 
 export const tooltipStyles = `
 .tooltip-popup {
@@ -33,6 +34,14 @@ export function Tooltip({
 }) {
   const id = useId();
   const [anchor, setAnchor] = useState<DOMRect | null>(null);
+  const hide = useCallback(() => setAnchor(null), []);
+
+  useLayoutEffect(
+    () => () => {
+      if (dismissActiveTooltip === hide) dismissActiveTooltip = undefined;
+    },
+    [hide],
+  );
 
   useLayoutEffect(() => {
     if (!anchor) return;
@@ -67,16 +76,21 @@ export function Tooltip({
     };
   }, [anchor, content, id]);
 
-  const show = (event: MouseEvent | FocusEvent) =>
+  const show = (event: MouseEvent | FocusEvent) => {
+    if (dismissActiveTooltip !== hide) dismissActiveTooltip?.();
+    dismissActiveTooltip = hide;
     setAnchor((event.currentTarget as HTMLElement).getBoundingClientRect());
+  };
   return (
     <div
       class={className}
       onMouseEnter={show}
       onMouseLeave={(event) => {
-        if (!event.currentTarget.matches(':focus-within')) setAnchor(null);
+        if (!event.currentTarget.querySelector(':focus-visible')) hide();
       }}
-      onFocusIn={show}
+      onFocusIn={(event) => {
+        if (event.target instanceof HTMLElement && event.target.matches(':focus-visible')) show(event);
+      }}
       onFocusOut={(event) => {
         if (event.relatedTarget instanceof Node && event.currentTarget.contains(event.relatedTarget)) return;
         if (!event.currentTarget.matches(':hover')) setAnchor(null);
