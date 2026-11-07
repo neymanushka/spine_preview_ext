@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.11.1] - 2026-11-07
+
+### Maintenance
+
+- Give blend mode display its own component and keep tooltip containers and
+  Escape listeners stable while live content updates.
+
 ## [3.11.0] - 2026-11-07
 
 ### Features

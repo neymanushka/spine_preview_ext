@@ -8,7 +8,13 @@ const MODES = [
   [BlendMode.Screen, 'Screen'],
 ] as const;
 
-export function collectBlendModes(spine: Spine | undefined) {
+export type BlendModeGroup = {
+  readonly mode: BlendMode;
+  readonly label: string;
+  readonly slots: readonly string[];
+};
+
+export function collectBlendModes(spine: Spine | undefined): readonly BlendModeGroup[] {
   const groups = MODES.map(([mode, label]) => ({ mode, label, slots: [] as string[] }));
   if (!spine?.isRenderable) return [];
   for (const slot of spine.skeleton.drawOrder) {

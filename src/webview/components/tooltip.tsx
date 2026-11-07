@@ -1,5 +1,5 @@
 import { render } from 'preact';
-import { useCallback, useId, useLayoutEffect, useState } from 'preact/hooks';
+import { useCallback, useId, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { ComponentChildren } from 'preact';
 
 const TOOLTIP_GAP = 8;
@@ -37,6 +37,8 @@ export function Tooltip({
   const id = useId();
   const [anchor, setAnchor] = useState<DOMRect | null>(null);
   const hide = useCallback(() => setAnchor(null), []);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const visible = anchor !== null;
 
   useLayoutEffect(
     () => () => {
@@ -46,10 +48,29 @@ export function Tooltip({
   );
 
   useLayoutEffect(() => {
-    if (!anchor) return;
+    if (!visible) return;
     // Each visible tooltip owns its DOM root; another instance cannot clear it.
     const container = document.createElement('div');
+    containerRef.current = container;
     document.body.appendChild(container);
+    const dismiss = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      event.stopPropagation();
+      hide();
+    };
+    document.addEventListener('keydown', dismiss, true);
+    return () => {
+      document.removeEventListener('keydown', dismiss, true);
+      render(null, container);
+      container.remove();
+      containerRef.current = null;
+    };
+  }, [visible, hide]);
+
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (!anchor || !container) return;
     render(
       <div
         id={id}
@@ -69,18 +90,6 @@ export function Tooltip({
     const top = fitsRight || fitsLeft ? anchor.top : anchor.bottom + TOOLTIP_GAP;
     popup.style.left = `${Math.max(0, Math.min(left, window.innerWidth - popup.offsetWidth))}px`;
     popup.style.top = `${Math.max(0, Math.min(top, window.innerHeight - popup.offsetHeight))}px`;
-    const dismiss = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      event.preventDefault();
-      event.stopPropagation();
-      setAnchor(null);
-    };
-    document.addEventListener('keydown', dismiss, true);
-    return () => {
-      document.removeEventListener('keydown', dismiss, true);
-      render(null, container);
-      container.remove();
-    };
   }, [anchor, content, id]);
 
   const show = (event: MouseEvent | FocusEvent) => {

@@ -13,6 +13,7 @@ import { overlaysPanelStyles } from './components/overlays-panel';
 import { appStyles } from './app';
 import { uiStyles } from './components/ui-styles';
 import { metricRowStyles } from './components/metric-row';
+import { blendModesRowStyles } from './components/blend-modes-row';
 
 // Every colour is sourced from the VS Code theme so the preview matches the
 // editor the user actually runs. The literals are fallbacks only - they apply
@@ -122,6 +123,7 @@ export const allStyles = [
   overlaysPanelStyles,
   statusBarStyles,
   performancePanelStyles,
+  blendModesRowStyles,
   animationListStyles,
   skinsPanelStyles,
   tracksPanelStyles,
