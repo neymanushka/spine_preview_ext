@@ -19,7 +19,9 @@ export const tooltipStyles = `
     white-space: pre;
     pointer-events: none;
     z-index: 1000;
-    max-width: 350px;
+    width: max-content;
+    max-width: min(350px, 100vw);
+    box-sizing: border-box;
     overflow: hidden;
 }`;
 
@@ -60,8 +62,13 @@ export function Tooltip({
       container,
     );
     const popup = container.firstElementChild as HTMLElement;
-    popup.style.left = `${Math.max(0, Math.min(anchor.right + TOOLTIP_GAP, window.innerWidth - popup.offsetWidth))}px`;
-    popup.style.top = `${Math.max(0, Math.min(anchor.top, window.innerHeight - popup.offsetHeight))}px`;
+    const fitsRight = anchor.right + TOOLTIP_GAP + popup.offsetWidth <= window.innerWidth;
+    const fitsLeft = anchor.left - TOOLTIP_GAP - popup.offsetWidth >= 0;
+    const fallbackLeft = fitsLeft ? anchor.left - TOOLTIP_GAP - popup.offsetWidth : anchor.left;
+    const left = fitsRight ? anchor.right + TOOLTIP_GAP : fallbackLeft;
+    const top = fitsRight || fitsLeft ? anchor.top : anchor.bottom + TOOLTIP_GAP;
+    popup.style.left = `${Math.max(0, Math.min(left, window.innerWidth - popup.offsetWidth))}px`;
+    popup.style.top = `${Math.max(0, Math.min(top, window.innerHeight - popup.offsetHeight))}px`;
     const dismiss = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;
       event.preventDefault();

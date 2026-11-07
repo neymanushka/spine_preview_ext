@@ -1,6 +1,12 @@
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { PerformanceProfiler, PerformanceStats } from '../performance-stats';
 import { MetricRow } from './metric-row';
+import type { Spine } from '@esotericsoftware/spine-pixi-v8';
+import { collectBlendModes } from '../blend-mode-stats';
+import { Tooltip } from './tooltip';
+
+// Refresh four times per second to keep metrics readable without rendering UI every frame.
+const PERFORMANCE_REFRESH_INTERVAL_MS = 250;
 
 export const performancePanelStyles = `
 .performance-button { white-space: nowrap; flex-shrink: 0; }
@@ -19,23 +25,30 @@ export const performancePanelStyles = `
 .performance-heading { display: flex; align-items: center; justify-content: space-between; }
 .performance-content { padding: var(--sp-3); }
 .performance-section { margin: 0 0 var(--sp-3); font-size: 13px; }
+.blend-mode-row { flex-wrap: wrap; }
+.blend-mode-row dd { min-width: 0; white-space: normal; }
+.blend-mode-summary { padding: 0; border: none; background: none; color: inherit; font: inherit; text-align: left; cursor: help; }
+.blend-mode-tooltip { white-space: normal; overflow-wrap: anywhere; }
 `;
 
 export function PerformancePanel({
   profiler,
+  skeleton,
   overlaysVisible,
   onHideOverlays,
 }: {
   profiler: PerformanceProfiler;
+  skeleton: Spine | undefined;
   overlaysVisible: boolean;
   onHideOverlays: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [stats, setStats] = useState<PerformanceStats>({
+  const [stats, setStats] = useState<PerformanceStats & { blendModes: ReturnType<typeof collectBlendModes> | null }>({
     drawCalls: null,
     peak: null,
     cpuUpdateMs: null,
     cpuUpdatePeakMs: null,
+    blendModes: null,
   });
   const trigger = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLElement>(null);
@@ -47,13 +60,16 @@ export function PerformancePanel({
   useLayoutEffect(() => {
     if (!open) return;
     profiler.start();
-    setStats({ ...profiler.stats });
-    const timer = window.setInterval(() => setStats({ ...profiler.stats }), 250);
+    setStats({ ...profiler.stats, blendModes: null });
+    const timer = window.setInterval(
+      () => setStats({ ...profiler.stats, blendModes: collectBlendModes(skeleton) }),
+      PERFORMANCE_REFRESH_INTERVAL_MS,
+    );
     return () => {
       window.clearInterval(timer);
       profiler.stop();
     };
-  }, [open, profiler]);
+  }, [open, profiler, skeleton]);
 
   useLayoutEffect(() => {
     if (!open) return;
@@ -104,6 +120,34 @@ export function PerformancePanel({
                 maximum={stats.peak}
                 maximumHint="Peak since opening this panel or switching skeletons"
               />
+              <div class="metric-row blend-mode-row">
+                <dt>Blend modes</dt>
+                <dd>
+                  <Tooltip
+                    content={
+                      <div class="blend-mode-tooltip">
+                        <div>Rendered slots in the current pose, grouped by blend mode.</div>
+                        {stats.blendModes
+                          ?.filter(({ label }) => label !== 'Normal')
+                          .map(({ label, slots }) => (
+                            <div key={label}>
+                              {label}: {slots.join(', ')}
+                            </div>
+                          ))}
+                      </div>
+                    }
+                  >
+                    {(tooltipId) => (
+                      <button type="button" class="blend-mode-summary" aria-describedby={tooltipId}>
+                        {stats.blendModes === null
+                          ? '—'
+                          : stats.blendModes.map(({ label, slots }) => `${label} ${slots.length}`).join(' · ') ||
+                            'None'}
+                      </button>
+                    )}
+                  </Tooltip>
+                </dd>
+              </div>
             </dl>
             <h3 class="performance-section">Animation</h3>
             <dl class="metric-list">

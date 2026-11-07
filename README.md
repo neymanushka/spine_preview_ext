@@ -49,6 +49,12 @@ Visible overlays are included; use Hide overlays in the panel to measure the
 animation alone. Values refresh four times per second, including while paused.
 These are draw submissions, not attachment counts or GPU execution time.
 
+Blend modes counts rendered slots in the current pose by Normal, Additive,
+Multiply and Screen. Unused modes are omitted; hover or focus the values to see
+slot names for non-normal modes. Fully transparent or clipped-away attachments
+are excluded. These counts describe the skeleton, excluding debug overlays,
+and are sampled only while Performance is open.
+
 CPU update / frame measures the animation and skeleton pose update, excluding
 overlays and rendering. It shows an exponentially smoothed time in milliseconds
 and the highest single update since opening the panel or switching skeletons.

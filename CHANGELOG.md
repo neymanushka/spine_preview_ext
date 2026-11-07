@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.11.0] - 2026-11-07
+
+### Features
+
+- Show rendered slot counts by blend mode in Performance, with non-normal slot
+  names in a hover or keyboard-focus tooltip. Sample only while the panel is open.
+
 ## [3.10.7] - 2026-11-07
 
 ### Fixes
