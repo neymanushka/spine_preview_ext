@@ -24,10 +24,9 @@ export const overlaysPanelStyles = `
     padding: var(--sp-2) var(--sp-3);
     cursor: pointer;
 }
-.overlays-option:hover { background: var(--hover-bg); }
+.overlays-option:hover:not(:has(input:disabled)) { background: var(--hover-bg); }
+.overlays-option:has(input:disabled) { opacity: 0.4; cursor: default; }
 .overlays-option input { margin: 0; accent-color: var(--accent); }
-.overlays-option-text { display: flex; flex-direction: column; gap: 2px; }
-.overlays-unavailable { color: var(--text-secondary); font-size: 11px; }
 .overlays-visibility { margin: var(--sp-2) var(--sp-3) 0; }
 .overlays-visibility:disabled { opacity: 0.5; cursor: default; }
 `;
@@ -37,7 +36,7 @@ const OPTIONS = [
   {
     id: 'boneNames',
     label: 'Bone names',
-    hint: 'Names beside active bone joints, with a constant text size when zooming.',
+    hint: 'Bone lengths and joints with names beside active joints. Text stays the same size when zooming.',
   },
   { id: 'mesh', label: 'Mesh wireframe', hint: 'Triangles of the currently attached meshes.' },
   {
@@ -77,7 +76,7 @@ export function OverlaysPanel({
 
   useLayoutEffect(() => {
     if (!open) return;
-    panel.current?.querySelector('input')?.focus();
+    panel.current?.querySelector<HTMLInputElement>('input:not(:disabled)')?.focus();
     const onPointerDown = (event: PointerEvent) => {
       if (event.target instanceof Node && !root.current?.contains(event.target)) setOpen(false);
     };
@@ -128,14 +127,10 @@ export function OverlaysPanel({
               <input
                 type="checkbox"
                 checked={options[id]}
+                disabled={id !== 'bones' && id !== 'boneNames' && id !== 'origin' && !available[id]}
                 onChange={() => onChange({ ...options, [id]: !options[id] })}
               />
-              <span class="overlays-option-text">
-                <span>{label}</span>
-                {id !== 'bones' && id !== 'boneNames' && id !== 'origin' && !available[id] && (
-                  <span class="overlays-unavailable">None in this skeleton</span>
-                )}
-              </span>
+              <span>{label}</span>
             </label>
           ))}
           <button

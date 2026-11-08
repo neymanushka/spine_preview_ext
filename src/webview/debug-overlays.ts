@@ -103,7 +103,7 @@ export class DebugOverlays {
       }
     }
 
-    if (options.bones) {
+    if (options.bones || options.boneNames) {
       const path = new GraphicsPath();
       for (const bone of skeleton.bones) {
         if (!bone.active) continue;
