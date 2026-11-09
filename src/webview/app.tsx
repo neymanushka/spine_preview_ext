@@ -45,10 +45,16 @@ export const appStyles = `
     top: calc(42px + var(--sp-2) * 2);
 }
 .left-panel {
+    --left-panel-min-width: 240px;
     display: flex;
     flex-direction: column;
     gap: var(--sp-2);
-    width: 240px;
+    width: max-content;
+    min-width: min(var(--left-panel-min-width), 50%);
+    /* Keep room for the stage controls; only names wider than the window
+       need the animation list's horizontal scrollbar. */
+    max-width: calc(100% - min(var(--left-panel-min-width), 50%) - var(--sp-2));
+    flex-shrink: 0;
     height: 100%;
     min-height: 0;
 }
@@ -56,6 +62,9 @@ export const appStyles = `
     flex: 1;
     min-height: 0;
 }
+/* Animation rows determine the column width. Selecting a track or skin
+   must not widen it again for the same animation name. */
+.left-panel > :not(.list-container) { contain: inline-size; min-width: 0; }
 @media (max-width: 700px) {
     .title-container { gap: var(--sp-2); }
 }
