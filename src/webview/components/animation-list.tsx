@@ -5,10 +5,11 @@ import { describeAnimation, describeConflict, drivenPhysics, trackConflicts } fr
 import type { PhysicsConstraintData, TrackConflict } from '../animation-info';
 
 export const animationListStyles = `
-.list-container { min-width: 220px; }
+.list-container { min-width: 0; scrollbar-gutter: stable; }
 .list-item {
     position: relative;
     display: flex;
+    min-width: max-content;
     align-items: center;
     gap: var(--sp-1);
     color: var(--text-primary);
@@ -55,9 +56,7 @@ export const animationListStyles = `
 }
 /* Extend the native button across the row's padding; Copy stays above it. */
 .list-item-select::after { content: ''; position: absolute; inset: 0; }
-/* overflow: hidden drops the flex minimum to zero, so without a floor the
-   badges after it could squeeze the name out entirely. */
-.list-item-label { min-width: 4em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.list-item-label { white-space: nowrap; }
 .list-item-duration {
     flex-shrink: 0;
     color: var(--text-secondary);
@@ -163,8 +162,6 @@ export function AnimationList({
                 <path d="M4 2h7l3 3v7a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm0 1v9h9V6h-3V3H4z" />
               </svg>
             </button>
-            {/* The tooltip's wrapper is the flex item, so it has to carry the
-              shrinking styles itself or a long name pushes the duration out. */}
             <Tooltip class="list-item-name" content={describe(a, physics, conflicts)}>
               {(tooltipId) => (
                 <button
