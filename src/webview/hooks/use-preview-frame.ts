@@ -19,7 +19,6 @@ export function usePreviewFrame({
   currentAnimRef,
   ticker,
   profiler,
-  playingRef,
   speedRef,
   overlays,
   overlaysHidden,
@@ -30,7 +29,6 @@ export function usePreviewFrame({
   currentAnimRef: RefObject<Spine | null>;
   ticker: Ticker;
   profiler: PerformanceProfiler;
-  playingRef: { current: boolean };
   speedRef: { current: number };
   overlays: OverlayOptions;
   overlaysHidden: boolean;
@@ -67,14 +65,14 @@ export function usePreviewFrame({
       const anim = currentAnimRef.current;
       if (!anim) return;
       const startedAt = performance.now();
-      // Pausing is a zero delta rather than a skipped update, so the pose is
-      // still re-applied and a scrub or a skin change lands on screen.
-      const delta = playingRef.current ? (ticker.deltaMS / 1000) * speedRef.current : 0;
+      // Each entry owns its pause through timeScale. Keep updating while any
+      // track plays; a zero delta still reapplies scrubs/skins when all pause.
+      const anyPlaying = anim.state.tracks.some((entry) => entry && entry.timeScale !== 0);
+      const delta = anyPlaying ? (ticker.deltaMS / 1000) * speedRef.current : 0;
       profiler.update(() => anim.update(delta));
       debugRef.current?.render(overlaysRef.current, overlaysHiddenRef.current);
       const elapsed = performance.now() - startedAt;
-      // While paused the playhead belongs to whoever is dragging it.
-      if (playingRef.current) syncTimelineDom();
+      syncTimelineDom();
       const fps = ticker.deltaMS > 0 ? 1000 / ticker.deltaMS : 0;
       smoothedUpdateMs += (elapsed - smoothedUpdateMs) * STATS_SMOOTHING;
       smoothedFps += (fps - smoothedFps) * STATS_SMOOTHING;
@@ -87,7 +85,7 @@ export function usePreviewFrame({
 
     ticker.add(tick);
     return () => ticker.remove(tick);
-  }, [ticker, syncTimelineDom, profiler, currentAnimRef, playingRef, speedRef]);
+  }, [ticker, syncTimelineDom, profiler, currentAnimRef, speedRef]);
 
   return statsRef;
 }

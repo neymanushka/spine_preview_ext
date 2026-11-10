@@ -240,13 +240,12 @@ export function TimelinePanel({
       >
         <StepBackIcon />
       </button>
-      {/* Pausing stops every track, so the transport stays live even when the
-          selected track is empty - only the per-track controls go dim. */}
       <button
         type="button"
         class="ui-icon-button timeline-button is-play"
         title={playing ? 'Pause (Space)' : 'Play (Space)'}
         aria-label={playing ? 'Pause' : 'Play'}
+        disabled={idle}
         onClick={onTogglePlay}
       >
         {playing ? <PauseIcon /> : <PlayIcon />}

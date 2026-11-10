@@ -4,6 +4,9 @@ import type { Animation, AnimationStateListener, Spine, TrackEntry } from '@esot
 import type { EventLogHandle } from '../components/event-log';
 
 const DEFAULT_SPEED = 1;
+const DEFAULT_LOOP = true;
+// Spine freezes an individual track at timeScale = 0; other entries keep advancing.
+const PLAYING_TRACK_TIME_SCALE = 1;
 // Spine stores times in seconds and has no notion of frames, so stepping picks
 // the rate most skeletons are authored at.
 const FRAME_SECONDS = 1 / 30;
@@ -60,9 +63,10 @@ export function usePlayback({
   skeleton: Spine | undefined;
   currentAnimRef: RefObject<Spine | null>;
 }) {
-  const [activeTrack, setActiveTrack] = useState(0);
-  const [playing, setPlaying] = useState(true);
-  const [loop, setLoop] = useState(true);
+  const [activeTrack, setActiveTrackState] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const [trackLoops, setTrackLoops] = useState<ReadonlyMap<number, boolean>>(new Map());
+  const loop = trackLoops.get(activeTrack) ?? DEFAULT_LOOP;
   const [speed, setSpeed] = useState(DEFAULT_SPEED);
   const [trackAnimation, setTrackAnimation] = useState<Animation | null>(null);
   const [trackAnimations, setTrackAnimations] = useState<readonly (string | null)[]>([]);
@@ -71,8 +75,7 @@ export function usePlayback({
   const timeLabelRef = useRef<HTMLSpanElement | null>(null);
   const eventLogRef = useRef<EventLogHandle | null>(null);
   const flashMarkerRef = useRef<((time: number) => void) | null>(null);
-  const playingRef = useRef(playing);
-  const loopRef = useRef(loop);
+  const trackLoopsRef = useRef(trackLoops);
   const speedRef = useRef(speed);
   const activeTrackRef = useRef(activeTrack);
   const currentEntry = useCallback(
@@ -87,11 +90,30 @@ export function usePlayback({
     if (timeLabelRef.current) timeLabelRef.current.textContent = `${time.toFixed(3)}s`;
   }, [currentEntry]);
 
-  // The ticker reads `playingRef` in the same frame a scrub writes it, so the
-  // ref cannot wait for the effect that normally mirrors state.
-  const applyPlaying = useCallback((value: boolean) => {
-    playingRef.current = value;
-    setPlaying(value);
+  const applyPlaying = useCallback(
+    (value: boolean) => {
+      const entry = currentEntry();
+      if (!entry) return;
+      entry.timeScale = value ? PLAYING_TRACK_TIME_SCALE : 0;
+      setPlaying(value);
+    },
+    [currentEntry],
+  );
+
+  const setActiveTrack = useCallback(
+    (track: number) => {
+      activeTrackRef.current = track;
+      setActiveTrackState(track);
+      const entry = currentAnimRef.current?.state.tracks[track];
+      setTrackAnimation(entry?.animation ?? null);
+      setPlaying(!!entry && entry.timeScale !== 0);
+    },
+    [currentAnimRef],
+  );
+
+  const applyTrackLoops = useCallback((value: ReadonlyMap<number, boolean>) => {
+    trackLoopsRef.current = value;
+    setTrackLoops(value);
   }, []);
 
   // `eventsFrom` is the far end of the window `apply()` fires events for.
@@ -147,25 +169,25 @@ export function usePlayback({
       // A finished one-shot and a manual step to the last frame both sit exactly
       // on the end; pressing play there should replay rather than do nothing.
       if (duration > 0 && entry.trackTime >= duration) seekTo(0);
-      // Ordered after the seek, which clears the flag.
-      entry.loop = loopRef.current;
     }
+    if (entry) entry.loop = trackLoopsRef.current.get(activeTrackRef.current) ?? DEFAULT_LOOP;
     applyPlaying(true);
   }, [applyPlaying, currentEntry, seekTo]);
 
   const togglePlay = useCallback(() => {
-    if (playingRef.current) {
+    if (currentEntry()?.timeScale !== 0) {
       applyPlaying(false);
       return;
     }
     startPlaying();
-  }, [applyPlaying, startPlaying]);
+  }, [applyPlaying, currentEntry, startPlaying]);
 
   const selectAnimation = useCallback(
     (name: string) => {
       const anim = currentAnimRef.current;
       if (!anim) return;
-      const entry = anim.state.setAnimation(activeTrackRef.current, name, loopRef.current);
+      const track = activeTrackRef.current;
+      const entry = anim.state.setAnimation(track, name, trackLoopsRef.current.get(track) ?? DEFAULT_LOOP);
       setTrackAnimation(entry.animation);
       setTrackAnimations(trackAnimationNames(anim));
       applyPlaying(true);
@@ -185,36 +207,37 @@ export function usePlayback({
       anim.update(0);
       const names = trackAnimationNames(anim);
       setTrackAnimations(names);
+      const loops = new Map(trackLoopsRef.current);
+      for (const index of loops.keys()) {
+        if (index === track || index >= names.length) loops.delete(index);
+      }
+      applyTrackLoops(loops);
       // The list ends one past the last track in use; if that free track was the
       // active one, it would drop out of the list as it shrinks.
       if (activeTrackRef.current > names.length) setActiveTrack(names.length);
-      else if (track === activeTrackRef.current) setTrackAnimation(null);
+      else if (track === activeTrackRef.current) setActiveTrack(track);
     },
-    [currentAnimRef],
+    [applyTrackLoops, currentAnimRef, setActiveTrack],
   );
 
   const handleLoop = useCallback(
     (value: boolean) => {
-      setLoop(value);
-      loopRef.current = value;
+      const loops = new Map(trackLoopsRef.current);
+      loops.set(activeTrackRef.current, value);
+      applyTrackLoops(loops);
       // Flipping the flag on the live entry keeps the playhead where it is;
       // re-running setAnimation would snap it back to zero. While paused the
       // entry stays unlooped - seeking owns it - and the next play applies this.
       const entry = currentEntry();
-      if (entry && playingRef.current) entry.loop = value;
+      if (entry && entry.timeScale !== 0) entry.loop = value;
     },
-    [currentEntry],
+    [applyTrackLoops, currentEntry],
   );
 
   const handleSpeed = useCallback((value: number) => {
     speedRef.current = value;
     setSpeed(value);
   }, []);
-
-  useEffect(() => {
-    activeTrackRef.current = activeTrack;
-    setTrackAnimation(currentAnimRef.current?.state.tracks[activeTrack]?.animation ?? null);
-  }, [activeTrack, currentAnimRef]);
 
   // Runs after the scrubber has re-rendered with the new `max`, which would
   // otherwise clamp whatever position was written before it.
@@ -225,13 +248,14 @@ export function usePlayback({
   useEffect(() => {
     if (!skeleton) return;
     activeTrackRef.current = 0;
-    setActiveTrack(0);
+    setActiveTrackState(0);
+    applyTrackLoops(new Map());
     const firstAnim = skeleton.skeleton.data.animations[0];
-    const entry = firstAnim ? skeleton.state.setAnimation(0, firstAnim.name, loopRef.current) : null;
+    const entry = firstAnim ? skeleton.state.setAnimation(0, firstAnim.name, DEFAULT_LOOP) : null;
     setTrackAnimation(entry?.animation ?? null);
     setTrackAnimations(trackAnimationNames(skeleton));
-    applyPlaying(true);
-  }, [skeleton, applyPlaying]);
+    setPlaying(!!entry);
+  }, [skeleton, applyTrackLoops]);
 
   // Only the runtime knows an event actually fired: deriving it from the
   // playhead would mean re-implementing the wrapping rules that decide when
@@ -283,7 +307,6 @@ export function usePlayback({
     speed,
     trackAnimation,
     trackAnimations,
-    playingRef,
     speedRef,
     scrubberRef,
     timeLabelRef,

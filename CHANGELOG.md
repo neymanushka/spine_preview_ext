@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.11.2] - 2026-11-10
+
+### Fixes
+
+- Expand the animation panel to fit full names, durations and track conflict
+  badges. Scroll horizontally when a row cannot fit in the available window.
+- Keep Loop independent for each track and preserve its setting when replacing
+  an animation. New and cleared tracks start with Loop enabled.
+- Apply Play/Pause, scrubbing and frame stepping only to the selected track.
+  Starting an animation leaves paused tracks stopped; disable Play on empty tracks.
+- Disable and dim unavailable overlay controls instead of showing a message.
+- Include bone lines and joints when Bone names is enabled, without drawing
+  them twice when Bones is also enabled.
+
 ## [3.11.1] - 2026-11-07
 
 ### Maintenance
