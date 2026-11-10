@@ -37,8 +37,14 @@ For a binary test scene, open `demo/demo.atlas` and select `fruits.skel` or
   Bone names includes the same bone lines and joints as Bones, plus names that
   follow active joints and stay the same size when zooming.
 
-Loop governs playback only: scrubbing and stepping stop on the first and last
-frame rather than wrapping around.
+Loop is independent for each track; the timeline button controls the selected
+track. New and cleared tracks start with Loop enabled. Switching skeletons resets
+these settings. Loop governs playback only: scrubbing and stepping stop on the
+first and last frame rather than wrapping around.
+
+Play/Pause, scrubbing and frame stepping affect only the selected track. Other
+tracks keep their current playback state. Choosing an animation starts it on the
+selected track without resuming paused tracks. Playback speed applies to all tracks.
 
 Open Performance to collect actual WebGL draw calls per rendered frame, after
 batching. The side panel shows the latest frame and the peak.
