@@ -14,8 +14,29 @@ If a skeleton fails to load, it is marked `(failed)` in the dropdown. Select it
 to see its error, or choose another skeleton to continue previewing. A missing
 or broken shared atlas still prevents the whole preview from loading.
 
-For a binary test scene, open `demo/demo.atlas` and select `fruits.skel` or
+For a binary test scene, open `demo/straight/demo.atlas` and select `fruits.skel` or
 `vegetables.skel`.
+
+The status bar shows **PMA** when the selected skeleton uses premultiplied alpha.
+Hover or focus the badge to see the affected texture pages. The same **PMA** badge
+appears if any referenced page uses PMA, including mixed alpha formats. It stays visible in narrow
+windows. This describes the atlas metadata, not an automatic analysis of pixels;
+an omitted `pma` field is treated as false by the Spine runtime.
+Only pages referenced by the selected skeleton's attachments are counted,
+including all skins and sequence frames, regardless of the current pose.
+
+Open `demo/pma/demo.atlas` for one atlas with a PMA page and a straight-alpha page:
+
+- `pma.json` uses only `pma.png`: **PMA**. Normal disc on the left, Additive on the right.
+- `straight.json` uses only `straight.png`: no PMA badge, with the same two discs.
+- `mixed.json` uses both pages: **PMA**, with only `pma.png` listed in the tooltip.
+  Left column PMA, right straight alpha; top row Normal, bottom row Additive.
+
+Play `fade` to check soft edges and animated slot opacity. Corresponding discs
+should look identical. Try Checkerboard, Dark and Light backgrounds.
+The PMA PNG contains premultiplied RGB values, rather than only a changed flag.
+Recreate both textures with `node utils/generate-pma-textures.mjs`.
+See [utils](utils/README.md) for reusable development tools.
 
 ## panels
 
@@ -69,7 +90,7 @@ when the panel is closed; this is CPU elapsed time, not GPU time or CPU usage pe
 
 ## blend mode demo
 
-Open `demo/demo.atlas`, select `drawcall-stress.json`, then play `blend-modes-test`
+Open `demo/straight/demo.atlas`, select `drawcall-stress.json`, then play `blend-modes-test`
 on Track 0 with other tracks empty and Performance open. Each phase lasts one
 second: Normal, Additive, Multiply, Screen, all four, then no rendered slots.
 The six-second loop has named event markers for seeking. A light-gray Normal

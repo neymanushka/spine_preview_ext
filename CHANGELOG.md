@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.12.0] - 2026-11-16
+
+### Features
+
+- Show a PMA badge in the status bar whenever the selected skeleton references any
+  PMA page. List page counts and names in a tooltip; keep the badge visible in narrow windows.
+- Count only texture pages referenced by the selected skeleton, including all
+  skins, meshes and sequence frames.
+- Separate original demos into `demo/straight`. Add `demo/pma/demo.atlas`
+  with genuine PMA and straight-alpha texture pages and three skeletons using
+  PMA only, straight alpha only, or both, with animated Normal/Additive samples.
+
 ## [3.11.2] - 2026-11-10
 
 ### Fixes

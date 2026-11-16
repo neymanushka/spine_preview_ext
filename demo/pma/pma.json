@@ -1,0 +1,29 @@
+{
+  "skeleton": { "spine": "4.2.0", "x": -120, "y": -64, "width": 240, "height": 128 },
+  "bones": [{ "name": "root" }],
+  "slots": [
+    { "name": "normal", "bone": "root", "attachment": "glow-pma" },
+    { "name": "additive", "bone": "root", "attachment": "glow-pma", "blend": "additive" }
+  ],
+  "skins": [
+    {
+      "name": "default",
+      "attachments": {
+        "normal": { "glow-pma": { "x": -56, "width": 128, "height": 128 } },
+        "additive": { "glow-pma": { "x": 56, "width": 128, "height": 128 } }
+      }
+    }
+  ],
+  "animations": {
+    "fade": {
+      "slots": {
+        "normal": {
+          "rgba": [{ "color": "ffffffff" }, { "time": 1, "color": "ffffff40" }, { "time": 2, "color": "ffffffff" }]
+        },
+        "additive": {
+          "rgba": [{ "color": "ffffffff" }, { "time": 1, "color": "ffffff40" }, { "time": 2, "color": "ffffffff" }]
+        }
+      }
+    }
+  }
+}
