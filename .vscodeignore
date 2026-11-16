@@ -1,6 +1,7 @@
 node_modules
 src
 demo
+utils
 .claude
 .vscode-test
 .gitignore

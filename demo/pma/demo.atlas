@@ -1,0 +1,13 @@
+pma.png
+size: 128, 128
+filter: Linear, Linear
+pma: true
+glow-pma
+  bounds: 0, 0, 128, 128
+
+straight.png
+size: 128, 128
+filter: Linear, Linear
+pma: false
+glow-straight
+  bounds: 0, 0, 128, 128

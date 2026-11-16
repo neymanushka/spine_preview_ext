@@ -18,6 +18,7 @@ import { usePlayback } from './hooks/use-playback';
 import { useSelectedSkeleton } from './hooks/use-selected-skeleton';
 import { usePreviewCamera } from './hooks/use-preview-camera';
 import { usePreviewFrame } from './hooks/use-preview-frame';
+import { skeletonTexturePages } from './skeleton-texture-pages';
 
 export const appStyles = `
 .title-container {
@@ -103,6 +104,10 @@ export function App({
     () => overlayAvailability(spineInstances[selectedFile]),
     [selectedFile, spineInstances],
   );
+  const texturePages = useMemo(
+    () => skeletonTexturePages(spineInstances[selectedFile]),
+    [selectedFile, spineInstances],
+  );
 
   const { zoom, setZoom, background, setBackground, resetView, applyView } = usePreviewCamera(
     currentAnimRef,
@@ -164,7 +169,7 @@ export function App({
     <>
       <div class="panel title-container" data-panel>
         <FileSelector files={SPINES} errors={skeletonErrors} selected={selectedFile} onChange={setSelectedFile} />
-        <StatusBar version={version} statsRef={statsRef} />
+        <StatusBar version={version} statsRef={statsRef} texturePages={texturePages} />
         <Controls
           zoom={zoom}
           onZoom={setZoom}
