@@ -4,18 +4,29 @@
 
 ## usage
 
-Open any `.atlas` file. Every Spine skeleton (`.json` or binary `.skel`) next to it is loaded and
-listed in the dropdown, so one atlas can serve several skeletons.
+Open a Spine `.json` or binary `.skel` directly in Explorer to preview that
+skeleton alone, without a skeleton dropdown. Recognition requires `skeleton.spine`
+and a `bones` array. Other JSON files, including invalid JSON, are opened in VS Code's
+text editor. This makes the extension a default editor candidate for all `*.json`;
+existing user editor associations can override it.
+VS Code may activate the target editor group when a JSON custom editor is opened
+programmatically with `preserveFocus`, before the extension checks its contents.
+
+The atlas and textures must be beside the JSON. An atlas with the same base name
+is preferred; otherwise the only `.atlas` in that folder is used. Missing or
+ambiguous atlases show an explanation rather than selecting an arbitrary file.
+To inspect or edit a Spine JSON, use **Reopen Editor With… → Text Editor** on its
+tab, or **Open With… → Text Editor** in Explorer. Preview does not yet auto-reload
+after edits; reopen it to load saved changes.
+
+Atlas files open as text in VS Code. They are supporting assets, not preview entry points.
 
 Use Spine 4.2 exports to match the bundled runtime. JSON and binary skeletons
 can share the same folder and atlas.
 
-If a skeleton fails to load, it is marked `(failed)` in the dropdown. Select it
-to see its error, or choose another skeleton to continue previewing. A missing
-or broken shared atlas still prevents the whole preview from loading.
+If a skeleton or its atlas fails to load, the preview shows its error.
 
-For a binary test scene, open `demo/straight/demo.atlas` and select `fruits.skel` or
-`vegetables.skel`.
+For a binary test scene, open `demo/straight/fruits.skel` or `demo/straight/vegetables.skel`.
 
 The status bar shows **PMA** when the selected skeleton uses premultiplied alpha.
 Hover or focus the badge to see the affected texture pages. The same **PMA** badge
@@ -25,7 +36,7 @@ an omitted `pma` field is treated as false by the Spine runtime.
 Only pages referenced by the selected skeleton's attachments are counted,
 including all skins and sequence frames, regardless of the current pose.
 
-Open `demo/pma/demo.atlas` for one atlas with a PMA page and a straight-alpha page:
+Open the JSON files in `demo/pma` to compare skeletons sharing an atlas:
 
 - `pma.json` uses only `pma.png`: **PMA**. Normal disc on the left, Additive on the right.
 - `straight.json` uses only `straight.png`: no PMA badge, with the same two discs.
@@ -90,7 +101,7 @@ when the panel is closed; this is CPU elapsed time, not GPU time or CPU usage pe
 
 ## blend mode demo
 
-Open `demo/straight/demo.atlas`, select `drawcall-stress.json`, then play `blend-modes-test`
+Open `demo/straight/drawcall-stress.json`, then play `blend-modes-test`
 on Track 0 with other tracks empty and Performance open. Each phase lasts one
 second: Normal, Additive, Multiply, Screen, all four, then no rendered slots.
 The six-second loop has named event markers for seeking. A light-gray Normal

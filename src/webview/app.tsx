@@ -157,9 +157,11 @@ export function App({
   if (skeletonErrors[selectedFile] !== undefined) {
     return (
       <>
-        <div class="panel title-container" data-panel>
-          <FileSelector files={SPINES} errors={skeletonErrors} selected={selectedFile} onChange={setSelectedFile} />
-        </div>
+        {SPINES.length > 1 && (
+          <div class="panel title-container" data-panel>
+            <FileSelector files={SPINES} errors={skeletonErrors} selected={selectedFile} onChange={setSelectedFile} />
+          </div>
+        )}
         <Notice kind="error" title={`Could not load ${selectedFile}`} detail={skeletonErrors[selectedFile]} />
       </>
     );
@@ -168,7 +170,9 @@ export function App({
   return (
     <>
       <div class="panel title-container" data-panel>
-        <FileSelector files={SPINES} errors={skeletonErrors} selected={selectedFile} onChange={setSelectedFile} />
+        {SPINES.length > 1 && (
+          <FileSelector files={SPINES} errors={skeletonErrors} selected={selectedFile} onChange={setSelectedFile} />
+        )}
         <StatusBar version={version} statsRef={statsRef} texturePages={texturePages} />
         <Controls
           zoom={zoom}

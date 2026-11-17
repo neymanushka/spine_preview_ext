@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.0.0] - 2026-11-17
+
+### Breaking changes
+
+- Open a Spine `.json` or binary `.skel` directly from Explorer instead of opening
+  an atlas and selecting a skeleton from a dropdown. Preview only the selected file.
+- Atlas files now open as text, including when old explicit editor associations
+  still point to Spine preview. Remove folder-wide skeleton discovery.
+
+### Features
+
+- Redirect other JSON and invalid JSON to the standard text editor.
+- Resolve an adjacent atlas by matching base name or by the only atlas in the
+  folder; explain missing and ambiguous atlas choices.
+
 ## [3.12.0] - 2026-11-16
 
 ### Features

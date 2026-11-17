@@ -3,26 +3,19 @@ import path = require('path');
 import fs = require('fs');
 import crypto = require('crypto');
 
-// Only the first few KB are read: a Spine export declares "skeleton" or "bones"
-// up front, so an unrelated file such as package.json never reaches the loader.
-const SKELETON_PROBE_BYTES = 4096;
-const SKELETON_KEY_PATTERN = /"(?:skeleton|bones)"\s*:/;
-
 type SpineEntry = { name: string; uri: string };
 
 const toScriptLiteral = (value: unknown) => JSON.stringify(value).replace(/</g, '\\u003c');
 
-async function isSkeletonJson(filePath: string): Promise<boolean> {
-  let handle: fs.promises.FileHandle | undefined;
+function isSpineDocument(document: vscode.TextDocument): boolean {
   try {
-    handle = await fs.promises.open(filePath, 'r');
-    const buffer = Buffer.alloc(SKELETON_PROBE_BYTES);
-    const { bytesRead } = await handle.read(buffer, 0, SKELETON_PROBE_BYTES, 0);
-    return SKELETON_KEY_PATTERN.test(buffer.subarray(0, bytesRead).toString('utf8'));
+    const data = JSON.parse(document.getText());
+    return (
+      data !== null && typeof data === 'object' && typeof data.skeleton?.spine === 'string' && Array.isArray(data.bones)
+    );
   } catch {
+    // Invalid JSON must remain available in the text editor for repair.
     return false;
-  } finally {
-    await handle?.close();
   }
 }
 
@@ -40,7 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
 }
 
-export class Provider implements vscode.CustomTextEditorProvider {
+export class Provider implements vscode.CustomReadonlyEditorProvider {
   private basePath: string;
 
   public static register(context: vscode.ExtensionContext): vscode.Disposable {
@@ -54,47 +47,81 @@ export class Provider implements vscode.CustomTextEditorProvider {
     this.basePath = context.extensionUri.fsPath;
   }
 
-  public async resolveCustomTextEditor(
-    document: vscode.TextDocument,
-    webviewPanel: vscode.WebviewPanel,
-  ): Promise<void> {
+  public openCustomDocument(uri: vscode.Uri): vscode.CustomDocument {
+    return { uri, dispose() {} };
+  }
+
+  public async resolveCustomEditor(document: vscode.CustomDocument, webviewPanel: vscode.WebviewPanel): Promise<void> {
+    const extension = path.extname(document.uri.fsPath).toLowerCase();
+    const isSkeleton =
+      extension === '.skel' ||
+      (extension === '.json' && isSpineDocument(await vscode.workspace.openTextDocument(document.uri)));
+    // Also reject stale user associations that still send .atlas files here.
+    if (!isSkeleton) {
+      const tab = vscode.window.tabGroups.all
+        .flatMap((group) => group.tabs)
+        .find(
+          ({ input, group }) =>
+            group.viewColumn === webviewPanel.viewColumn &&
+            input instanceof vscode.TabInputCustom &&
+            input.viewType === Provider.viewType &&
+            input.uri.toString() === document.uri.toString(),
+        );
+      await vscode.commands.executeCommand('vscode.openWith', document.uri, 'default', {
+        viewColumn: webviewPanel.viewColumn,
+        preserveFocus: tab ? !tab.group.isActive : !webviewPanel.active,
+        preview: tab?.isPreview ?? true,
+      });
+      if (tab) {
+        // Close only the original custom-editor tab and preserve the active group.
+        if (tab.group.tabs.includes(tab)) await vscode.window.tabGroups.close(tab, true);
+      } else {
+        webviewPanel.dispose();
+      }
+      return;
+    }
+
     webviewPanel.webview.options = {
       enableScripts: true,
       localResourceRoots: [vscode.Uri.file(path.dirname(document.uri.fsPath)), vscode.Uri.file(this.basePath)],
     };
-    const atlasUri = webviewPanel.webview.asWebviewUri(document.uri);
-    webviewPanel.webview.html = await this.getHtmlForWebview(webviewPanel.webview, atlasUri, document.uri.fsPath);
-  }
-
-  private async collectSpines(webview: vscode.Webview, directory: string): Promise<SpineEntry[]> {
-    let entries: fs.Dirent[];
     try {
-      entries = await fs.promises.readdir(directory, { withFileTypes: true });
-    } catch {
-      return [];
+      const atlasPath = await this.findAtlas(document.uri.fsPath);
+      const atlasUri = webviewPanel.webview.asWebviewUri(vscode.Uri.file(atlasPath));
+      const spines = [
+        {
+          name: path.basename(document.uri.fsPath),
+          uri: webviewPanel.webview.asWebviewUri(document.uri).toString(),
+        },
+      ];
+      webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview, atlasUri, spines);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      // Render the error as text, never interpolate filenames as HTML.
+      const escaped = message.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      webviewPanel.webview.html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'"></head><body><h2>Could not open Spine preview</h2><p>${escaped}</p><p>Use Reopen Editor With… → Text Editor to view or edit the JSON.</p></body></html>`;
     }
-
-    const candidates = entries.filter((e) => e.isFile() && /\.(json|skel)$/i.test(e.name));
-    const probed = await Promise.all(
-      candidates.map(async (e) => {
-        const filePath = path.join(directory, e.name);
-        return {
-          name: e.name,
-          uri: webview.asWebviewUri(vscode.Uri.file(filePath)).toString(),
-          isSkeleton: e.name.toLowerCase().endsWith('.skel') || (await isSkeletonJson(filePath)),
-        };
-      }),
-    );
-
-    return probed.filter((p) => p.isSkeleton).map(({ name, uri }) => ({ name, uri }));
   }
 
-  private async getHtmlForWebview(
-    webview: vscode.Webview,
-    atlasUri: vscode.Uri,
-    documentPath: string,
-  ): Promise<string> {
-    const spines = await this.collectSpines(webview, path.dirname(documentPath));
+  private async findAtlas(documentPath: string): Promise<string> {
+    const directory = path.dirname(documentPath);
+    const entries = await fs.promises.readdir(directory, { withFileTypes: true });
+    const atlases = entries.filter((entry) => entry.isFile() && path.extname(entry.name).toLowerCase() === '.atlas');
+    const matchingName = `${path.basename(documentPath, path.extname(documentPath))}.atlas`;
+    const match = atlases.find((entry) => entry.name.toLowerCase() === matchingName.toLowerCase());
+    if (match) return path.join(directory, match.name);
+    if (atlases.length === 1) return path.join(directory, atlases[0].name);
+    if (atlases.length === 0) {
+      throw new Error(
+        'No .atlas file next to this Spine skeleton. Export the atlas and textures into the same folder.',
+      );
+    }
+    throw new Error(
+      `Several atlases found: ${atlases.map(({ name }) => name).join(', ')}. Give the matching atlas the same base name as the skeleton.`,
+    );
+  }
+
+  private getHtmlForWebview(webview: vscode.Webview, atlasUri: vscode.Uri, spines: SpineEntry[]): string {
     const webviewScript = webview.asWebviewUri(vscode.Uri.file(path.join(this.basePath, 'out', 'webview', 'app.js')));
     const nonce = crypto.randomBytes(32).toString('base64');
     const csp = [
