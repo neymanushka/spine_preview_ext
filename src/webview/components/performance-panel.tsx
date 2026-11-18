@@ -1,4 +1,5 @@
-import { useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { useCallback, useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { useFocusedKeydown } from '../hooks/use-focused-keydown';
 import type { PerformanceProfiler, PerformanceStats } from '../performance-stats';
 import { MetricRow } from './metric-row';
 import type { Spine } from '@esotericsoftware/spine-pixi-v8';
@@ -70,15 +71,17 @@ export function PerformancePanel({
   useLayoutEffect(() => {
     if (!open) return;
     panel.current?.focus();
-    const onKeyDown = (event: KeyboardEvent) => {
+  }, [open]);
+
+  useFocusedKeydown(
+    useCallback((event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;
       event.preventDefault();
       setOpen(false);
       trigger.current?.focus();
-    };
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [open]);
+    }, []),
+    open,
+  );
 
   return (
     <>

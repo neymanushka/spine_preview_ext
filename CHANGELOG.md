@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.12.1] - 2026-11-18
+
+### Fixes
+
+- Detach keyboard shortcuts when the preview loses focus, so inactive previews
+  do not handle playback keys or Escape while working in another editor.
+
 ## [3.12.0] - 2026-11-16
 
 ### Features
