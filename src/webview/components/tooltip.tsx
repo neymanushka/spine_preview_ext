@@ -1,6 +1,7 @@
 import { render } from 'preact';
 import { useCallback, useId, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { ComponentChildren } from 'preact';
+import { useFocusedKeydown } from '../hooks/use-focused-keydown';
 
 const TOOLTIP_GAP = 8;
 let dismissActiveTooltip: (() => void) | undefined;
@@ -53,20 +54,26 @@ export function Tooltip({
     const container = document.createElement('div');
     containerRef.current = container;
     document.body.appendChild(container);
-    const dismiss = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      event.preventDefault();
-      event.stopPropagation();
-      hide();
-    };
-    document.addEventListener('keydown', dismiss, true);
     return () => {
-      document.removeEventListener('keydown', dismiss, true);
       render(null, container);
       container.remove();
       containerRef.current = null;
     };
   }, [visible, hide]);
+
+  useFocusedKeydown(
+    useCallback(
+      (event: KeyboardEvent) => {
+        if (event.key !== 'Escape') return;
+        event.preventDefault();
+        event.stopPropagation();
+        hide();
+      },
+      [hide],
+    ),
+    visible,
+    true,
+  );
 
   useLayoutEffect(() => {
     const container = containerRef.current;

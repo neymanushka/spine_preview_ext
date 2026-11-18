@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import type { RefObject } from 'preact';
 import type { Animation, AnimationStateListener, Spine, TrackEntry } from '@esotericsoftware/spine-pixi-v8';
 import type { EventLogHandle } from '../components/event-log';
+import { useFocusedKeydown } from './use-focused-keydown';
 
 const DEFAULT_SPEED = 1;
 const DEFAULT_LOOP = true;
@@ -275,30 +276,31 @@ export function usePlayback({
     return () => anim.state.removeListener(listener);
   }, [skeleton, currentEntry]);
 
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.altKey || e.metaKey) return;
-      if (isTextEntry(e.target)) return;
-      if (e.code === 'Space') {
-        // Focused buttons own Space; canvas and range inputs keep the playback shortcut.
-        if (e.target instanceof Element && e.target.closest('button')) return;
-        e.preventDefault();
-        togglePlay();
-        return;
-      }
-      // The scrubber already seeks with the arrow keys.
-      if (isRangeInput(e.target)) return;
-      if (e.code === 'ArrowLeft') {
-        e.preventDefault();
-        stepFrames(-1);
-      } else if (e.code === 'ArrowRight') {
-        e.preventDefault();
-        stepFrames(1);
-      }
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [togglePlay, stepFrames]);
+  useFocusedKeydown(
+    useCallback(
+      (e: KeyboardEvent) => {
+        if (e.ctrlKey || e.altKey || e.metaKey) return;
+        if (isTextEntry(e.target)) return;
+        if (e.code === 'Space') {
+          // Focused buttons own Space; canvas and range inputs keep the playback shortcut.
+          if (e.target instanceof Element && e.target.closest('button')) return;
+          e.preventDefault();
+          togglePlay();
+          return;
+        }
+        // The scrubber already seeks with the arrow keys.
+        if (isRangeInput(e.target)) return;
+        if (e.code === 'ArrowLeft') {
+          e.preventDefault();
+          stepFrames(-1);
+        } else if (e.code === 'ArrowRight') {
+          e.preventDefault();
+          stepFrames(1);
+        }
+      },
+      [togglePlay, stepFrames],
+    ),
+  );
 
   return {
     activeTrack,
