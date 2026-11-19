@@ -38,6 +38,7 @@ const OPTIONS = [
     label: 'Bone names',
     hint: 'Bone lengths and joints with names beside active joints. Text stays the same size when zooming.',
   },
+  { id: 'slotNames', label: 'Slot names', hint: 'Slot names beside their bones, including slots with no attachment.' },
   { id: 'mesh', label: 'Mesh wireframe', hint: 'Triangles of the currently attached meshes.' },
   {
     id: 'hull',
@@ -89,7 +90,7 @@ export function OverlaysPanel({
       class="overlays-control"
       ref={root}
       onKeyDown={(event) => {
-        // Checkboxes and panel buttons keep their native keyboard behaviour.
+        // Checkboxes and panel buttons keep their native keyboard behavior.
         event.stopPropagation();
         if (event.key === 'Escape' && open) {
           event.preventDefault();

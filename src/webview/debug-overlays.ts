@@ -6,12 +6,19 @@ import {
   RegionAttachment,
   VertexAttachment,
 } from '@esotericsoftware/spine-pixi-v8';
-import type { Bone, Spine } from '@esotericsoftware/spine-pixi-v8';
+import type { Bone, Slot, Spine } from '@esotericsoftware/spine-pixi-v8';
 import { Container, Graphics, GraphicsPath, Text } from 'pixi.js';
+
+const LABEL_FONT_SIZE_PX = 12;
+const LABEL_JOINT_OFFSET_PX = 6;
+const SLOT_LABEL_LINE_HEIGHT_PX = 16;
+const BONE_LABEL_COLOR = 0xffffff;
+const SLOT_LABEL_COLOR = 0xffdc87;
 
 export type OverlayOptions = {
   bones: boolean;
   boneNames: boolean;
+  slotNames: boolean;
   mesh: boolean;
   hull: boolean;
   regions: boolean;
@@ -24,6 +31,7 @@ export type OverlayOptions = {
 export const DEFAULT_OVERLAYS: OverlayOptions = {
   bones: false,
   boneNames: false,
+  slotNames: false,
   mesh: false,
   hull: false,
   regions: false,
@@ -36,6 +44,7 @@ export const DEFAULT_OVERLAYS: OverlayOptions = {
 export function overlayAvailability(spine: Spine | undefined) {
   const attachments = spine?.skeleton.data.skins.flatMap((skin) => skin.getAttachments()) ?? [];
   return {
+    slotNames: !!spine?.skeleton.slots.length,
     mesh: attachments.some(({ attachment }) => attachment instanceof MeshAttachment),
     hull: attachments.some(({ attachment }) => attachment instanceof MeshAttachment && attachment.hullLength >= 6),
     regions: attachments.some(({ attachment }) => attachment instanceof RegionAttachment),
@@ -45,29 +54,52 @@ export function overlayAvailability(spine: Spine | undefined) {
   };
 }
 
+function createNameLabel(container: Container, name: string, color: number) {
+  const label = new Text({
+    text: name,
+    style: {
+      fontFamily: 'sans-serif',
+      fontSize: LABEL_FONT_SIZE_PX,
+      fill: color,
+      stroke: { color: 0x181818, width: 3 },
+    },
+    resolution: 2,
+  });
+  label.eventMode = 'none';
+  label.accessible = false;
+  container.addChild(label);
+  return label;
+}
+
 // Kept separate from the artwork so hiding diagnostics never changes its pose,
 // alpha or attachments. Coordinates are local to the Spine display object.
 export class DebugOverlays {
   private readonly graphics = new Graphics({ label: 'Debug overlays' });
-  private readonly names = new Container({ label: 'Bone names' });
+  private readonly boneNames = new Container({ label: 'Bone names' });
+  private readonly slotNames = new Container({ label: 'Slot names' });
   private readonly boneLabels = new Map<Bone, Text>();
+  private readonly slotLabels = new Map<Slot, Text>();
+  private readonly slotRows = new Map<string, number>();
   private readonly vertices = new WeakMap<VertexAttachment | RegionAttachment, Float32Array>();
 
   constructor(private readonly spine: Spine) {
     this.graphics.eventMode = 'none';
     this.graphics.accessible = false;
-    this.names.eventMode = 'none';
-    this.names.interactiveChildren = false;
-    this.names.accessibleChildren = false;
     spine.addChild(this.graphics);
-    spine.addChild(this.names);
+    for (const labels of [this.boneNames, this.slotNames]) {
+      labels.eventMode = 'none';
+      labels.interactiveChildren = false;
+      labels.accessibleChildren = false;
+      spine.addChild(labels);
+    }
   }
 
   render(options: OverlayOptions, hidden: boolean) {
     const g = this.graphics;
     g.clear();
     g.visible = !hidden && Object.values(options).some(Boolean);
-    this.names.visible = !hidden && options.boneNames;
+    this.boneNames.visible = !hidden && options.boneNames;
+    this.slotNames.visible = !hidden && options.slotNames;
     if (!g.visible) return;
     const scale = Math.max(Math.abs(this.spine.scale.x), 0.001);
     const dot = 2.5 / scale;
@@ -81,25 +113,13 @@ export class DebugOverlays {
           continue;
         }
         if (!label) {
-          label = new Text({
-            text: bone.data.name,
-            style: {
-              fontFamily: 'sans-serif',
-              fontSize: 12,
-              fill: 0xffffff,
-              stroke: { color: 0x181818, width: 3 },
-            },
-            resolution: 2,
-          });
+          label = createNameLabel(this.boneNames, bone.data.name, BONE_LABEL_COLOR);
           label.anchor.set(0, 1);
-          label.eventMode = 'none';
-          label.accessible = false;
           this.boneLabels.set(bone, label);
-          this.names.addChild(label);
         }
         label.visible = true;
         label.scale.set(1 / scale);
-        label.position.set(bone.worldX + 6 / scale, bone.worldY - 6 / scale);
+        label.position.set(bone.worldX + LABEL_JOINT_OFFSET_PX / scale, bone.worldY - LABEL_JOINT_OFFSET_PX / scale);
       }
     }
 
@@ -116,6 +136,7 @@ export class DebugOverlays {
       this.stroke(path, 0x25bdcf, scale);
     }
 
+    if (options.slotNames) this.drawSlotNames(scale);
     for (const slot of skeleton.slots) {
       if (!slot.bone.active) continue;
       const attachment = slot.getAttachment();
@@ -173,6 +194,31 @@ export class DebugOverlays {
     }
   }
 
+  private drawSlotNames(scale: number) {
+    this.slotRows.clear();
+    for (const slot of this.spine.skeleton.slots) {
+      const bone = slot.bone;
+      let label = this.slotLabels.get(slot);
+      if (!bone.active) {
+        if (label) label.visible = false;
+        continue;
+      }
+      if (!label) {
+        label = createNameLabel(this.slotNames, slot.data.name, SLOT_LABEL_COLOR);
+        this.slotLabels.set(slot, label);
+      }
+      const joint = `${Math.round(bone.worldX * scale)},${Math.round(bone.worldY * scale)}`;
+      const row = this.slotRows.get(joint) ?? 0;
+      this.slotRows.set(joint, row + 1);
+      label.visible = true;
+      label.scale.set(1 / scale);
+      label.position.set(
+        bone.worldX + LABEL_JOINT_OFFSET_PX / scale,
+        bone.worldY + (LABEL_JOINT_OFFSET_PX + row * SLOT_LABEL_LINE_HEIGHT_PX) / scale,
+      );
+    }
+  }
+
   private vertexBuffer(attachment: VertexAttachment | RegionAttachment, length: number) {
     let vertices = this.vertices.get(attachment);
     if (!vertices || vertices.length !== length) {
@@ -217,7 +263,10 @@ export class DebugOverlays {
 
   destroy() {
     this.graphics.destroy();
-    this.names.destroy({ children: true });
+    this.boneNames.destroy({ children: true });
+    this.slotNames.destroy({ children: true });
     this.boneLabels.clear();
+    this.slotLabels.clear();
+    this.slotRows.clear();
   }
 }
