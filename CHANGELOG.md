@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.13.0] - 2026-11-19
+
+### Features
+
+- Add a Slot names overlay that labels slots at their bones, including slots
+  without attachments.
+
 ## [3.12.1] - 2026-11-18
 
 ### Fixes

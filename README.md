@@ -47,7 +47,7 @@ See [utils](utils/README.md) for reusable development tools.
 - Event markers sit under the scrubber; click one to jump to it, and events
   authored on the same frame share a marker
 - Fired events pop up above the timeline and flash the marker they came from
-- Overlays - toggle bones, bone names, mesh wireframes, mesh hulls, region attachment outlines,
+- Overlays - toggle bones, bone names, slot names, mesh wireframes, mesh hulls, region attachment outlines,
   clipping polygons, paths with control handles, bounding box attachments and the
   skeleton's local origin. Layers without matching geometry are disabled.
   Hide/show all layers without clearing their selection;
@@ -57,6 +57,7 @@ See [utils](utils/README.md) for reusable development tools.
   green +Y (up).
   Bone names includes the same bone lines and joints as Bones, plus names that
   follow active joints and stay the same size when zooming.
+  Slot names shows slots at their active bone joints, including slots with no attachment.
 
 Loop is independent for each track; the timeline button controls the selected
 track. New and cleared tracks start with Loop enabled. Switching skeletons resets
